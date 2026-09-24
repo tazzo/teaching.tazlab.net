@@ -1,0 +1,13 @@
+.git
+.gitignore
+.github
+__pycache__
+*.pyc
+.venv
+venv
+web/node_modules
+web/dist
+tests
+docs
+*.md
+__omp_shell("README.md")
