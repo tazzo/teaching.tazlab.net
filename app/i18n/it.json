@@ -5,7 +5,7 @@
   "difficulty.easy": "Facile",
   "difficulty.medium": "Media",
   "difficulty.hard": "Difficile",
-  "stmt.first_degree": "Risolvi l'equazione: {a}x + {b} = 0",
+  "stmt.first_degree": "Risolvi l'equazione: {a}x {+b} = 0",
   "stmt.uniform_easy": "Un oggetto si muove di moto rettilineo uniforme con velocità v = {v} m/s. Quale distanza percorre in t = {t} s?",
   "stmt.uniform_medium": "Un'auto viaggia a {v_kmh} km/h. Quanti metri percorre in t = {t} s?",
   "stmt.uniform_hard": "Dal grafico spazio-tempo di un moto rettilineo uniforme leggi la velocità dell'oggetto.",

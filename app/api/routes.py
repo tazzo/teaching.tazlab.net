@@ -5,21 +5,27 @@ from __future__ import annotations
 import logging
 import os
 import time
+from fractions import Fraction
 
 from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi.responses import Response
 
 from app.api.schemas import (
     Catalog,
+    ExportRequest,
     GenerateResponse,
     Health,
     TopicInfo,
+    VariantsRequest,
+    VariantsResponse,
     WireAnswer,
     WireItem,
     WireStatement,
     WireStep,
 )
 from app.core.rng import make_rng
-from app.generators.base import Item, wire_params
+from app.core.strings import load_strings
+from app.generators.base import Answer, Item, Step, wire_params
 from app.generators.registry import TOPICS
 
 router = APIRouter(prefix="/api")
@@ -30,7 +36,7 @@ MAX_ATTEMPTS = int(os.getenv("TEACHING_MAX_ATTEMPTS", "8"))
 MAX_COUNT = 20
 
 
-def _failure(request: Request, status: int, code: str, detail: str | None = None) -> HTTPException:
+def _fail(status: int, code: str, detail: str | None = None) -> HTTPException:
     return HTTPException(
         status_code=status,
         detail={"error": {"code": code, "message_key": f"error.{code}", "detail": detail}},
@@ -47,11 +53,44 @@ def _to_wire(item: Item) -> WireItem:
     )
 
 
+def _from_wire(topic_id: str, difficulty: str, seed: int, wire: WireItem) -> Item:
+    """Rebuild an internal Item from posted wire data so it can be re-verified.
+
+    Posted items are untrusted input on a public, ungated endpoint: they are never
+    rendered straight to PDF (STRUCTURE §4.4).
+    """
+    return Item(
+        topic=topic_id,
+        difficulty=difficulty,
+        seed=seed,
+        index=wire.index,
+        params={key: Fraction(value) for key, value in wire.statement.params.items()},
+        statement_key=wire.statement.key,
+        steps=tuple(Step(s.label_key, s.latex, s.note_key) for s in wire.steps),
+        answer=Answer(
+            latex=wire.answer.latex,
+            kind=wire.answer.kind,
+            payload={key: list(values) for key, values in wire.answer.payload.items()},
+        ),
+        figure=wire.figure,
+    )
+
+
 @router.get("/healthz", response_model=Health)
 async def healthz() -> Health:
     # DEBUG on purpose: probes must not flood the log stream (DESIGN §2.11).
     logger.debug("health check")
     return Health(version=VERSION)
+
+
+@router.get("/i18n")
+async def i18n() -> dict[str, str]:
+    """The label table, so the frontend and the PDF share one source of truth."""
+    try:
+        return load_strings("it")
+    except FileNotFoundError as exc:  # a packaging bug, not a client error
+        logger.error("strings missing", extra={"error": str(exc)})
+        raise _fail(500, "strings_unavailable") from exc
 
 
 @router.get("/catalog", response_model=Catalog)
@@ -80,9 +119,9 @@ async def generate(
 ) -> GenerateResponse:
     impl = TOPICS.get(topic)
     if impl is None:
-        raise _failure(request, 400, "unknown_topic", topic)
+        raise _fail(400, "unknown_topic", topic)
     if difficulty not in impl.difficulties:
-        raise _failure(request, 400, "invalid_difficulty", difficulty)
+        raise _fail(400, "invalid_difficulty", difficulty)
 
     started = time.perf_counter()
     items: list[WireItem] = []
@@ -102,14 +141,8 @@ async def generate(
             # A discarded item is a bug signal, not noise (DESIGN §2.11).
             logger.warning(
                 "item discarded",
-                extra={
-                    "topic": topic,
-                    "difficulty": difficulty,
-                    "seed": seed,
-                    "index": index,
-                    "attempt": attempt + 1,
-                    "reason": last_reason,
-                },
+                extra={"topic": topic, "difficulty": difficulty, "seed": seed, "index": index,
+                       "attempt": attempt + 1, "reason": last_reason},
             )
         if item is None:
             discarded.append(f"{index}:{last_reason}")
@@ -122,16 +155,76 @@ async def generate(
             extra={"topic": topic, "difficulty": difficulty, "seed": seed,
                    "discarded": discarded, "max_attempts": MAX_ATTEMPTS},
         )
-        raise _failure(request, 503, "generation_failed", ",".join(discarded))
+        raise _fail(503, "generation_failed", ",".join(discarded))
 
-    logger.info(
-        "generated",
-        extra={
-            "topic": topic,
-            "difficulty": difficulty,
-            "seed": seed,
-            "count": len(items),
-            "duration_ms": round((time.perf_counter() - started) * 1000, 2),
-        },
-    )
+    logger.info("generated", extra={"topic": topic, "difficulty": difficulty, "seed": seed,
+                                    "count": len(items),
+                                    "duration_ms": round((time.perf_counter() - started) * 1000, 2)})
     return GenerateResponse(topic=topic, difficulty=difficulty, seed=seed, items=items)
+
+
+@router.post("/variants", response_model=VariantsResponse)
+async def variants(payload: VariantsRequest) -> VariantsResponse:
+    """LLM-assisted physics variants: the model proposes a spec, SymPy solves and verifies it.
+
+    Degradation is normal, not an error: an unavailable provider, a timeout or an invalid
+    spec falls back to the deterministic template generator and says so (DESIGN §2.5).
+    """
+    from app.llm.variants import generate_variants  # lazy: keeps the API importable without it
+
+    started = time.perf_counter()
+    items, degraded, reason = await generate_variants(payload.scenario, payload.difficulty, payload.count)
+    logger.info(
+        "variants served",
+        extra={"scenario": payload.scenario, "difficulty": payload.difficulty,
+               "count": len(items), "degraded": degraded, "reason": reason,
+               "duration_ms": round((time.perf_counter() - started) * 1000, 2)},
+    )
+    if not items:
+        raise _fail(503, "generation_failed", reason or "no_items")
+    return VariantsResponse(
+        scenario=payload.scenario, degraded=degraded, reason=reason,
+        items=[_to_wire(item) for item in items],
+    )
+
+
+@router.post("/export")
+async def export(payload: ExportRequest, request: Request) -> Response:
+    """Worksheet PDF. The body is untrusted: schema-validated, re-verified, and capped."""
+    impl = TOPICS.get(payload.topic)
+    if impl is None:
+        raise _fail(400, "unknown_topic", payload.topic)
+    if payload.difficulty not in impl.difficulties:
+        raise _fail(400, "invalid_difficulty", payload.difficulty)
+
+    rebuilt: list[Item] = []
+    for wire in payload.items:
+        try:
+            item = _from_wire(payload.topic, payload.difficulty, payload.seed, wire)
+        except (ValueError, ZeroDivisionError) as exc:
+            logger.warning("invalid export body", extra={"topic": payload.topic, "error": str(exc)})
+            raise _fail(400, "invalid_body", f"item {wire.index}: {exc}") from exc
+        result = impl.verify(item)
+        if not result.ok:
+            logger.warning(
+                "export rejected: posted item failed verification",
+                extra={"topic": payload.topic, "index": wire.index, "reason": result.reason},
+            )
+            raise _fail(400, "invalid_body", f"item {wire.index}: {result.reason}")
+        rebuilt.append(item)
+
+    from app.render.pdf import render_worksheet  # lazy: WeasyPrint is heavy
+
+    try:
+        pdf = render_worksheet(rebuilt, answers=payload.answers, strings=load_strings("it"))
+    except Exception as exc:  # rendering failure is ours, not the caller's
+        logger.exception("export failed", extra={"topic": payload.topic, "items": len(rebuilt)})
+        raise _fail(500, "export_failed", str(exc)) from exc
+
+    logger.info("exported", extra={"topic": payload.topic, "items": len(rebuilt),
+                                  "answers": payload.answers, "bytes": len(pdf)})
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"content-disposition": 'attachment; filename="esercizi.pdf"'},
+    )

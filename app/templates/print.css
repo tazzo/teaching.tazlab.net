@@ -1,0 +1,172 @@
+/* Print layout for the worksheet PDF (STRUCTURE §4.4).
+ *
+ * Structural rules only: this file carries no human-readable text. The three strings
+ * the page margin boxes need arrive as CSS custom properties (--pdf-title,
+ * --pdf-page, --pdf-page-of) set by worksheet.html.j2 from app/i18n/it.json, so the
+ * screen and the print read the same label table.
+ *
+ * Layout is block/inline-block on purpose. WeasyPrint's own docs call flexbox "not
+ * deeply tested" and grid support "for simple cases", and the research artifact
+ * pdf-export-generated-worksheets.md §Q2 makes that a constraint of the print path.
+ *
+ * Pagination (verified against WeasyPrint 70.0, research §Q2):
+ *   - A4 with a running head and a "Pagina N di M" footer via @page margin boxes;
+ *   - .exercise keeps an exercise with its own figure on one page (break-inside);
+ *   - .key starts the answer key on a fresh page (break-before).
+ */
+
+@page {
+  size: A4;
+  margin: 16mm 15mm 18mm;
+
+  @top-left {
+    content: var(--pdf-title);
+    font-size: 8pt;
+    color: #666;
+  }
+
+  @bottom-center {
+    content: var(--pdf-page) " " counter(page) " " var(--pdf-page-of) " " counter(pages);
+    font-size: 8pt;
+    color: #666;
+  }
+}
+
+html {
+  font-family: "DejaVu Sans", sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.4;
+  color: #111;
+}
+
+body {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ header */
+
+.sheet-header {
+  margin-bottom: 7mm;
+  padding-bottom: 2mm;
+  border-bottom: 0.8pt solid #333;
+}
+
+.sheet-header h1 {
+  margin: 0 0 2mm 0;
+  font-size: 16pt;
+}
+
+.fields {
+  margin: 0;
+  font-size: 9.5pt;
+  color: #333;
+}
+
+.field {
+  margin-right: 7mm;
+}
+
+.blank {
+  display: inline-block;
+  width: 38mm;
+  border-bottom: 0.6pt solid #666;
+}
+
+/* --------------------------------------------------------------- exercises */
+
+.exercise {
+  break-inside: avoid;
+  margin-bottom: 7mm;
+}
+
+.exercise-header {
+  margin-bottom: 1.5mm;
+}
+
+.badge {
+  display: inline-block;
+  min-width: 6mm;
+  padding: 0 1.5mm;
+  border: 0.6pt solid #333;
+  border-radius: 1mm;
+  font-size: 9pt;
+  text-align: center;
+}
+
+.statement {
+  margin: 0;
+}
+
+.figure {
+  margin: 2mm 0 0 0;
+}
+
+.figure svg {
+  display: block;
+  width: 100%;
+}
+
+.axis-caption {
+  margin: 0;
+  font-size: 8.5pt;
+  color: #444;
+}
+
+.legend {
+  margin: 1mm 0 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 8.5pt;
+  color: #333;
+}
+
+.legend li {
+  display: inline-block;
+  margin-right: 6mm;
+}
+
+/* -------------------------------------------------------------- answer key */
+
+.key {
+  break-before: page;
+}
+
+.key h2 {
+  margin: 0 0 4mm 0;
+  font-size: 14pt;
+  break-after: avoid;
+}
+
+.key-item {
+  break-inside: avoid;
+  margin-bottom: 5mm;
+}
+
+.key-item .badge {
+  margin-right: 2mm;
+}
+
+.step {
+  margin: 0 0 1.5mm 8mm;
+}
+
+.step-label {
+  font-size: 8.5pt;
+  color: #555;
+}
+
+.answer {
+  margin: 1.5mm 0 0 8mm;
+}
+
+.answer-label {
+  font-size: 9pt;
+  font-weight: bold;
+}
+
+/* KaTeX ships display-mode formulas centred with a full-line margin; in a key that
+ * costs a page for nothing. */
+.key .katex-display {
+  margin: 0.3em 0;
+  text-align: left;
+}

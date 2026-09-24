@@ -24,7 +24,7 @@ class UniformMotion:
     family = "physics"
     difficulties = ("easy", "medium", "hard")
     label_key = "topic.uniform"
-    scenarios = ("uniform_one_object", "uniform_unit_conversion", "uniform_graph_reading")
+    scenarios = ("uniform_one_object", "uniform_unit_conversion", "uniform_graph_reading", "uniform_sound_distance")
 
     # ---------------------------------------------------------------- generate
     def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:

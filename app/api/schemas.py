@@ -1,8 +1,8 @@
-"""Wire models (STRUCTURE §4.1-§4.3). Numbers cross the wire as exact strings."""
+"""Wire models (STRUCTURE §4.1-§4.5). Numbers cross the wire as exact strings."""
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class TopicInfo(BaseModel):
@@ -54,6 +54,37 @@ class GenerateResponse(BaseModel):
     difficulty: str
     seed: int
     items: list[WireItem]
+
+
+class VariantsRequest(BaseModel):
+    scenario: str
+    difficulty: str = "medium"
+    count: int = Field(5, ge=1, le=10)
+
+
+class VariantsResponse(BaseModel):
+    scenario: str
+    degraded: bool
+    reason: str | None = None
+    items: list[WireItem]
+
+
+class ExportRequest(BaseModel):
+    """The rendered items travel in the body: with D9 there is no URL that could
+    regenerate a sheet, and nothing is stored server-side."""
+
+    topic: str
+    difficulty: str = "easy"
+    seed: int = 0
+    items: list[WireItem] = Field(..., min_length=1, max_length=50)
+    answers: bool = False
+
+    @field_validator("items")
+    @classmethod
+    def at_least_one(cls, value: list[WireItem]) -> list[WireItem]:
+        if not value:
+            raise ValueError("items must not be empty")
+        return value
 
 
 class ErrorBody(BaseModel):

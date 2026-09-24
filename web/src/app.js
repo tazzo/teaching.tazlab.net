@@ -1,9 +1,10 @@
 // Minimal configurator: pick a topic, generate, read the graph.
-import strings from "./i18n/it.json";
 import { renderFigure } from "./figure.js";
 import { renderFormula, renderText } from "./formula.js";
 
-const state = { catalog: null };
+// One source of truth for labels: the same table the server uses for the PDF.
+const state = { catalog: null, strings: {} };
+let strings = {};
 
 const el = (tag, className, text) => {
   const node = document.createElement(tag);
@@ -11,6 +12,11 @@ const el = (tag, className, text) => {
   if (text !== undefined) node.textContent = text;
   return node;
 };
+
+async function loadStrings() {
+  strings = await (await fetch("/api/i18n")).json();
+  state.strings = strings;
+}
 
 async function loadCatalog() {
   const response = await fetch("/api/catalog");
@@ -55,9 +61,12 @@ function renderItem(item, index) {
   header.append(statement);
   card.append(header);
 
-  const figureHost = el("div", "figure");
-  card.append(figureHost);
-  renderFigure(figureHost, item.figure, strings);
+  // Algebra topics carry no figure; only draw when the server sent one.
+  if (item.figure) {
+    const figureHost = el("div", "figure");
+    card.append(figureHost);
+    renderFigure(figureHost, item.figure, strings);
+  }
 
   const steps = el("details", "steps");
   steps.append(el("summary", null, strings["ui.steps"]));
@@ -102,7 +111,8 @@ async function generate() {
   }
 }
 
-function main() {
+async function main() {
+  await loadStrings();
   document.title = strings["ui.title"];
   document.getElementById("title").textContent = strings["ui.title"];
   [
@@ -119,9 +129,11 @@ function main() {
   document.getElementById("topic").addEventListener("change", syncDifficulties);
   document.getElementById("generate").addEventListener("click", generate);
   document.getElementById("status").textContent = strings["ui.empty"];
-  loadCatalog().catch((error) => {
+  await loadCatalog().catch((error) => {
     document.getElementById("status").textContent = `Catalog: ${error}`;
   });
 }
 
-main();
+main().catch((error) => {
+  document.getElementById("status").textContent = `Avvio: ${error}`;
+});

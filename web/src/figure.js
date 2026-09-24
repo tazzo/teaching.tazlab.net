@@ -1,66 +1,78 @@
 // Figure JSON -> JSXGraph. The browser only draws what the server decided.
-// Vendored prebuilt bundle: JSXGraph's `exports` field does not expose
-// ./distrib/*, and its ESM entry is ~40 side-effect imports (not tree-shakeable),
-// so the distrib files are committed and imported directly (research recommendation).
 import JXG from "../vendor/jsxgraphcore.js";
 import "../vendor/jsxgraph.css";
 
-const LABELS = {
-  "trace.position": "s(t)",
-  "trace.velocity": "v(t)",
-};
+// A kinematics plot has seconds on x and metres on y: the two axes must NOT keep a
+// shared pixel aspect ratio, or JSXGraph widens one range to preserve the ratio and
+// the plotted line lands outside the visible box (observed: an empty grid).
+const PAD = 0.08;
+
+function extent(values) {
+  const nums = values.map(Number).filter((n) => Number.isFinite(n));
+  if (!nums.length) return [0, 1];
+  return [Math.min(...nums), Math.max(...nums)];
+}
 
 function label(strings, key, fallback) {
   return strings?.[key] ?? fallback ?? key;
 }
 
 export function renderFigure(container, figure, strings) {
-  const domain = figure.domain ?? { t_min: "0", t_max: "1" };
-  const tMax = Number(domain.t_max) + 1;
+  if (!figure) return null;              // algebra items have no figure
+  const traces = figure.traces ?? [];
+  const markers = figure.markers ?? [];
+  if (!traces.length && !markers.length) return null;
+
+  const xs = traces.flatMap((t) => t.samples.map(([x]) => x)).concat(markers.map((m) => m.at[0]));
+  const ys = traces.flatMap((t) => t.samples.map(([, y]) => y)).concat(markers.map((m) => m.at[1]));
+
+  let [xMin, xMax] = extent(xs.length ? xs : ["0", "1"]);
+  let [yMin, yMax] = extent(ys.length ? ys : ["0", "1"]);
+  // always show the origin, so the graph reads as a physical plot
+  xMin = Math.min(0, xMin);
+  yMin = Math.min(0, yMin);
+  const padX = (xMax - xMin || 1) * PAD;
+  const padY = (yMax - yMin || 1) * PAD;
 
   const board = JXG.JSXGraph.initBoard(container, {
-    boundingbox: [-0.5, 1, tMax + 0.5, -1],
+    // [left, top, right, bottom] in data units
+    boundingbox: [xMin - padX, yMax + padY, xMax + padX, yMin - padY],
+    keepaspectratio: false,
     axis: true,
     showNavigation: false,
     showCopyright: false,
+    pan: { enabled: false },
+    zoom: { enabled: false },
     defaultAxes: {
-      x: { name: `${label(strings, "axis.time", "t")} [${figure.x_unit}]`, withLabel: true },
-      y: { name: `[${figure.y_unit}]`, withLabel: true },
+      x: { name: `t [${figure.x_unit}]`, withLabel: true, label: { position: "rt", offset: [-40, 20] } },
+      y: { name: `[${figure.y_unit}]`, withLabel: true, label: { position: "rt", offset: [10, -10] } },
     },
   });
 
-  const curves = (figure.traces ?? []).map((trace, index) => {
-    const xs = trace.samples.map(([x]) => Number(x));
-    const ys = trace.samples.map(([, y]) => Number(y));
-    return board.create("curve", [xs, ys], {
+  traces.forEach((trace, index) => {
+    board.create("curve", [trace.samples.map(([x]) => Number(x)), trace.samples.map(([, y]) => Number(y))], {
       strokeColor: index === 0 ? "#1f6feb" : "#d29922",
       strokeWidth: 3,
-      name: label(strings, trace.label_key, LABELS[trace.label_key] ?? trace.label_key),
+      name: label(strings, trace.label_key, trace.label_key),
       withLabel: true,
-      label: { position: "rt" },
+      label: { position: "rt", offset: [6, -6] },
     });
   });
 
-  (figure.markers ?? []).forEach((marker) => {
+  markers.forEach((marker) => {
     const [x, y] = marker.at.map(Number);
     board.create("point", [x, y], {
       size: 4,
-      color: "#c0392b",
+      face: "cross",
+      strokeColor: "#c0392b",
+      strokeWidth: 3,
       fixed: true,
       name: label(strings, marker.label_key, marker.label_key),
       withLabel: true,
-      label: { offset: [8, 8] },
+      label: { offset: [-30, 18] },
     });
   });
 
-  // rescale once the real data extent is known
-  const allY = (figure.traces ?? []).flatMap((t) => t.samples.map(([, y]) => Number(y)))
-    .concat((figure.markers ?? []).map((m) => Number(m.at[1])));
-  if (allY.length) {
-    const maxY = Math.max(...allY);
-    const minY = Math.min(...allY);
-    board.setBoundingBox([-0.5, maxY + Math.abs(maxY) * 0.15 + 1, tMax + 0.5, minY - Math.abs(maxY || 1) * 0.15 - 1], true);
-  }
-
+  board.update();
   return board;
 }

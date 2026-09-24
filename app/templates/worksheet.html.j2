@@ -1,0 +1,56 @@
+{# Worksheet document: statements, optional answer key (STRUCTURE §4.4).
+ *
+ * Filled by app/render/pdf.py from wire items. Every visible string is a label from
+ * app/i18n/it.json; this file contains no prose. `labels` is resolved by the renderer,
+ * which raises on a missing key rather than printing a blank line.
+ *
+ * Deliberately absent per decision D9: the seed. The header carries the title and the
+ * name/class/date placeholders only — the sheet is an artefact, not a reproduction key.
+ #}
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>{{ labels['pdf.title'] }}</title>
+{% if katex_css %}<style>{{ katex_css | safe }}</style>{% endif %}
+<style>{{ print_css | safe }}</style>
+<style>
+  html {
+    --pdf-title: {{ labels['pdf.title'] | tojson }};
+    --pdf-page: {{ labels['pdf.page'] | tojson }};
+    --pdf-page-of: {{ labels['pdf.page_of'] | tojson }};
+  }
+</style>
+</head>
+<body>
+<header class="sheet-header">
+  <h1>{{ labels['pdf.title'] }}</h1>
+  <p class="fields">
+    <span class="field">{{ labels['pdf.field_name'] }} <span class="blank"></span></span>
+    <span class="field">{{ labels['pdf.field_class'] }} <span class="blank"></span></span>
+    <span class="field">{{ labels['pdf.field_date'] }} <span class="blank"></span></span>
+  </p>
+</header>
+{% for item in items %}
+<article class="exercise">
+  <header class="exercise-header"><span class="badge">{{ item.number }}</span></header>
+  <p class="statement">{{ item.statement }}</p>
+  {% if item.figure %}<div class="figure">{{ item.figure | safe }}</div>{% endif %}
+</article>
+{% endfor %}
+{% if answers %}
+<section class="key">
+  <h2>{{ labels['pdf.answer_key'] }}</h2>
+  {% for item in items %}
+  <article class="key-item">
+    <span class="badge">{{ item.number }}</span>
+    {% for step in item.steps %}
+    <p class="step"><span class="step-label">{{ step.label }}</span> {{ step.html | safe }}</p>
+    {% endfor %}
+    <p class="answer"><span class="answer-label">{{ labels['ui.answer'] }}</span> {{ item.answer | safe }}</p>
+  </article>
+  {% endfor %}
+</section>
+{% endif %}
+</body>
+</html>

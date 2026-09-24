@@ -15,6 +15,21 @@ export function renderFormula(latex, displayMode = false) {
   return span;
 }
 
+/**
+ * Templates use `{key}` for a raw value and `{+key}` when the value needs an explicit
+ * sign — otherwise a negative constant renders as "+ -12" in an equation. The minus is
+ * U+2212, which is the character KaTeX also renders, so screen and PDF agree.
+ */
 export function renderText(template, params) {
-  return template.replace(/\{(\w+)\}/g, (_, key) => (params?.[key] ?? "?"));
+  return template
+    .replace(/\{\+(\w+)\}/g, (_, key) => signed(params?.[key]))
+    .replace(/\{(\w+)\}/g, (_, key) => (params?.[key] ?? "?"));
+}
+
+function signed(value) {
+  if (value === undefined || value === null) return "?";
+  const text = String(value);
+  const negative = text.startsWith("-");
+  const magnitude = negative ? text.slice(1) : text;
+  return `${negative ? "\u2212" : "+"} ${magnitude}`;
 }
