@@ -1,139 +1,217 @@
-// Minimal configurator: pick a topic, generate, read the graph.
-import { renderFigure } from "./figure.js";
-import { renderFormula, renderText } from "./formula.js";
+// SPA: macro -> sub-topic -> page. Everything is driven by GET /api/pages, so the
+// navigation tree lives on the server and the client only renders it.
+import { renderItemForKind, el } from "./pages.js";
 
-// One source of truth for labels: the same table the server uses for the PDF.
-const state = { catalog: null, strings: {} };
+const state = { strings: {}, nav: null };
 let strings = {};
 
-const el = (tag, className, text) => {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-};
+const t = (key, fallback) => strings[key] ?? fallback ?? key;
 
-async function loadStrings() {
-  strings = await (await fetch("/api/i18n")).json();
-  state.strings = strings;
+// -------------------------------------------------------------------- routing
+function parseRoute() {
+  const parts = (location.hash.replace(/^#\/?/, "") || "").split("/").filter(Boolean);
+  return { macro: parts[0] ?? null, sub: parts[1] ?? null, pageId: parts[2] ?? null };
 }
 
-async function loadCatalog() {
-  const response = await fetch("/api/catalog");
-  state.catalog = await response.json();
-  const select = document.getElementById("topic");
-  select.replaceChildren(
-    ...state.catalog.topics.map((topic) => {
-      const option = el("option", null, strings[`topic.${topic.id}`] ?? topic.id);
-      option.value = topic.id;
-      return option;
-    }),
-  );
-  syncDifficulties();
+const href = (...parts) => `#/${parts.filter(Boolean).join("/")}`;
+
+function pagesOf(macro, sub) {
+  return (state.nav?.pages ?? []).filter((page) => page.macro === macro && page.sub === sub);
 }
 
-function currentTopic() {
-  const id = document.getElementById("topic").value;
-  return state.catalog.topics.find((t) => t.id === id);
+function findPage(pageId) {
+  return (state.nav?.pages ?? []).find((page) => page.id === pageId);
 }
 
-function syncDifficulties() {
-  const topic = currentTopic();
-  const select = document.getElementById("difficulty");
-  select.replaceChildren(
-    ...(topic?.difficulties ?? []).map((difficulty) => {
-      const option = el("option", null, strings[`difficulty.${difficulty}`] ?? difficulty);
-      option.value = difficulty;
-      return option;
-    }),
-  );
-}
-
-function renderItem(item, index) {
-  const card = el("article", "card");
-  const header = el("header", "card-header");
-  header.append(el("span", "badge", `#${index + 1}`));
-
-  const topic = currentTopic();
-  const statement = el("p", "statement");
-  const template = strings[item.statement.key] ?? item.statement.key;
-  statement.append(renderText(template, item.statement.params));
-  header.append(statement);
-  card.append(header);
-
-  // Algebra topics carry no figure; only draw when the server sent one.
-  if (item.figure) {
-    const figureHost = el("div", "figure");
-    card.append(figureHost);
-    renderFigure(figureHost, item.figure, strings);
-  }
-
-  const steps = el("details", "steps");
-  steps.append(el("summary", null, strings["ui.steps"]));
-  item.steps.forEach((step) => {
-    const row = el("div", "step");
-    row.append(el("span", "step-label", strings[step.label_key] ?? step.label_key));
-    row.append(renderFormula(step.latex));
-    steps.append(row);
-  });
-  card.append(steps);
-
-  const answer = el("div", "answer");
-  answer.append(el("span", "answer-label", strings["ui.answer"]));
-  answer.append(renderFormula(item.answer.latex, true));
-  card.append(answer);
-
-  return card;
-}
-
-async function generate() {
-  const status = document.getElementById("status");
-  const results = document.getElementById("results");
-  const topic = currentTopic();
-  const difficulty = document.getElementById("difficulty").value;
-  const seed = Number(document.getElementById("seed").value) || 1;
-  const count = Number(document.getElementById("count").value) || 3;
-
-  status.textContent = strings["ui.loading"];
-  results.replaceChildren();
-  try {
-    const url = `/api/generate?topic=${encodeURIComponent(topic.id)}&difficulty=${difficulty}&seed=${seed}&count=${count}`;
-    const response = await fetch(url);
-    const body = await response.json();
-    if (!response.ok) {
-      status.textContent = `${strings["ui.error"]}: ${body?.error?.code ?? response.status}`;
-      return;
+// --------------------------------------------------------------------- layout
+function crumb(pairs) {
+  const nav = el("nav", "crumbs");
+  pairs.forEach(([label, target], index) => {
+    if (index) nav.append(el("span", "crumb-sep", "\u203a"));
+    if (target) {
+      const link = el("a", null, label);
+      link.href = target;
+      nav.append(link);
+    } else {
+      nav.append(el("strong", null, label));
     }
-    status.textContent = "";
-    body.items.forEach((item, index) => results.append(renderItem(item, index)));
-  } catch (error) {
-    status.textContent = `${strings["ui.error"]}: ${error}`;
+  });
+  return nav;
+}
+
+function linkList(entries) {
+  const list = el("ul", "link-list");
+  entries.forEach(([label, target, hint]) => {
+    const item = el("li");
+    const link = el("a", null, label);
+    link.href = target;
+    item.append(link);
+    if (hint) item.append(el("span", "hint", hint));
+    list.append(item);
+  });
+  return list;
+}
+
+function renderHome() {
+  const view = el("section", "page");
+  view.append(el("h2", null, t("ui.home_intro")));
+  view.append(linkList((state.nav?.macros ?? []).map((macro) => [
+    t(`macro.${macro}`, macro), href(macro),
+    (state.nav?.subs?.[macro] ?? []).map((sub) => t(`sub.${sub}`, sub)).join(" · "),
+  ])));
+  return view;
+}
+
+function renderMacro(macro) {
+  const view = el("section", "page");
+  view.append(crumb([[t("nav.home"), href()], [t(`macro.${macro}`, macro), null]]));
+  view.append(el("h2", null, t("ui.macro_intro")));
+  view.append(linkList((state.nav?.subs?.[macro] ?? []).map((sub) => {
+    const count = pagesOf(macro, sub).length;
+    return [t(`sub.${sub}`, sub), href(macro, sub), `${count} pagine`];
+  })));
+  return view;
+}
+
+function renderSub(macro, sub) {
+  const view = el("section", "page");
+  view.append(crumb([
+    [t("nav.home"), href()], [t(`macro.${macro}`, macro), href(macro)], [t(`sub.${sub}`, sub), null],
+  ]));
+  view.append(el("h2", null, t("ui.sub_intro")));
+  view.append(linkList(pagesOf(macro, sub).map((page) => [
+    t(page.label_key, page.id), href(macro, sub, page.id), t(`kind.${page.kind}`, page.kind),
+  ])));
+  return view;
+}
+
+// ---------------------------------------------------------------- page itself
+function controls(page, reload) {
+  const form = el("form", "controls");
+  form.onsubmit = (event) => event.preventDefault();
+
+  let difficulty = page.difficulty;
+  if (!difficulty) {
+    const label = el("label", null, t("ui.difficulty"));
+    label.htmlFor = "difficulty";
+    const select = el("select");
+    select.id = "difficulty";
+    ["easy", "medium", "hard"].forEach((value) => {
+      const option = el("option", null, t(`difficulty.${value}`, value));
+      option.value = value;
+      select.append(option);
+    });
+    select.value = "easy";
+    form.append(label, select);
   }
+
+  const seedLabel = el("label", null, t("ui.seed"));
+  seedLabel.htmlFor = "seed";
+  const seed = el("input");
+  seed.id = "seed";
+  seed.type = "number";
+  seed.value = String(Math.floor(Math.random() * 1e6));
+
+  const countLabel = el("label", null, t("ui.count"));
+  countLabel.htmlFor = "count";
+  const count = el("input");
+  count.id = "count";
+  count.type = "number";
+  count.min = "1";
+  count.max = "20";
+  count.value = page.kind === "graph_filling" ? "1" : "3";
+
+  const submit = el("button", null, t("ui.generate"));
+  submit.type = "button";
+  form.append(seedLabel, seed, countLabel, count, submit);
+
+  const read = () => ({
+    difficulty: difficulty ?? form.querySelector("#difficulty")?.value ?? "easy",
+    seed: Number(seed.value) || 1,
+    count: Number(count.value) || 3,
+  });
+
+  submit.addEventListener("click", () => reload(read()));
+  return { form, read };
+}
+
+async function fetchItems(topic, difficulty, seed, count, figureMode) {
+  const url = `/api/generate?topic=${encodeURIComponent(topic)}&difficulty=${difficulty}` +
+    `&seed=${seed}&count=${count}&figure=${figureMode}`;
+  const response = await fetch(url);
+  const body = await response.json();
+  if (!response.ok) throw new Error(body?.error?.code ?? String(response.status));
+  return body.items;
+}
+
+function renderPage(macro, sub, page) {
+  const view = el("section", "page");
+  view.append(crumb([
+    [t("nav.home"), href()], [t(`macro.${macro}`, macro), href(macro)],
+    [t(`sub.${sub}`, sub), href(macro, sub)], [t(page.label_key, page.id), null],
+  ]));
+  view.append(el("h2", null, t(page.label_key, page.id)));
+  view.append(el("p", "kind-tag", t(`kind.${page.kind}`, page.kind)));
+
+  const status = el("p", "status");
+  const results = el("main", "results");
+
+  const { form, read } = controls(page, async ({ difficulty, seed, count }) => {
+    status.textContent = t("ui.loading");
+    status.classList.remove("bad");
+    results.replaceChildren();
+    try {
+      const mode = page.kind === "graph_filling" ? "hidden" : "full";
+      const items = await fetchItems(page.topic, difficulty, seed, count, mode);
+      if (page.kind === "graph_filling" && items.length) {
+        // the model for the same item: same topic/difficulty/seed/index, full figure
+        const model = (await fetchItems(page.topic, difficulty, seed, 1, "full"))[0];
+        status.textContent = "";
+        results.append(renderItemForKind(page.kind, items[0], 0, { strings, model }));
+        return;
+      }
+      status.textContent = "";
+      items.forEach((item, index) => {
+        results.append(renderItemForKind(page.kind, item, index, { strings }));
+      });
+    } catch (error) {
+      // log the real thing for the console, show a short message to the user
+      console.error("generate failed", error);
+      status.textContent = `${t("ui.error")}: ${error?.message ?? error}`;
+      status.classList.add("bad");
+    }
+  });
+
+  view.append(form, status, results);
+  return view;
+}
+
+// ---------------------------------------------------------------------- shell
+function render() {
+  const route = parseRoute();
+  const host = document.getElementById("view");
+  let content;
+  if (!route.macro) content = renderHome();
+  else if (!route.sub) content = renderMacro(route.macro);
+  else if (!route.pageId) content = renderSub(route.macro, route.sub);
+  else {
+    const page = findPage(route.pageId);
+    content = page ? renderPage(route.macro, route.sub, page)
+      : el("p", "status bad", `${t("ui.error")}: ${route.pageId}`);
+  }
+  host.replaceChildren(content);
+  window.scrollTo({ top: 0 });
 }
 
 async function main() {
-  await loadStrings();
-  document.title = strings["ui.title"];
-  document.getElementById("title").textContent = strings["ui.title"];
-  [
-    ["topic", "ui.topic"],
-    ["difficulty", "ui.difficulty"],
-    ["seed", "ui.seed"],
-    ["count", "ui.count"],
-    ["generate", "ui.generate"],
-  ].forEach(([id, key]) => {
-    const target = id === "generate" ? document.getElementById(id) : document.querySelector(`label[for="${id}"]`);
-    if (target) target.textContent = strings[key];
-  });
-  document.getElementById("seed").value = String(Math.floor(Math.random() * 1e6));
-  document.getElementById("topic").addEventListener("change", syncDifficulties);
-  document.getElementById("generate").addEventListener("click", generate);
-  document.getElementById("status").textContent = strings["ui.empty"];
-  await loadCatalog().catch((error) => {
-    document.getElementById("status").textContent = `Catalog: ${error}`;
-  });
+  strings = await (await fetch("/api/i18n")).json();
+  document.title = t("ui.title");
+  document.getElementById("title").textContent = t("ui.title");
+  state.nav = await (await fetch("/api/pages")).json();
+  window.addEventListener("hashchange", render);
+  render();
 }
 
 main().catch((error) => {
-  document.getElementById("status").textContent = `Avvio: ${error}`;
+  document.getElementById("view").textContent = `Avvio: ${error}`;
 });

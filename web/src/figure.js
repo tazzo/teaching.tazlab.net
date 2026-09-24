@@ -21,13 +21,19 @@ export function renderFigure(container, figure, strings) {
   if (!figure) return null;              // algebra items have no figure
   const traces = figure.traces ?? [];
   const markers = figure.markers ?? [];
-  if (!traces.length && !markers.length) return null;
+  // An empty graph (graph_filling pages) still needs axes, so only a missing figure
+  // stops us here.
 
   const xs = traces.flatMap((t) => t.samples.map(([x]) => x)).concat(markers.map((m) => m.at[0]));
   const ys = traces.flatMap((t) => t.samples.map(([, y]) => y)).concat(markers.map((m) => m.at[1]));
 
-  let [xMin, xMax] = extent(xs.length ? xs : ["0", "1"]);
-  let [yMin, yMax] = extent(ys.length ? ys : ["0", "1"]);
+  // Name the y axis after the quantity it carries ("s(t) [m]"), not only its unit.
+  const quantityKey = figure.y_label ?? traces[0]?.label_key;
+  const quantity = quantityKey ? label(strings, quantityKey, quantityKey) : null;
+  const domain = figure.domain ?? { t_min: "0", t_max: "1" };
+  let [xMin, xMax] = extent(xs.length ? xs : [domain.t_min ?? "0", domain.t_max ?? "1"]);
+  // A hidden figure carries the intended y scale so the student's grid is meaningful.
+  let [yMin, yMax] = extent(ys.length ? ys : figure.y_range ?? ["0", "1"]);
   // always show the origin, so the graph reads as a physical plot
   xMin = Math.min(0, xMin);
   yMin = Math.min(0, yMin);
@@ -45,7 +51,11 @@ export function renderFigure(container, figure, strings) {
     zoom: { enabled: false },
     defaultAxes: {
       x: { name: `t [${figure.x_unit}]`, withLabel: true, label: { position: "rt", offset: [-40, 20] } },
-      y: { name: `[${figure.y_unit}]`, withLabel: true, label: { position: "rt", offset: [10, -10] } },
+      y: {
+        name: `${quantity ? `${quantity} ` : ""}[${figure.y_unit}]`,
+        withLabel: true,
+        label: { position: "rt", offset: [10, -10] },
+      },
     },
   });
 

@@ -27,7 +27,7 @@ from app.core.verify import no_floats, real_solutions, satisfies
 from app.generators.base import Answer, Item, Step
 from app.generators.registry import TOPICS
 from app.llm.spec import SCENARIOS, ScenarioSpec, Spec, SpecError
-from app.render.figure import cartesian_trace, linear_samples, quadratic_samples
+from app.render.figure import cartesian_trace, linear_samples
 
 S = Symbol("s")
 V = Symbol("v")
@@ -117,7 +117,7 @@ def _item(
 
 
 # ------------------------------------------------------------------- builders
-def _build_uniform_one_object(spec, declared, topic, seed, index) -> Item:
+def _build_uniform_one_object(spec, declared, seed, index) -> Item:
     given = _canonical_givens(spec, declared)
     v, t = given["v"], given["t"]
     s = _check_answer(declared, _solve(S - V * T, S, {V: _sym(v), T: _sym(t)}))
@@ -138,7 +138,7 @@ def _build_uniform_one_object(spec, declared, topic, seed, index) -> Item:
     )
 
 
-def _build_uniform_unit_conversion(spec, declared, topic, seed, index) -> Item:
+def _build_uniform_unit_conversion(spec, declared, seed, index) -> Item:
     given = _canonical_givens(spec, declared)
     v_kmh, t = given["v_kmh"], given["t"]
     v = convert(v_kmh, "km/h", "m/s")
@@ -160,7 +160,7 @@ def _build_uniform_unit_conversion(spec, declared, topic, seed, index) -> Item:
     )
 
 
-def _build_uniform_graph_reading(spec, declared, topic, seed, index) -> Item:
+def _build_uniform_graph_reading(spec, declared, seed, index) -> Item:
     given = _canonical_givens(spec, declared)
     t1, s1, t2, s2 = given["t1"], given["s1"], given["t2"], given["s2"]
     if t2 <= t1:
@@ -190,7 +190,7 @@ def _build_uniform_graph_reading(spec, declared, topic, seed, index) -> Item:
     )
 
 
-def _build_uniform_sound_distance(spec, declared, topic, seed, index) -> Item:
+def _build_uniform_sound_distance(spec, declared, seed, index) -> Item:
     given = _canonical_givens(spec, declared)
     c, t = given["c"], given["t"]
     s = _check_answer(declared, _solve(S - C * T, S, {C: _sym(c), T: _sym(t)}))
@@ -211,12 +211,13 @@ def _build_uniform_sound_distance(spec, declared, topic, seed, index) -> Item:
     )
 
 
-def _build_accelerated_from_rest(spec, declared, topic, seed, index) -> Item:
+def _build_accelerated_from_rest(spec, declared, seed, index) -> Item:
     given = _canonical_givens(spec, declared)
     a, t = given["a"], given["t"]
     v0 = Fraction(0)
     v = _check_answer(declared, _solve(V - A * T, V, {A: _sym(a), T: _sym(t)}))
     s = v0 * t + a * t * t / 2
+    t_max = t * Fraction(5, 4)
     return _item(
         declared, seed=seed, index=index,
         params={"a": a, "t": t, "v0": v0, "v": v, "s": s}, value=v, value_unit="m/s",
@@ -227,15 +228,15 @@ def _build_accelerated_from_rest(spec, declared, topic, seed, index) -> Item:
             Step("step.result", f"v = {fmt(v)}\\,\\text{{m/s}}"),
         ),
         figure=cartesian_trace(
-            x_unit="s", y_unit="m", t_max=t, samples=quadratic_samples(v0, a, t),
-            trace_label="trace.position", phase_label="phase.accelerated",
-            markers=[(t, s, "marker.asked_instant")],
-            extra_traces=[("trace.velocity", [(Fraction(0), v0), (t, v0 + a * t)])],
+            x_unit="s", y_unit="m/s", t_max=t_max,
+            samples=[(Fraction(0), v0), (t_max, v0 + a * t_max)],
+            trace_label="trace.velocity", phase_label="phase.accelerated",
+            markers=[(t, v, "marker.asked_instant")],
         ),
     )
 
 
-def _build_accelerated_with_v0(spec, declared, topic, seed, index) -> Item:
+def _build_accelerated_with_v0(spec, declared, seed, index) -> Item:
     given = _canonical_givens(spec, declared)
     v0, a = given["v0"], given["a"]
     if a >= 0:
@@ -244,6 +245,7 @@ def _build_accelerated_with_v0(spec, declared, topic, seed, index) -> Item:
         declared, _solve(V0 + A * T_STOP, T_STOP, {V0: _sym(v0), A: _sym(a)})
     )
     s_stop = v0 * t_stop + a * t_stop * t_stop / 2
+    t_max = t_stop * Fraction(5, 4)
     return _item(
         declared, seed=seed, index=index,
         params={"a": a, "v0": v0, "t_stop": t_stop, "s_stop": s_stop},
@@ -255,15 +257,15 @@ def _build_accelerated_with_v0(spec, declared, topic, seed, index) -> Item:
             Step("step.result", f"t = {fmt(t_stop)}\\,\\text{{s}}"),
         ),
         figure=cartesian_trace(
-            x_unit="s", y_unit="m", t_max=t_stop, samples=quadratic_samples(v0, a, t_stop),
-            trace_label="trace.position", phase_label="phase.accelerated",
-            markers=[(t_stop, s_stop, "marker.stop")],
-            extra_traces=[("trace.velocity", [(Fraction(0), v0), (t_stop, v0 + a * t_stop)])],
+            x_unit="s", y_unit="m/s", t_max=t_max,
+            samples=[(Fraction(0), v0), (t_max, v0 + a * t_max)],
+            trace_label="trace.velocity", phase_label="phase.accelerated",
+            markers=[(t_stop, Fraction(0), "marker.stop")],
         ),
     )
 
 
-def _build_accelerated_derive_a(spec, declared, topic, seed, index) -> Item:
+def _build_accelerated_derive_a(spec, declared, seed, index) -> Item:
     given = _canonical_givens(spec, declared)
     t1, v1, t2, v2 = given["t1"], given["v1"], given["t2"], given["v2"]
     if t2 <= t1:
@@ -293,7 +295,7 @@ def _build_accelerated_derive_a(spec, declared, topic, seed, index) -> Item:
     )
 
 
-BUILDERS: dict[str, Callable[[Spec, ScenarioSpec, object, int, int], Item]] = {
+BUILDERS: dict[str, Callable[[Spec, ScenarioSpec, int, int], Item]] = {
     "uniform_one_object": _build_uniform_one_object,
     "uniform_unit_conversion": _build_uniform_unit_conversion,
     "uniform_graph_reading": _build_uniform_graph_reading,
@@ -304,11 +306,12 @@ BUILDERS: dict[str, Callable[[Spec, ScenarioSpec, object, int, int], Item]] = {
 }
 
 
-def spec_to_item(spec: Spec, topic=None, *, seed: int, index: int) -> Item:
-    """Turn a validated spec into an ``Item`` solved and verifiable like a template one.
+def spec_to_item(spec: Spec, *, seed: int, index: int) -> Item:
+    """Turn a validated spec into an ``Item``, then verify it with the topic's own rules.
 
-    ``topic`` defaults to the scenario's registered physics topic, whose ``verify()`` is
-    the only judge of the finished item.
+    Solving and verifying happen here so a proposal that cannot be turned into a *sound*
+    item fails as one thing: the topic's ``verify()`` is the only judge, exactly as on the
+    template path. A failure raises :class:`SpecError`, and the caller discards the spec.
     """
     declared = SCENARIOS.get(spec.scenario)
     if declared is None:
@@ -316,8 +319,17 @@ def spec_to_item(spec: Spec, topic=None, *, seed: int, index: int) -> Item:
     builder = BUILDERS.get(spec.scenario)
     if builder is None:
         raise SpecError("no_builder", spec.scenario)
-    impl = topic if topic is not None else TOPICS[declared.topic_id]
-    return builder(spec, declared, impl, seed, index)
+
+    item = builder(spec, declared, seed, index)
+    try:
+        result = TOPICS[declared.topic_id].verify(item)
+    except Exception as exc:  # noqa: BLE001 - several verifiers raise on a missing param key
+        # A verifier that raises is a rejection, not a crash: the spec is arbitrary input
+        # and an exception escaping here would turn a bad proposal into a 500.
+        raise SpecError("verification_raised", f"{type(exc).__name__}: {exc}") from exc
+    if not result.ok:
+        raise SpecError("verification_failed", result.reason or "unspecified")
+    return item
 
 
 def scenarios() -> tuple[str, ...]:

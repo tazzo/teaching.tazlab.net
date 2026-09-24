@@ -9,9 +9,11 @@ position continuity (``x(t₁)`` from both branches) and velocity continuity
 (``v_out = next v_in``) hold by construction. Drawing ``v₁, a, t`` independently instead
 leaves ~33% of items with ``v₂ ≤ 0`` on the same distribution.
 
-The figure carries one ``phases[]`` entry per phase with the exact boundary vertices, a
-position trace and a second ``v(t)`` trace, so the continuity the generator claims is
-visible in the payload (STRUCTURE §4.3).
+The figure is the **position** timeline: one ``phases[]`` entry per phase with the exact
+boundary vertices (both branches kept, so the payload shows continuity at the boundary)
+and a single trace under a single ``y_unit``. Velocity is not a second trace — one figure
+carries one measured quantity — it is asserted symbolically instead (``x`` and ``v``
+continuous at every boundary), where it is exact rather than eyeballed.
 """
 
 from __future__ import annotations
@@ -107,24 +109,24 @@ def _model_position(phases: list[tuple], at: Fraction) -> Fraction | None:
     return None
 
 
-def _model_speed(phases: list[tuple], at: Fraction) -> Fraction | None:
-    for t_from, t_to, v_in, a, _, _ in phases:
-        if t_from <= at <= t_to:
-            return v_in + a * (at - t_from)
-    return None
-
-
 def _timeline(phases: list[tuple], markers: list[tuple[Fraction, Fraction, str]]) -> dict:
+    """The position timeline — one measured quantity, one y-unit (STRUCTURE §4.3).
+
+    The velocity story is *not* a second trace: a figure carries a single ``y_unit``, so a
+    ``v(t)`` trace in m/s under a ``[m]`` axis would be a lie. Velocity continuity is
+    asserted symbolically in ``verify`` instead (``v_out`` of one phase is ``v_in`` of the
+    next), where it is exact rather than eyeballed.
+    """
     t_max = phases[-1][1]
     position: list[tuple[Fraction, Fraction]] = []
-    velocity: list[tuple[Fraction, Fraction]] = []
     entries = []
     for t_from, t_to, v_in, a, s_from, label in phases:
         span = t_to - t_from
-        segment = [(x + t_from, y) for x, y in quadratic_samples(v_in, a, span, x0=s_from, steps=4)]
-        position.extend(segment if not position else segment[1:])
-        velocity.append((t_from, v_in))
-        velocity.append((t_to, v_in + a * span))
+        # both branches keep their endpoint at a shared boundary, so the payload itself
+        # carries the continuity evidence (two samples at one instant, equal values)
+        position.extend(
+            (x + t_from, y) for x, y in quadratic_samples(v_in, a, span, x0=s_from, steps=4)
+        )
         entries.append({"label_key": label, "t_from": fmt(t_from), "t_to": fmt(t_to),
                         "style": "solid"})
     figure = cartesian_trace(
@@ -135,7 +137,6 @@ def _timeline(phases: list[tuple], markers: list[tuple[Fraction, Fraction, str]]
         trace_label="trace.position",
         phase_label=phases[0][5],
         markers=markers,
-        extra_traces=[("trace.velocity", velocity)],
     )
     figure["phases"] = entries
     return figure
@@ -154,22 +155,18 @@ class MultiPhaseMotion:
         t1 = Fraction(rng.choice(_FIRST_DURATIONS))
         params: dict[str, Fraction] = {"v1": v1, "t1": t1}
 
-        if difficulty == "hard":
-            # the unknown is the accelerated phase's duration; the total distance is given
-            v2 = _draw_next_speed(rng, v1, above=True)
-            t2 = _draw_phase_duration(rng, v2 - v1)
-            params.update({"v2": v2, "t2": t2, "a2": (v2 - v1) / t2})
-        else:
-            v2 = _draw_next_speed(rng, v1, above=False)
-            t2 = _draw_phase_duration(rng, v2 - v1)
-            params.update({"v2": v2, "t2": t2, "a2": (v2 - v1) / t2})
-            if difficulty == "medium":
-                v3 = _draw_next_speed(rng, v2, above=False)
-                t3 = _draw_phase_duration(rng, v3 - v2)
-                params.update({"v3": v3, "t3": t3, "a3": (v3 - v2) / t3})
+        # hard draws the final speed above the entry speed, which makes the quadratic in
+        # t₂ have exactly one positive root; the other scenarios may accelerate or brake
+        v2 = _draw_next_speed(rng, v1, above=difficulty == "hard")
+        t2 = _draw_phase_duration(rng, v2 - v1)
+        params.update({"v2": v2, "t2": t2, "a2": (v2 - v1) / t2})
+        if difficulty == "medium":
+            v3 = _draw_next_speed(rng, v2, above=False)
+            t3 = _draw_phase_duration(rng, v3 - v2)
+            params.update({"v3": v3, "t3": t3, "a3": (v3 - v2) / t3})
 
         phases = _phases_from_params(difficulty, params)
-        s_total, t_total = _exit(phases[-1])[2], _exit(phases[-1])[0]
+        t_total, _, s_total = _exit(phases[-1])
         s1 = v1 * t1
         s2 = _exit(phases[1])[2] - s1
         params["s1"] = s1
@@ -278,7 +275,16 @@ class MultiPhaseMotion:
         ):
             return VerificationResult(False, "parameter_inconsistent")
 
-        # 2. the figure is the model: exact boundary vertices in both traces
+        # 2. boundaries: continuity asserted on the laws, and visible in the payload
+        for step in range(1, len(phases)):
+            previous = _exit(phases[step - 1])
+            # position continuity: x_branch2(t₁) − x_branch1(t₁) == 0
+            if previous[2] != phases[step][4]:
+                return VerificationResult(False, "position_discontinuity")
+            # velocity continuity: v_out of one phase is v_in of the next
+            if previous[1] != phases[step][2]:
+                return VerificationResult(False, "velocity_discontinuity")
+
         declared = figure.get("phases") or []
         if len(declared) != len(phases):
             return VerificationResult(False, "phase_count_mismatch")
@@ -286,19 +292,20 @@ class MultiPhaseMotion:
             if Fraction(entry["t_from"]) != phase[0] or Fraction(entry["t_to"]) != phase[1]:
                 return VerificationResult(False, "phase_boundary_mismatch")
         traces = figure.get("traces") or []
-        if len(traces) != 2:
-            return VerificationResult(False, "missing_velocity_trace")
+        # one measured quantity per figure: the timeline is a position graph, so a second
+        # trace would need its own y-unit (and this schema has exactly one)
+        if len(traces) != 1:
+            return VerificationResult(False, "unexpected_extra_trace")
         for x, y in traces[0]["samples"]:
             model = _model_position(phases, Fraction(x))
             if model is None or Fraction(y) != model:
                 return VerificationResult(False, "figure_disagrees_with_model")
-        for x, y in traces[1]["samples"]:
-            model = _model_speed(phases, Fraction(x))
-            if model is None or Fraction(y) != model:
-                return VerificationResult(False, "figure_disagrees_with_model")
         for boundary in (phase[1] for phase in phases[:-1]):
-            if not any(Fraction(x) == boundary for x, _ in traces[0]["samples"]):
-                return VerificationResult(False, "missing_boundary_vertex")
+            at_boundary = [Fraction(y) for x, y in traces[0]["samples"] if Fraction(x) == boundary]
+            # position continuity, read off the payload: both branches are vertices at
+            # the boundary instant and they must agree there
+            if len(at_boundary) != 2 or at_boundary[0] != at_boundary[1]:
+                return VerificationResult(False, "position_discontinuity")
 
         # 3. the ask, recomputed through a second path
         if item.difficulty == "hard":

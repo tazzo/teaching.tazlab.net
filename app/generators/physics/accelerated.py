@@ -12,7 +12,7 @@ from fractions import Fraction
 from app.core.units import fmt
 from app.core.verify import VerificationResult, no_floats
 from app.generators.base import Answer, Item, Step
-from app.render.figure import cartesian_trace, quadratic_samples
+from app.render.figure import cartesian_trace
 
 
 class AcceleratedMotion:
@@ -36,7 +36,7 @@ class AcceleratedMotion:
                 Step("step.result", f"v = {fmt(v)}\\,\\text{{m/s}}"),
             )
             answer = Answer(f"{fmt(v)}\\,\\text{{m/s}}", "scalar_with_unit", {"value": [fmt(v)], "unit": ["m/s"]})
-            marker = (t, s, "marker.asked_instant")
+            marker = (t, v, "marker.asked_instant")
             t_plot = t
         elif difficulty == "medium":
             a = -Fraction(rng.randint(2, 8))          # braking
@@ -50,7 +50,7 @@ class AcceleratedMotion:
                 Step("step.result", f"t = {fmt(t_stop)}\\,\\text{{s}}"),
             )
             answer = Answer(f"{fmt(t_stop)}\\,\\text{{s}}", "scalar_with_unit", {"value": [fmt(t_stop)], "unit": ["s"]})
-            marker = (t_stop, s_stop, "marker.stop")
+            marker = (t_stop, Fraction(0), "marker.stop")
             t_plot = t_stop
         else:
             # Read the acceleration off a v(t) graph: two speed readings.
@@ -75,29 +75,18 @@ class AcceleratedMotion:
         t_max = Fraction(t_plot) * Fraction(5, 4)
         v0 = Fraction(params["v0"])
         a = Fraction(params["a"])
-        if difficulty == "hard":
-            # velocity axes: the student reads two speeds and their time interval
-            figure = cartesian_trace(
-                x_unit="s",
-                y_unit="m/s",
-                t_max=t_max,
-                samples=[(Fraction(0), v0), (t_max, v0 + a * t_max)],
-                trace_label="trace.velocity",
-                phase_label="phase.accelerated",
-                markers=[marker],
-            )
-        else:
-            v_trace = [(Fraction(0), v0), (t_max, v0 + a * t_max)]
-            figure = cartesian_trace(
-                x_unit="s",
-                y_unit="m",
-                t_max=t_max,
-                samples=quadratic_samples(v0, a, t_max),
-                trace_label="trace.position",
-                phase_label="phase.accelerated",
-                markers=[marker],
-                extra_traces=[("trace.velocity", v_trace)],
-            )
+        # ONE measured quantity per figure: a shared y-axis cannot be captioned "[m]" while
+        # also carrying metres per second. Every difficulty here asks about velocity, so the
+        # figure is the v(t) line — where the braking case visibly crosses zero.
+        figure = cartesian_trace(
+            x_unit="s",
+            y_unit="m/s",
+            t_max=t_max,
+            samples=[(Fraction(0), v0), (t_max, v0 + a * t_max)],
+            trace_label="trace.velocity",
+            phase_label="phase.accelerated",
+            markers=[marker],
+        )
         return Item(
             topic=self.id,
             difficulty=difficulty,
@@ -149,10 +138,8 @@ class AcceleratedMotion:
         # the marked point must lie on whichever law the figure plots
         x = Fraction(item.figure["markers"][0]["at"][0])
         y = Fraction(item.figure["markers"][0]["at"][1])
-        if difficulty == "hard":
-            on_law = y == item.params["v0"] + a * x
-        else:
-            on_law = y == item.params["v0"] * x + a * x * x / 2
+        # the figure is v(t) for every difficulty, so the marked point must satisfy that law
+        on_law = y == item.params["v0"] + a * x
         if not on_law:
             return VerificationResult(False, "figure_disagrees_with_model")
         return VerificationResult(True)

@@ -23,7 +23,15 @@ export function renderFormula(latex, displayMode = false) {
 export function renderText(template, params) {
   return template
     .replace(/\{\+(\w+)\}/g, (_, key) => signed(params?.[key]))
-    .replace(/\{(\w+)\}/g, (_, key) => (params?.[key] ?? "?"));
+    .replace(/\{(\w+)\}/g, (_, key) => typographic(params?.[key]));
+}
+
+/** Render a leading ASCII hyphen as U+2212, the character KaTeX uses, so a coefficient
+ *  reads as a maths minus rather than a dash: "-6x" becomes "−6x". */
+function typographic(value) {
+  if (value === undefined || value === null) return "?";
+  const text = String(value);
+  return text.startsWith("-") ? `\u2212${text.slice(1)}` : text;
 }
 
 function signed(value) {

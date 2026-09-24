@@ -129,7 +129,9 @@ def test_corrupted_answer_latex_is_rejected(topic, difficulty: str) -> None:
 def test_figure_that_is_not_the_model_is_rejected(topic, difficulty: str) -> None:
     item = make(topic, difficulty)
     if item.figure is None:
-        pytest.skip("this item deliberately carries no figure (answer would be on the axis)")
+        # a deliberately figureless item refuses a figure that is not its model
+        assert not topic.verify(rebuilt(item, figure={"kind": "kinematics", "traces": []})).ok
+        return
     tampered = {
         **item.figure,
         "traces": [{**item.figure["traces"][0], "samples": [["0", "0"], ["1", "999"]]}]
@@ -144,8 +146,11 @@ def test_figure_that_is_not_the_model_is_rejected(topic, difficulty: str) -> Non
 def test_missing_figure_is_rejected(topic, difficulty: str) -> None:
     item = make(topic, difficulty)
     if item.figure is None:
-        pytest.skip("this item deliberately carries no figure")
-    assert not topic.verify(rebuilt(item, figure=None)).ok
+        # circular hard is figureless on purpose: the only figure this schema can carry
+        # is a periodic trace, which would print the period on the axis
+        assert topic.id == "physics.kinematics.circular" and difficulty == "hard"
+        return
+    assert topic.verify(rebuilt(item, figure=None)).reason == "missing_figure"
 
 
 def test_corrupted_physics_parameter_is_rejected() -> None:
@@ -175,7 +180,8 @@ def test_steps_end_with_the_exact_answer() -> None:
 def test_figure_numbers_are_exact_rational_strings(topic, difficulty: str) -> None:
     item = make(topic, difficulty)
     if item.figure is None:
-        pytest.skip("this item deliberately carries no figure")
+        assert topic.id == "physics.kinematics.circular" and difficulty == "hard"
+        return
     figure = item.figure
     assert Fraction(figure["domain"]["t_min"]) == 0
     assert Fraction(figure["domain"]["t_max"]) > 0
@@ -186,6 +192,23 @@ def test_figure_numbers_are_exact_rational_strings(topic, difficulty: str) -> No
             assert str(Fraction(x)) == x and str(Fraction(y)) == y
     for marker in figure["markers"]:
         assert all(str(Fraction(value)) == value for value in marker["at"])
+
+
+@pytest.mark.parametrize("topic", TOPICS, ids=lambda topic: topic.id)
+@pytest.mark.parametrize("difficulty", DIFFICULTIES)
+def test_figure_carries_one_measured_quantity(topic, difficulty: str) -> None:
+    """One y-unit per figure: a second series is only allowed in the same unit."""
+    item = make(topic, difficulty)
+    if item.figure is None:
+        return
+    figure = item.figure
+    assert isinstance(figure["y_unit"], str) and figure["y_unit"]
+    # relative motion draws two bodies, but both are positions in metres — one unit;
+    # the other topics draw the single quantity the exercise asks about
+    assert len(figure["traces"]) == (2 if topic is RELATIVE else 1)
+    if topic is MULTI_PHASE:
+        extra = {**item.figure, "traces": item.figure["traces"] * 2}
+        assert topic.verify(rebuilt(item, figure=extra)).reason == "unexpected_extra_trace"
 
 
 # ------------------------------------------------- zero denominators are rejected
@@ -297,19 +320,21 @@ def test_multi_phase_boundaries_are_exact_vertices_and_continuous() -> None:
                 item = make(MULTI_PHASE, difficulty, seed, index)
                 phases = multi_phase_module._phases_from_params(difficulty, item.params)
                 assert len(phases) == (3 if difficulty == "medium" else 2)
+                assert len(item.figure["traces"]) == 1          # one measured quantity
                 position = item.figure["traces"][0]["samples"]
-                velocity = item.figure["traces"][1]["samples"]
-                for index, (t_from, t_to, v_in, a, s_from, _) in enumerate(phases):
+                for phase_index, (t_from, t_to, v_in, a, s_from, _) in enumerate(phases):
                     assert multi_phase_module._model_position(phases, t_from) == s_from
-                    if index:
+                    if phase_index:
                         # position continuity: the second branch enters at the first's exit
-                        assert multi_phase_module._exit(phases[index - 1])[2] == s_from
+                        assert multi_phase_module._exit(phases[phase_index - 1])[2] == s_from
                         # velocity continuity: v_out of one phase is v_in of the next
-                        assert multi_phase_module._exit(phases[index - 1])[1] == v_in
+                        assert multi_phase_module._exit(phases[phase_index - 1])[1] == v_in
+                        # both branches leave a vertex at the boundary and both agree:
+                        # the continuity claim is visible in the payload, not just asserted
+                        at_boundary = [y for x, y in position if Fraction(x) == t_from]
+                        assert len(at_boundary) == 2 and at_boundary[0] == at_boundary[1]
+                        assert Fraction(at_boundary[0]) == s_from
                     assert min(v_in, v_in + a * (t_to - t_from)) > 0     # monotone position
-                    if index:
-                        assert any(Fraction(x) == t_from for x, _ in position)
-                        assert any(Fraction(x) == t_from for x, _ in velocity)
                 assert [Fraction(x) for x, _ in position] == sorted(Fraction(x) for x, _ in position)
                 assert Fraction(item.figure["domain"]["t_max"]) == item.params["t_total"]
 

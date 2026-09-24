@@ -1,3 +1,22 @@
+.page-header { display: flex; align-items: baseline; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.page-header h1 { margin: 0; font-size: 1.5rem; }
+.page-header h1 a { color: inherit; text-decoration: none; }
+.topnav { display: flex; gap: 1rem; }
+.topnav a { color: var(--muted); text-decoration: none; padding: .25rem .5rem; border-radius: .35rem; }
+.topnav a:hover { background: #eef2f6; }
+.topnav a.active { color: var(--ink); font-weight: 600; background: #e7edf5; }
+.page { background: #fff; border: 1px solid var(--line); border-radius: .6rem; padding: 1.25rem; }
+.crumbs { color: var(--muted); font-size: .9rem; margin-bottom: .75rem; display: flex; gap: .4rem; flex-wrap: wrap; }
+.crumbs a { color: var(--accent); text-decoration: none; }
+.crumb-sep { color: var(--line); }
+.areas { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; margin-top: 1rem; }
+.area-card { display: block; border: 1px solid var(--line); border-radius: .5rem; padding: 1rem; text-decoration: none; color: inherit; }
+.area-card:hover { border-color: var(--accent); }
+.area-card h3 { margin: 0 0 .4rem; }
+.area-card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.link-list { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .5rem; }
+.link-list a { display: block; padding: .6rem .75rem; border: 1px solid var(--line); border-radius: .4rem; text-decoration: none; color: var(--ink); }
+.link-list a:hover { border-color: var(--accent); background: #f6f9ff; }
 :root { color-scheme: light; --ink: #1b1f24; --muted: #57606a; --line: #d8dee4; --accent: #1f6feb; }
 * { box-sizing: border-box; }
 body { margin: 0; padding: 1.5rem; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #f6f8fa; }
@@ -22,3 +41,10 @@ body { margin: 0; padding: 1.5rem; font-family: system-ui, -apple-system, "Segoe
 .answer { border-top: 1px solid var(--line); padding-top: .6rem; display: flex; gap: .75rem; align-items: baseline; }
 .answer-label { color: var(--muted); font-size: .85rem; }
 .formula-error { color: #c0392b; }
+.kind-tag { display: inline-block; font-size: .75rem; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: .1rem .6rem; margin: 0 0 .75rem; }
+.hint { display: block; color: var(--muted); font-size: .85rem; margin-top: .25rem; }
+.page-actions { display: flex; gap: .5rem; margin: .6rem 0; }
+.page-actions button { padding: .4rem .9rem; border: 1px solid var(--line); border-radius: .35rem; background: #fff; font: inherit; cursor: pointer; }
+.page-actions button:hover { border-color: var(--accent); }
+.status.bad { color: #c0392b; }
+.fillable { cursor: crosshair; }

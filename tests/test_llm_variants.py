@@ -14,10 +14,10 @@ import logging
 import httpx
 import pytest
 
-from app.generators.physics.variants import spec_to_item
+from app.generators.physics.variants import BUILDERS, scenarios as variant_scenarios, spec_to_item
 from app.generators.registry import TOPICS
 from app.llm.client import LLMClient, ProviderConfig, fetch_variant_specs, fetch_variant_specs_report
-from app.llm.spec import SCENARIOS, SpecError, parse_and_validate
+from app.llm.spec import SCENARIOS, SOUND_SPEED, SpecError, parse_and_validate
 from app.llm.variants import fallback_seed, generate_variants
 
 SECRET = "sk-test-secret-must-never-be-logged"
@@ -27,7 +27,7 @@ SAMPLE_GIVENS: dict[str, list[tuple[str, object, str]]] = {
     "uniform_one_object": [("v", 13, "m/s"), ("t", 21, "s")],
     "uniform_unit_conversion": [("v_kmh", 72, "km/h"), ("t", 10, "s")],
     "uniform_graph_reading": [("t1", 3, "s"), ("s1", 39, "m"), ("t2", 8, "s"), ("s2", 104, "m")],
-    "uniform_sound_distance": [("c", 343, "m/s"), ("t", 3, "s")],
+    "uniform_sound_distance": [("c", int(SOUND_SPEED), "m/s"), ("t", 3, "s")],
     "accelerated_from_rest": [("a", 4, "m/s^2"), ("t", 10, "s")],
     "accelerated_with_v0": [("v0", 20, "m/s"), ("a", -7, "m/s^2")],
     "accelerated_derive_a": [("t1", 4, "s"), ("v1", 12, "m/s"), ("t2", 9, "s"), ("v2", 27, "m/s")],
@@ -189,6 +189,12 @@ def test_spec_that_solves_but_fails_verification_is_discarded() -> None:
     topic = TOPICS["physics.kinematics.uniform"]
     assert topic.verify(items[0]).ok and items[0].difficulty == "hard"
 
+    # ... and the same proposal is refused at the source, with the topic's own reason.
+    with pytest.raises(SpecError) as caught:
+        spec_to_item(parse_and_validate(payload, "uniform_graph_reading"), seed=1, index=0)
+    assert caught.value.reason == "verification_failed"
+    assert caught.value.detail == "point_not_on_the_line"
+
 
 @pytest.mark.parametrize(
     ("overrides", "expected"),
@@ -226,7 +232,8 @@ def test_scenario_mismatch_and_unknown_scenario_are_rejected() -> None:
 
 
 def test_sound_scenario_pins_the_speed_of_sound() -> None:
-    assert SAMPLE_GIVENS["uniform_sound_distance"][0][1] == 343
+    assert SOUND_SPEED == 343  # the named constant, never a draw
+    assert SAMPLE_GIVENS["uniform_sound_distance"][0][1] == SOUND_SPEED
     with pytest.raises(SpecError) as caught:
         parse_and_validate(
             spec_payload("uniform_sound_distance", givens=[
@@ -236,6 +243,16 @@ def test_sound_scenario_pins_the_speed_of_sound() -> None:
             "uniform_sound_distance",
         )
     assert caught.value.reason == "implausible_magnitude"
+
+
+def test_the_scenario_catalogue_and_its_builders_agree() -> None:
+    """No scenario may drift: every declared scenario has a builder, a registered topic,
+    and a catalog entry the configurator UI can actually offer."""
+    assert variant_scenarios() == tuple(sorted(SCENARIOS)) == tuple(sorted(BUILDERS))
+    for identifier, declared in SCENARIOS.items():
+        assert declared.id == identifier
+        assert declared.topic_id in TOPICS
+        assert identifier in TOPICS[declared.topic_id].scenarios
 
 
 # -------------------------------------------- (c) provider failure → degrade
@@ -252,6 +269,7 @@ def test_provider_400_degrades_and_is_not_retried() -> None:
     recorder = Recorder(lambda _request, _n: httpx.Response(400, text="MissingSessionID"))
     outcome = run(fetch_variant_specs_report("uniform_one_object", "easy", 1, client=client_for(recorder)))
 
+    assert outcome.degraded is True
     assert outcome.specs == () and outcome.error == "http_400"
     assert outcome.attempts == 1 and len(recorder.requests) == 1
 
@@ -311,7 +329,7 @@ def test_scenario_a_topic_declares_but_no_builder_knows(monkeypatch: pytest.Monk
     monkeypatch.setattr(variants_module, "TOPICS", {**TOPICS, real.id: DeclaredButNotBuilt()})
     items, degraded, reason = run(generate_variants("declared_but_not_built", "easy", 2))
 
-    assert (degraded, reason) == (True, "unknown_scenario")
+    assert (degraded, reason) == (True, "no_variant_for_scenario")
     assert len(items) == 2 and all(real.verify(item).ok for item in items)
 
 
@@ -385,6 +403,57 @@ def test_ambiguous_or_contradictory_givens_are_refused() -> None:
     with pytest.raises(SpecError) as caught:
         spec_to_item(spec, seed=1, index=0)
     assert caught.value.reason == "degenerate_interval"
+
+
+def test_a_verifier_that_raises_rejects_the_spec_instead_of_crashing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Several verifiers in this codebase raise on a missing param key rather than
+    returning a reason; a model proposal must never turn that into an escaping error."""
+    import app.generators.physics.variants as variants_module
+
+    class Exploding:
+        def verify(self, _item):
+            raise KeyError("v_over_pi")
+
+    monkeypatch.setitem(variants_module.TOPICS, "physics.kinematics.uniform", Exploding())
+    spec = parse_and_validate(spec_payload("uniform_one_object"), "uniform_one_object")
+    with pytest.raises(SpecError) as caught:
+        spec_to_item(spec, seed=1, index=0)
+    assert caught.value.reason == "verification_raised"
+    assert "KeyError" in caught.value.detail
+
+
+def test_the_fallback_net_survives_a_topic_that_raises() -> None:
+    """The net is the last resort: a topic whose generate or verify explodes yields an
+    empty list, never an exception."""
+    from app.llm.variants import template_items
+
+    class BrokenGenerate:
+        id = "physics.broken"
+        difficulties = ("easy",)
+
+        def generate(self, *_args):
+            raise ValueError("generator is broken")
+
+        def verify(self, _item):
+            raise AssertionError("unreachable")
+
+    assert template_items(BrokenGenerate(), "easy", 2, 1) == []
+
+    real = TOPICS["physics.kinematics.uniform"]
+
+    class BrokenVerify:
+        id = real.id
+        difficulties = real.difficulties
+
+        def generate(self, *args):
+            return real.generate(*args)
+
+        def verify(self, _item):
+            raise RuntimeError("flaky verifier")
+
+    assert template_items(BrokenVerify(), "easy", 1, 1) == []
 
 
 def test_the_model_text_never_leaks_into_the_item() -> None:

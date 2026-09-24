@@ -106,12 +106,6 @@ body {
   width: 100%;
 }
 
-.axis-caption {
-  margin: 0;
-  font-size: 8.5pt;
-  color: #444;
-}
-
 .legend {
   margin: 1mm 0 0 0;
   padding: 0;
@@ -164,9 +158,13 @@ body {
   font-weight: bold;
 }
 
-/* KaTeX ships display-mode formulas centred with a full-line margin; in a key that
- * costs a page for nothing. */
+/* KaTeX ships display-mode formulas centred with a full-line margin, and centres the
+ * inner `.katex`; in a key that costs a page for nothing. */
 .key .katex-display {
   margin: 0.3em 0;
+  text-align: left;
+}
+
+.key .katex-display > .katex {
   text-align: left;
 }

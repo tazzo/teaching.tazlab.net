@@ -25,7 +25,7 @@ import math
 from dataclasses import dataclass
 from fractions import Fraction
 
-from app.core.units import speed_of_sound, to_si
+from app.core.units import fmt, speed_of_sound, to_si
 
 
 class SpecError(ValueError):
@@ -51,23 +51,6 @@ class Spec:
     unknown: str
     ask: str
     result_units: str
-
-    def given(self, symbol: str) -> Given | None:
-        for item in self.givens:
-            if item.symbol == symbol:
-                return item
-        return None
-
-    def as_dict(self) -> dict:
-        return {
-            "scenario": self.scenario,
-            "givens": [
-                {"symbol": g.symbol, "value": str(g.value), "unit": g.unit} for g in self.givens
-            ],
-            "unknown": self.unknown,
-            "ask": self.ask,
-            "result_units": self.result_units,
-        }
 
 
 # --------------------------------------------------------------------- quantities
@@ -109,11 +92,10 @@ class ScenarioSpec:
     unknown: Quantity
 
 
-_SPEED = ("m/s", "km/h")
-_LENGTH = ("m", "km", "cm")
-_TIME = ("s", "min")
-_ACCEL = ("m/s^2",)
 _MS = "m/s"
+
+# The speed of sound in air at 20 °C is a named constant, never a random draw (DESIGN §2.10).
+SOUND_SPEED = speed_of_sound()
 
 
 def _q(symbol: str, unit: str, lo, hi, allowed: tuple[str, ...] = ()) -> Quantity:
@@ -169,7 +151,7 @@ SCENARIOS: dict[str, ScenarioSpec] = {
             "constant c = 343 m/s and give the distance covered in a short time"
         ),
         givens=(
-            _q("c", _MS, speed_of_sound(), speed_of_sound()),
+            _q("c", _MS, SOUND_SPEED, SOUND_SPEED),
             _q("t", "s", Fraction(3, 100), 15),
         ),
         unknown=_q("s", "m", 10, 5000, ("km",)),
@@ -214,7 +196,7 @@ SCENARIOS: dict[str, ScenarioSpec] = {
 # The speeds of sound is a named constant (DESIGN §2.10): it may never be drawn.
 SOUND_SPEED = speed_of_sound()
 
-_SCALELESS = {"", "1", "-", "none", "null", "dimensionless", "unitless", "%", "percent", "rad", "rad/s"}
+_SCALELESS = {"", "1", "-", "none", "null", "dimensionless", "unitless", "%", "percent"}
 
 
 def scenario(scenario_id: str) -> ScenarioSpec | None:
@@ -384,8 +366,8 @@ def _extract_array(text: str) -> tuple[list | None, str | None]:
     candidate = body[start : end + 1] if start != -1 and end > start else body
     try:
         payload = json.loads(candidate)
-    except json.JSONDecodeError as exc:
-        return None, f"unparseable_json"
+    except json.JSONDecodeError:
+        return None, "unparseable_json"
     if isinstance(payload, dict):
         payload = [payload]  # a single object is tolerated; the schema is the array
     if not isinstance(payload, list):
@@ -413,7 +395,7 @@ def prompt(scenario_id: str, count: int) -> str:
     declared = SCENARIOS[scenario_id]
     givens = "\n".join(
         f'  - "{q.symbol}" in {q.unit} (allowed: {", ".join(q.units)}), magnitude between '
-        f"{_ascii(q.lo)} and {_ascii(q.hi)} {q.unit}"
+        f"{fmt(q.lo)} and {fmt(q.hi)} {q.unit}"
         for q in declared.givens
     )
     unknown = declared.unknown
@@ -434,7 +416,3 @@ def prompt(scenario_id: str, count: int) -> str:
         "all quantities must be physically plausible for the scenario; the objects must "
         "differ from each other in their numbers.\n"
     )
-
-
-def _ascii(value: Fraction) -> str:
-    return str(value.numerator) if value.denominator == 1 else f"{value.numerator}/{value.denominator}"

@@ -35,6 +35,69 @@
     "t = 24/5\\,\\text{s}",
     "24/5\\,\\text{s}"
   ],
+  "physics.kinematics.circular|easy": [
+    "v = \\frac{2\\pi r}{T}",
+    "v = \\frac{2\\pi \\cdot 5}{\\frac{5}{2}}",
+    "v = 4 \\pi\\,\\text{m/s}",
+    "4 \\pi\\,\\text{m/s}"
+  ],
+  "physics.kinematics.circular|hard": [
+    "a_c = \\omega^2 r \\;\\Rightarrow\\; \\omega = \\sqrt{\\frac{a_c}{r}}",
+    "\\omega = \\sqrt{\\frac{1}{1}} = 1\\,\\text{rad/s}",
+    "T = \\frac{2\\pi}{\\omega}",
+    "T = 2 \\pi\\,\\text{s}",
+    "2 \\pi\\,\\text{s}"
+  ],
+  "physics.kinematics.circular|medium": [
+    "48\\,\\text{rpm} = \\frac{8 \\pi}{5}\\,\\text{rad/s}",
+    "a_c = \\omega^2 r",
+    "a_c = \\left(\\frac{8 \\pi}{5}\\right)^2 \\cdot 50",
+    "a_c = 128 \\pi^{2}\\,\\text{m/s}^2",
+    "128 \\pi^{2}\\,\\text{m/s}^2"
+  ],
+  "physics.kinematics.multi_phase|easy": [
+    "s = s_1 + s_2",
+    "s_1 = v_1 t_1 = 4 \\cdot 3 = 12\\,\\text{m}",
+    "v_2 = v_1 + a_2 t_2 = 2\\,\\text{m/s};\\quad s_2 = v_1 t_2 + \\frac{a_2 t_2^2}{2} = 4 \\cdot 4 + \\frac{-1/2 \\cdot 4^2}{2} = 12\\,\\text{m}",
+    "s = 24\\,\\text{m}",
+    "24\\,\\text{m}"
+  ],
+  "physics.kinematics.multi_phase|hard": [
+    "s = v_1 t_1 + v_1 t_2 + \\frac{a_2 t_2^2}{2}",
+    "117/2 = 3 \\cdot 12 + 3 t_2 + \\frac{3/5 t_2^2}{2}",
+    "Risolvo l'equazione di secondo grado in t_2",
+    "t_2 = 5\\,\\text{s}",
+    "5\\,\\text{s}"
+  ],
+  "physics.kinematics.multi_phase|medium": [
+    "s = s_1 + s_2 + s_3",
+    "s_1 = v_1 t_1 = 210\\,\\text{m}",
+    "s_2 = v_1 t_2 + \\frac{a_2 t_2^2}{2} = 105/2\\,\\text{m}",
+    "v_2 = v_1 + a_2 t_2 = 21/2\\,\\text{m/s};\\quad s_3 = v_2 t_3 + \\frac{a_3 t_3^2}{2} = 35\\,\\text{m}",
+    "s = 595/2\\,\\text{m}",
+    "595/2\\,\\text{m}"
+  ],
+  "physics.kinematics.relative|easy": [
+    "v_{rel} = v_A - v_B",
+    "v_{rel} = 6 - 1 = 5\\,\\text{m/s}",
+    "t = \\frac{d}{v_{rel}} = \\frac{15}{5}",
+    "t = 3\\,\\text{s}",
+    "3\\,\\text{s}"
+  ],
+  "physics.kinematics.relative|hard": [
+    "v_A t = d - v_B (t - \\delta)",
+    "1 t = 76 - 3 (t - 12)",
+    "t = \\frac{d + v_B \\delta}{v_A + v_B} = \\frac{76 + 3 \\cdot 12}{4}",
+    "t = 28\\,\\text{s}",
+    "28\\,\\text{s}"
+  ],
+  "physics.kinematics.relative|medium": [
+    "v_{rel} = v_A + v_B",
+    "v_{rel} = 5 + 5 = 10\\,\\text{m/s}",
+    "x = v_A \\cdot \\frac{d}{v_{rel}} = 5 \\cdot \\frac{60}{10}",
+    "x = 30\\,\\text{m}",
+    "30\\,\\text{m}"
+  ],
   "physics.kinematics.uniform|easy": [
     "s = v \\cdot t",
     "s = 15\\,\\text{m/s} \\cdot 21\\,\\text{s}",

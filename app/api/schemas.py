@@ -11,6 +11,9 @@ class TopicInfo(BaseModel):
     difficulties: list[str]
     label_key: str
     scenarios: list[str] = Field(default_factory=list)
+    # Navigation areas this topic appears in (STRUCTURE §4.1): every topic can be
+    # practised as problems; ones that carry a figure also have a graph page.
+    modes: list[str] = Field(default_factory=lambda: ["problemi"])
 
 
 class Catalog(BaseModel):
@@ -47,6 +50,22 @@ class WireItem(BaseModel):
     steps: list[WireStep]
     answer: WireAnswer
     figure: dict | None = None
+
+
+class PageInfo(BaseModel):
+    id: str
+    macro: str
+    sub: str
+    kind: str
+    topic: str
+    difficulty: str | None = None
+    label_key: str
+
+
+class PagesResponse(BaseModel):
+    macros: list[str]
+    subs: dict[str, list[str]]
+    pages: list[PageInfo]
 
 
 class GenerateResponse(BaseModel):

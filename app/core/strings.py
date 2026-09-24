@@ -20,3 +20,28 @@ def load_strings(lang: str = "it") -> dict[str, str]:
     if not path.exists():
         raise FileNotFoundError(f"no strings for language {lang!r}")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+_PLACEHOLDER = "{{key}}"
+_SIGNED = "{{+key}}"
+
+
+def render_template(template: str, params: dict[str, str]) -> str:
+    """Expand a template exactly like the frontend's ``renderText``.
+
+    Grammar (keep the browser and the PDF in lockstep — a divergence prints literal
+    ``{+b}`` on one surface and the intended value on the other):
+      - ``{name}``  -> the value, with a leading ASCII hyphen rendered as U+2212
+      - ``{+name}`` -> an explicit sign: ``+ 12`` / ``U+2212 12``
+    """
+    import re
+
+    def _typographic(value: str) -> str:
+        return f"\u2212{value[1:]}" if value.startswith("-") else value
+
+    def _signed(value: str) -> str:
+        negative = value.startswith("-")
+        return f"{'\u2212' if negative else '+'} {value[1:] if negative else value}"
+
+    out = re.sub(r"\{\+(\w+)\}", lambda m: _signed(str(params.get(m.group(1), "?"))), template)
+    return re.sub(r"\{(\w+)\}", lambda m: _typographic(str(params.get(m.group(1), "?"))), out)

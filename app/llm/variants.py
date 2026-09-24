@@ -54,20 +54,29 @@ def _topic_for_scenario(scenario: str):
 
 
 def template_items(topic, difficulty: str, count: int, seed: int) -> list[Item]:
-    """The deterministic baseline — exactly the ``/api/generate`` loop, bounded."""
+    """The deterministic baseline — exactly the ``/api/generate`` loop, bounded.
+
+    This is the safety net, so it may not itself fall over: a verifier that *raises*
+    (several do, on a missing param key) is treated as a discard and the next attempt is
+    tried, rather than escaping and turning a degraded answer into a crashed request.
+    """
     items: list[Item] = []
     for index in range(count):
         for attempt in range(MAX_ATTEMPTS):
             rng = make_rng(seed, topic.id, difficulty, index, attempt)
-            candidate = topic.generate(rng, difficulty, seed, index)
-            result = topic.verify(candidate)
-            if result.ok:
+            try:
+                candidate = topic.generate(rng, difficulty, seed, index)
+                result = topic.verify(candidate)
+                ok, reason = bool(result.ok), result.reason
+            except Exception as exc:  # noqa: BLE001 - see docstring
+                ok, reason = False, f"raised:{type(exc).__name__}"
+            if ok:
                 items.append(candidate)
                 break
             logger.warning(
                 "item discarded",
                 extra={"topic": topic.id, "difficulty": difficulty, "seed": seed, "index": index,
-                       "attempt": attempt + 1, "reason": result.reason, "source": "template_fallback"},
+                       "attempt": attempt + 1, "reason": reason, "source": "template_fallback"},
             )
     return items
 
@@ -92,14 +101,16 @@ async def generate_variants(
         if topic is None:
             logger.warning("variants degraded", extra={"scenario": scenario, "reason": "unknown_scenario"})
             return [], True, "unknown_scenario"
+        # A catalog scenario with no variant builder yet: serve the template at the
+        # requested difficulty when the topic supports it, at its own shape otherwise.
         fallback_difficulty = difficulty if difficulty in topic.difficulties else topic.difficulties[0]
         items = template_items(topic, fallback_difficulty, count, fallback)
         logger.warning(
             "variants degraded",
-            extra={"scenario": scenario, "reason": "unknown_scenario",
+            extra={"scenario": scenario, "reason": "no_variant_for_scenario",
                    "difficulty": fallback_difficulty, "items": len(items)},
         )
-        return items, True, "unknown_scenario"
+        return items, True, "no_variant_for_scenario"
 
     topic = TOPICS[declared.topic_id]
     outcome = await fetch_variant_specs_report(scenario, difficulty, count, client=client)
@@ -110,23 +121,14 @@ async def generate_variants(
         if len(items) >= count:
             break
         try:
-            item = spec_to_item(spec, topic, seed=fallback, index=len(items))
+            # Solving *and* verification live behind this call: an item that cannot be
+            # verified is discarded, never silently repaired (DESIGN §2.5).
+            items.append(spec_to_item(spec, seed=fallback, index=len(items)))
         except SpecError as exc:
             discarded.append(exc.reason)
             logger.warning(
                 "variant spec discarded",
                 extra={"scenario": scenario, "reason": exc.reason, "detail": exc.detail},
-            )
-            continue
-        result = topic.verify(item)
-        if result.ok:
-            items.append(item)
-        else:
-            # An unverifiable item is a bug signal, not noise (DESIGN §2.11).
-            discarded.append(result.reason or "unverifiable")
-            logger.warning(
-                "variant item discarded",
-                extra={"scenario": scenario, "reason": result.reason, "index": len(items)},
             )
 
     if outcome.error is None and items:

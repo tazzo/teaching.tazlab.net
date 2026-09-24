@@ -6,6 +6,9 @@ from typing import Protocol
 
 from app.generators.math.first_degree import TOPIC as FIRST_DEGREE
 from app.generators.physics.accelerated import TOPIC as ACCELERATED
+from app.generators.physics.circular import TOPIC as CIRCULAR
+from app.generators.physics.multi_phase import TOPIC as MULTI_PHASE
+from app.generators.physics.relative import TOPIC as RELATIVE
 from app.generators.physics.uniform import TOPIC as UNIFORM
 
 
@@ -21,4 +24,7 @@ TOPICS: dict[str, Topic] = {
     FIRST_DEGREE.id: FIRST_DEGREE,
     UNIFORM.id: UNIFORM,
     ACCELERATED.id: ACCELERATED,
+    CIRCULAR.id: CIRCULAR,
+    MULTI_PHASE.id: MULTI_PHASE,
+    RELATIVE.id: RELATIVE,
 }

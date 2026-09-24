@@ -15,6 +15,8 @@ from app.api.schemas import (
     ExportRequest,
     GenerateResponse,
     Health,
+    PageInfo,
+    PagesResponse,
     TopicInfo,
     VariantsRequest,
     VariantsResponse,
@@ -27,6 +29,7 @@ from app.core.rng import make_rng
 from app.core.strings import load_strings
 from app.generators.base import Answer, Item, Step, wire_params
 from app.generators.registry import TOPICS
+from app.pages import MACROS, PAGES, pages_for, subs
 
 router = APIRouter(prefix="/api")
 logger = logging.getLogger("teaching.api")
@@ -93,6 +96,42 @@ async def i18n() -> dict[str, str]:
         raise _fail(500, "strings_unavailable") from exc
 
 
+def _hidden_figure(figure: dict) -> dict:
+    """Strip the answer but keep the frame: axes, units and the scale to draw on.
+
+    A "fill in the empty graph" page needs a grid the student can plot on. The scale is
+    not the answer — the problem statement already gives the data — but without it the
+    grid would have no meaningful extent.
+    """
+    ys: list[Fraction] = []
+    for trace in figure.get("traces", []):
+        ys.extend(Fraction(y) for _, y in trace.get("samples", []))
+    ys.extend(Fraction(marker["at"][1]) for marker in figure.get("markers", []))
+    hidden = {**figure, "traces": [], "markers": [], "vectors": []}
+    # the stripped trace still tells us what the student is expected to plot
+    if figure.get("traces"):
+        hidden["y_label"] = figure["traces"][0].get("label_key")
+    if ys:
+        hidden["y_range"] = [str(min(ys)), str(max(ys))]
+    return hidden
+
+
+@router.get("/pages", response_model=PagesResponse)
+async def pages() -> PagesResponse:
+    """The information architecture: macros -> sub-topics -> pages."""
+    known = set(TOPICS)
+    available = [p for p in PAGES if p.topic in known]
+    return PagesResponse(
+        macros=[m for m in MACROS if any(p.macro == m for p in available)],
+        subs={m: [s for s in subs(m) if pages_for(m, s)] for m in MACROS},
+        pages=[
+            PageInfo(id=p.id, macro=p.macro, sub=p.sub, kind=p.kind, topic=p.topic,
+                     difficulty=p.difficulty, label_key=p.label_key)
+            for p in available
+        ],
+    )
+
+
 @router.get("/catalog", response_model=Catalog)
 async def catalog() -> Catalog:
     topics = [
@@ -102,6 +141,9 @@ async def catalog() -> Catalog:
             difficulties=list(topic.difficulties),
             label_key=topic.label_key,
             scenarios=list(getattr(topic, "scenarios", ())),
+            # a topic with a figure belongs to the graph area too; the figure is a
+            # property of the generated item, so only the family can decide it here
+            modes=["problemi", "grafici"] if topic.family == "physics" else ["problemi"],
         )
         for topic in sorted(TOPICS.values(), key=lambda item: item.id)
     ]
@@ -116,6 +158,10 @@ async def generate(
     difficulty: str = Query(...),
     seed: int = Query(...),
     count: int = Query(5, ge=1, le=MAX_COUNT),
+    # "full" draws the figure; "hidden" keeps the axes and drops every trace and marker,
+    # which is what a "fill in the empty graph" page needs (the solution is fetched
+    # separately from the same seed, so the two calls describe the same item).
+    figure: str = Query("full", pattern="^(full|hidden)$"),
 ) -> GenerateResponse:
     impl = TOPICS.get(topic)
     if impl is None:
@@ -147,7 +193,10 @@ async def generate(
         if item is None:
             discarded.append(f"{index}:{last_reason}")
             continue
-        items.append(_to_wire(item))
+        wire = _to_wire(item)
+        if figure == "hidden" and wire.figure:
+            wire.figure = _hidden_figure(wire.figure)
+        items.append(wire)
 
     if discarded:
         logger.error(

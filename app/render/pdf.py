@@ -26,7 +26,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import re
 import shutil
 import subprocess
 from contextlib import contextmanager
@@ -37,6 +36,7 @@ from typing import Any, Iterator, Mapping, Sequence
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 
+from app.core.strings import render_template
 from app.core.units import fmt
 from app.render.figure import KINEMATICS
 
@@ -94,7 +94,7 @@ def _template_dir() -> Path:
     """
     override = os.environ.get("TEACHING_TEMPLATE_DIR")
     candidates = [
-        *( [Path(override)] if override else [] ),
+        *([Path(override)] if override else []),
         Path(__file__).resolve().parent.parent / "templates",
         Path.cwd() / "app" / "templates",
     ]
@@ -111,7 +111,7 @@ def _katex_dir() -> Path:
     """The ``katex/dist`` directory holding ``katex.mjs``, ``katex.min.css`` and fonts."""
     override = os.environ.get("TEACHING_KATEX_DIR")
     candidates = [
-        *( [Path(override)] if override else [] ),
+        *([Path(override)] if override else []),
         Path("/opt/katex"),  # the runtime image (see Dockerfile)
         Path(__file__).resolve().parents[2] / "web" / "node_modules" / "katex" / "dist",
     ]
@@ -164,8 +164,6 @@ def _frozen_clock() -> Iterator[None]:
 
 def _render_katex(formulas: Sequence[tuple[str, str, bool]], katex_dir: Path) -> dict[str, str]:
     """Render every formula of one document in a single Node process."""
-    if not formulas:
-        return {}
     node = os.environ.get("TEACHING_NODE") or shutil.which("node")
     if node is None:
         raise RuntimeError("node is required to render formulas; see the Dockerfile runtime stage")
@@ -188,26 +186,21 @@ def _render_katex(formulas: Sequence[tuple[str, str, bool]], katex_dir: Path) ->
 
 # ------------------------------------------------------------------- items
 
-_PLACEHOLDER = re.compile(r"\{(\w+)\}")
-
 
 def _statement(item: Any, strings: Mapping[str, str]) -> str:
-    """The statement sentence: the label template with the exact wire numbers in it.
+    """The statement sentence: the label template with the exact item numbers in it.
 
-    The browser does the same substitution with the same numbers (web/src/formula.js
-    ``renderText``), so screen and print cannot drift. Values are numeric — the wire path
-    parses every parameter into a Fraction before an item ever reaches the renderer — and
-    a placeholder without a value stays literal rather than becoming "None".
+    Expansion is delegated to ``app.core.strings.render_template`` — the Python twin of
+    web/src/formula.js ``renderText`` — so ``{name}``/``{+name}`` (and the typographic
+    minus) read identically on both surfaces. Values are numeric: the wire path parses
+    every parameter into a Fraction before an item reaches the renderer.
     """
     wire = getattr(item, "statement", None)
     if wire is not None:  # WireItem (app/api/schemas.py)
         key, params = wire.key, {name: str(value) for name, value in wire.params.items()}
     else:  # Item (app/generators/base.py) — what the export route passes
         key, params = item.statement_key, {name: str(value) for name, value in item.params.items()}
-    template = strings.get(key, key)
-    return _PLACEHOLDER.sub(
-        lambda match: params.get(match.group(1), match.group(0)), template
-    )
+    return render_template(strings.get(key, key), params)
 
 
 # ----------------------------------------------------------------- figures
@@ -219,10 +212,13 @@ def _statement(item: Any, strings: Mapping[str, str]) -> str:
 _TRACE_COLORS = ("#1f6feb", "#d29922")
 _MARKER_COLOR = "#c0392b"
 
-# SVG user units; the plot box is inset so the axis labels have room.
+# SVG user units; the plot box is inset so the axis names have room of their own: the
+# x name sits on a second line below the tick numbers, the y unit above the top tick.
 _SVG_W, _SVG_H = 1000, 600
 _PLOT_LEFT, _PLOT_RIGHT = 74, 26
-_PLOT_TOP, _PLOT_BOTTOM = 26, 46
+_PLOT_TOP, _PLOT_BOTTOM = 44, 84
+#: Trace labels that name the measured quantity of a series (it.json ``trace.*``).
+_POSITION_TRACE, _VELOCITY_TRACE = "trace.position", "trace.velocity"
 _MAX_TICKS = 6
 #: Tick ladder — all exact Fractions, so a tick label is never a rounded float.
 _STEP_LADDER = (
@@ -281,6 +277,26 @@ def _samples(trace: Mapping[str, Any], index: int) -> tuple[tuple[Fraction, Frac
     return tuple(points)
 
 
+def _check_axis_unit(traces: list, y_unit: str) -> None:
+    """One measured quantity per y axis, or refuse to draw.
+
+    A shared y axis cannot be captioned ``[m]`` while also carrying an m/s trace: the
+    student would read a speed off a metre scale. The trace label vocabulary says what
+    the series measures, so the mismatch is detectable and is a payload bug — the axis
+    caption would otherwise be a lie, on screen and in print alike.
+    """
+    keys = {key for key, _ in traces}
+    if {_POSITION_TRACE, _VELOCITY_TRACE} <= keys:
+        raise ValueError(
+            "figure puts a position trace and a velocity trace on one y axis; "
+            "a figure carries one measured quantity"
+        )
+    if _VELOCITY_TRACE in keys and "/" not in y_unit:
+        raise ValueError(f"figure carries a {_VELOCITY_TRACE} trace under y_unit={y_unit!r}")
+    if _POSITION_TRACE in keys and "/" in y_unit:
+        raise ValueError(f"figure carries a {_POSITION_TRACE} trace under y_unit={y_unit!r}")
+
+
 def _axis(low: Fraction, high: Fraction) -> tuple[Fraction, Fraction, list[Fraction]]:
     """Snap an axis to a nice exact step and list its ticks (at most ``_MAX_TICKS``)."""
     if high <= low:
@@ -309,9 +325,10 @@ def _figure_html(figure: Mapping[str, Any], strings: Mapping[str, str]) -> str:
     label = lambda key: strings.get(key, key)  # noqa: E731 - mirrors figure.js's fallback
 
     traces = [
-        (label(trace.get("label_key", "")), _samples(trace, index))
+        (str(trace.get("label_key", "")), _samples(trace, index))
         for index, trace in enumerate(figure.get("traces") or [])
     ]
+    _check_axis_unit(traces, y_unit)
     markers = []
     for index, marker in enumerate(figure.get("markers") or []):
         try:
@@ -341,7 +358,7 @@ def _figure_html(figure: Mapping[str, Any], strings: Mapping[str, str]) -> str:
     for tick in y_ticks:
         y = _q(to_y(tick))
         parts.append(
-            f'<line x1="{left}" y1="{y}" x2="{right}" y2="{y}" stroke="#dddddd" '
+            f'<line x1="{left}" y1="{y}" x2="{right}" y2="{y}" stroke="#e8e8e8" '
             f'stroke-width="1" stroke-dasharray="6 6"/>'
         )
         parts.append(
@@ -351,7 +368,7 @@ def _figure_html(figure: Mapping[str, Any], strings: Mapping[str, str]) -> str:
     for tick in x_ticks:
         x = _q(to_x(tick))
         parts.append(
-            f'<line x1="{x}" y1="{top}" x2="{x}" y2="{bottom}" stroke="#dddddd" '
+            f'<line x1="{x}" y1="{top}" x2="{x}" y2="{bottom}" stroke="#e8e8e8" '
             f'stroke-width="1" stroke-dasharray="6 6"/>'
         )
         parts.append(
@@ -360,8 +377,18 @@ def _figure_html(figure: Mapping[str, Any], strings: Mapping[str, str]) -> str:
         )
     parts.append(f'<line x1="{left}" y1="{top}" x2="{left}" y2="{bottom}" stroke="#333" stroke-width="2"/>')
     parts.append(f'<line x1="{left}" y1="{bottom}" x2="{right}" y2="{bottom}" stroke="#333" stroke-width="2"/>')
+    # Axis names sit on the axes themselves, as in web/src/figure.js (`defaultAxes`):
+    # the x axis gets "t [s]" on its own line under the tick numbers, the y axis its
+    # unit from the payload above the top tick.
+    parts.append(
+        f'<text x="{right}" y="{bottom + 62}" text-anchor="end" fill="#333">'
+        f'{label("axis.time")} [{x_unit}]</text>'
+    )
+    parts.append(
+        f'<text x="{left}" y="{top - 20}" text-anchor="start" fill="#333">[{y_unit}]</text>'
+    )
 
-    for index, (_, points) in enumerate(traces):
+    for index, (key, points) in enumerate(traces):
         colour = _TRACE_COLORS[index % len(_TRACE_COLORS)]
         coordinates = " ".join(f"{_q(to_x(t))},{_q(to_y(s))}" for t, s in points)
         parts.append(
@@ -373,10 +400,12 @@ def _figure_html(figure: Mapping[str, Any], strings: Mapping[str, str]) -> str:
         )
     parts.append("</svg>")
 
+    # The legend names the traces and locates the markers; it deliberately does not
+    # repeat the y unit per trace (the payload's y_unit governs the whole y axis).
     legend = [
         f'<li><span style="display:inline-block;width:14px;height:3px;background:{colour}"></span> '
-        f'{text} [{y_unit}]</li>'
-        for colour, (text, _) in zip(
+        f'{label(key)}</li>'
+        for colour, (key, _) in zip(
             (_TRACE_COLORS[index % len(_TRACE_COLORS)] for index in range(len(traces))), traces
         )
     ]
@@ -386,22 +415,18 @@ def _figure_html(figure: Mapping[str, Any], strings: Mapping[str, str]) -> str:
         f'{_tick_label(s)} {y_unit})</li>'
         for text, t, s in markers
     ]
-    caption = f'{label("axis.time")} [{x_unit}]'
-    return (
-        "".join(parts)
-        + f'<p class="axis-caption">{caption}</p>'
-        + '<ul class="legend">' + "".join(legend) + "</ul>"
-    )
+    return "".join(parts) + '<ul class="legend">' + "".join(legend) + "</ul>"
 
 
 # ------------------------------------------------------------------- build
 
-def _build(items: Sequence[Any], answers: bool, strings: Mapping[str, str]) -> tuple[dict[str, Any], Path | None]:
-    """Assemble the template context; ``None`` when the document needs no KaTeX at all.
 
-    A statements-only sheet carries no formula (the statements are prose with exact
-    numbers in them, as on screen), so it neither spawns Node nor embeds the KaTeX
-    webfonts.
+def _build(items: Sequence[Any], answers: bool, strings: Mapping[str, str]) -> tuple[dict[str, Any], Path | None]:
+    """Assemble the template context and the KaTeX directory it needs.
+
+    The directory is ``None`` when the document has no formula at all: a statements-only
+    sheet carries no LaTeX (the statements are prose with exact numbers in them, as on
+    screen), so it neither spawns Node nor embeds the KaTeX webfonts.
     """
     labels = {key: strings[key] for key in DOCUMENT_LABELS}
 

@@ -11,10 +11,34 @@ RUN npm run build
 # --- Stage 2: runtime (FastAPI + SymPy + WeasyPrint) ----------------------
 FROM python:3.14-slim
 
+# WeasyPrint is not pure Python. weasyprint.text.ffi dlopens pango, pangoft2, harfbuzz,
+# fontconfig and gobject through cffi, and harfbuzz-subset performs the font subsetting
+# (WeasyPrint 70 warns that it will be required). A `pip install weasyprint` therefore
+# imports fine and then dies on the first render in a slim image, which ships neither the
+# libraries nor a single text family. libpangoft2-1.0-0 pulls pango, fontconfig,
+# harfbuzz and glib (gobject) with it; libc/glibc and libstdc++/libgcc (node's runtime)
+# are already in the base, since apt itself links them.
+# gdk-pixbuf and cairo are deliberately NOT installed: WeasyPrint 70 renders SVG with its
+# own engine and raster images through Pillow (checked against the installed package —
+# neither name appears in a single import).
+RUN apt-get update \
+ && apt-get install --no-install-recommends --yes \
+      libpangoft2-1.0-0 \
+      libharfbuzz-subset0 \
+      shared-mime-info \
+      fonts-dejavu-core \
+ && rm -rf /var/lib/apt/lists/*
+
 # Node is copied in (not installed) because KaTeX renders server-side for the
 # PDF: same source of truth as the screen, no markup accepted from clients.
 # Binaries built against glibc 2.36 (bookworm) run on trixie's 2.41.
 COPY --from=web /usr/local/bin/node /usr/local/bin/node
+
+# The katex package the frontend bundle already vendors. app/render/pdf.py runs
+# `katex.renderToString` through that node binary once per document, so screen and PDF
+# share one KaTeX version and one LaTeX source; /opt/katex is that module's default
+# location (TEACHING_KATEX_DIR overrides it).
+COPY --from=web /web/node_modules/katex/dist /opt/katex
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
