@@ -22,10 +22,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Dependencies first (slow, rarely changing) — read from pyproject so it stays the
+# single source of truth; then the application, which setuptools needs present.
 COPY pyproject.toml ./
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir .
+RUN pip install --no-cache-dir --upgrade pip \
+ && python -c "import pathlib,tomllib; d=tomllib.loads(pathlib.Path('pyproject.toml').read_text()); print(chr(10).join(d['project']['dependencies']))" > /tmp/requirements.txt \
+ && pip install --no-cache-dir -r /tmp/requirements.txt
 
 COPY app/ ./app/
+RUN pip install --no-cache-dir --no-deps .
 COPY --from=web /web/dist ./web/dist
 
 # git sha of the image build, surfaced in the startup banner
