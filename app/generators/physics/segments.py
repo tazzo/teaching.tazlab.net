@@ -24,7 +24,7 @@ import random
 from dataclasses import dataclass
 from fractions import Fraction
 
-from app.core.units import fmt, fmt_reading
+from app.core.units import fmt, fmt_reading, unit_latex
 from app.core.verify import VerificationResult, no_floats
 from app.generators.base import Answer, Item, Step
 
@@ -288,7 +288,8 @@ class SegmentMotion:
             statement_key=statement_key,
             steps=self._steps(segments, ask, seg_index, t_ask, converted, quantity),
             answer=Answer(
-                latex=f"{fmt_reading(value)}\\,\\text{{{answer_unit}}}",
+                # the caret in m/s^2 cannot live inside \text{}: KaTeX refuses the formula
+                latex=f"{fmt_reading(value)}\\,{unit_latex(answer_unit)}",
                 kind="scalar_with_unit",
                 payload={"value": [fmt_reading(value)], "unit": [answer_unit]},
             ),
