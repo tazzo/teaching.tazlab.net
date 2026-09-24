@@ -23,7 +23,17 @@ export function renderFormula(latex, displayMode = false) {
 export function renderText(template, params) {
   return template
     .replace(/\{\+(\w+)\}/g, (_, key) => signed(params?.[key]))
+    .replace(/\{\*(\w+)\}/g, (_, key) => coefficient(params?.[key]))
     .replace(/\{(\w+)\}/g, (_, key) => typographic(params?.[key]));
+}
+
+/** Coefficient form: 1 -> "" ("x", not "1x"), -1 -> "−", otherwise the value. */
+function coefficient(value) {
+  if (value === undefined || value === null) return "?";
+  const text = String(value);
+  if (text === "1") return "";
+  if (text === "-1") return "\u2212";
+  return typographic(text);
 }
 
 /** Render a leading ASCII hyphen as U+2212, the character KaTeX uses, so a coefficient

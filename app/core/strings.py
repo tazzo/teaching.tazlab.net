@@ -39,9 +39,17 @@ def render_template(template: str, params: dict[str, str]) -> str:
     def _typographic(value: str) -> str:
         return f"\u2212{value[1:]}" if value.startswith("-") else value
 
+    def _coefficient(value: str) -> str:
+        if value == "1":
+            return ""
+        if value == "-1":
+            return "\u2212"
+        return _typographic(value)
+
     def _signed(value: str) -> str:
         negative = value.startswith("-")
         return f"{'\u2212' if negative else '+'} {value[1:] if negative else value}"
 
     out = re.sub(r"\{\+(\w+)\}", lambda m: _signed(str(params.get(m.group(1), "?"))), template)
+    out = re.sub(r"\{\*(\w+)\}", lambda m: _coefficient(str(params.get(m.group(1), "?"))), out)
     return re.sub(r"\{(\w+)\}", lambda m: _typographic(str(params.get(m.group(1), "?"))), out)
