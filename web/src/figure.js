@@ -21,7 +21,7 @@ function graphTokens() {
     font: parseFloat(cssToken("--graph-font", "20")) || 20,
     axisFont: parseFloat(cssToken("--graph-axis-font", "22")) || 22,
     danger: cssToken("--danger", "#c0392b"),
-    guide: cssToken("--line-strong", "#b8c1ca"),
+    guide: cssToken("--guide", "#8b949e"),
     // one colour per motion-segment kind, matching the legend the page draws
     kinds: {
       uniform: cssToken("--kind-uniform", "#1f6feb"),
@@ -154,9 +154,10 @@ export function renderFigure(container, figure, strings) {
     board.create("point", [x, y], {
       size: 6,
       face: "circle",
-      fillColor: "#fff",
-      strokeColor: tokens.kinds[vertex.kind] ?? "#1f6feb",
-      strokeWidth: 3,
+      // filled, with a white ring: a hollow dot reads as a break in the line
+      fillColor: tokens.kinds[vertex.kind] ?? "#1f6feb",
+      strokeColor: "#fff",
+      strokeWidth: 2,
       fixed: true,
       highlight: false,
       withLabel: false,
@@ -168,7 +169,7 @@ export function renderFigure(container, figure, strings) {
     const x = toNumber(guide.at);
     board.create("segment", [[x, yMin], [x, yMax]], {
       strokeColor: tokens.guide,
-      strokeWidth: 1,
+      strokeWidth: 2,
       dash: 2,
       fixed: true,
     });
@@ -185,7 +186,7 @@ export function renderFigure(container, figure, strings) {
       fixed: true,
       name: label(strings, marker.label_key, marker.label_key),
       withLabel: true,
-      label: { offset: [-40, 24], fontSize: GRAPH_FONT },
+      label: { position: "rt", offset: [12, 14], fontSize: GRAPH_FONT },
     });
   });
 
