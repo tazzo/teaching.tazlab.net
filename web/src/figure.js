@@ -108,10 +108,26 @@ export function renderFigure(container, figure, strings) {
   traces.forEach((trace, index) => {
     board.create("curve", [trace.samples.map(([x]) => Number(x)), trace.samples.map(([, y]) => Number(y))], {
       strokeColor: tokens.kinds[trace.kind] ?? palette[index % palette.length],
-      strokeWidth: 3,
+      strokeWidth: 4,
       name: label(strings, trace.label_key, trace.label_key),
       withLabel: labelTraces && traces.length <= 2,
       label: { position: "rt", offset: [10, -10], fontSize: GRAPH_FONT },
+    });
+  });
+
+  // the vertices of the broken line: white-centred dots ringed in the segment's colour,
+  // large enough to read from the back of a classroom
+  (figure.vertices ?? []).forEach((vertex) => {
+    const [x, y] = vertex.at.map(Number);
+    board.create("point", [x, y], {
+      size: 6,
+      face: "circle",
+      fillColor: "#fff",
+      strokeColor: tokens.kinds[vertex.kind] ?? "#1f6feb",
+      strokeWidth: 3,
+      fixed: true,
+      highlight: false,
+      withLabel: false,
     });
   });
 
@@ -129,9 +145,10 @@ export function renderFigure(container, figure, strings) {
   markers.forEach((marker) => {
     const [x, y] = marker.at.map(Number);
     board.create("point", [x, y], {
-      size: 5,
-      face: "cross",
-      strokeColor: tokens.danger,
+      size: 7,
+      face: "circle",
+      fillColor: tokens.danger,
+      strokeColor: "#fff",
       strokeWidth: 3,
       fixed: true,
       name: label(strings, marker.label_key, marker.label_key),

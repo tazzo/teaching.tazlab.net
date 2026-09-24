@@ -405,6 +405,12 @@ class SegmentMotion:
             markers.append({"label_key": "marker.asked_segment",
                             "at": [middle[0], middle[1]]})
 
+        # The vertices of the broken line: where the motion changes, the graph bends. Drawn
+        # as points so a student can SEE the readings the statement talks about.
+        vertices = [{"at": traces[0]["samples"][0], "kind": traces[0]["kind"]}]
+        for trace in traces:
+            vertices.append({"at": trace["samples"][-1], "kind": trace["kind"]})
+
         guides = []
         boundary = Fraction(0)
         for seg in segments[:-1]:
@@ -419,6 +425,7 @@ class SegmentMotion:
             "y_label": "trace.position" if quantity == POSITION else "trace.velocity",
             "domain": {"t_min": "0", "t_max": fmt(elapsed)},
             "traces": traces,
+            "vertices": vertices,
             "markers": markers,
             "guides": guides,
             "phases": phases,
@@ -462,6 +469,11 @@ class SegmentMotion:
         for guide in figure.get("guides", []):
             if not 0 < Fraction(guide["at"]) < times[-1]:
                 return VerificationResult(False, "guide_outside_domain")
+        # every vertex of the broken line must be a point the traces actually pass through
+        drawn = {(x, y) for trace in traces for x, y in trace["samples"]}
+        for vertex in figure.get("vertices", []):
+            if tuple(vertex["at"]) not in drawn:
+                return VerificationResult(False, "vertex_not_on_the_line")
         # markers must sit inside the plotted box
         for marker in figure.get("markers", []):
             x, y = (Fraction(value) for value in marker["at"])
