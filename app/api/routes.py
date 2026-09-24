@@ -126,7 +126,9 @@ async def pages() -> PagesResponse:
         subs={m: [s for s in subs(m) if pages_for(m, s)] for m in MACROS},
         pages=[
             PageInfo(id=p.id, macro=p.macro, sub=p.sub, kind=p.kind, topic=p.topic,
-                     difficulty=p.difficulty, label_key=p.label_key)
+                     difficulty=p.difficulty,
+                     difficulties=list(TOPICS[p.topic].difficulties) if p.topic in known else [],
+                     label_key=p.label_key)
             for p in available
         ],
     )

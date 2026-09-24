@@ -96,12 +96,13 @@ function controls(page, reload) {
     label.htmlFor = "difficulty";
     const select = el("select");
     select.id = "difficulty";
-    ["easy", "medium", "hard"].forEach((value) => {
+    // exactly the difficulties the topic declares: not every topic has an easy level
+    (page.difficulties ?? []).forEach((value) => {
       const option = el("option", null, t(`difficulty.${value}`, value));
       option.value = value;
       select.append(option);
     });
-    select.value = "easy";
+    if (select.options.length) select.value = select.options[0].value;
     form.append(label, select);
   }
 
@@ -126,7 +127,7 @@ function controls(page, reload) {
   form.append(seedLabel, seed, countLabel, count, submit);
 
   const read = () => ({
-    difficulty: difficulty ?? form.querySelector("#difficulty")?.value ?? "easy",
+    difficulty: difficulty ?? form.querySelector("#difficulty")?.value ?? page.difficulties?.[0],
     seed: Number(seed.value) || 1,
     count: Number(count.value) || 3,
   });

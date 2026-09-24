@@ -58,7 +58,10 @@ class PageInfo(BaseModel):
     sub: str
     kind: str
     topic: str
+    # a page may pin one difficulty; otherwise the client offers exactly what the topic
+    # supports (a topic without an "easy" level must not be asked for one)
     difficulty: str | None = None
+    difficulties: list[str] = Field(default_factory=list)
     label_key: str
 
 
