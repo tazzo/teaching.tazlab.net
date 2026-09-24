@@ -31,8 +31,24 @@ function graphTokens() {
   };
 }
 
+/**
+ * A drawing coordinate -> number.
+ *
+ * The wire carries exact rationals ("-7/2", "3"), which `Number()` reads as `NaN`: that is
+ * how every trace of a graph once collapsed to nothing while the legend still listed it.
+ * Only here, at the boundary, is the exact value turned into a float — the payload keeps
+ * the exact form, and the server verifies against it.
+ */
+function toNumber(value) {
+  if (typeof value === "number") return value;
+  const text = String(value).trim();
+  const rational = /^(-?\d+)\/(\d+)$/.exec(text);
+  if (rational) return Number(rational[1]) / Number(rational[2]);
+  return Number(text);
+}
+
 function extent(values) {
-  const nums = values.map(Number).filter((n) => Number.isFinite(n));
+  const nums = values.map(toNumber).filter((n) => Number.isFinite(n));
   if (!nums.length) return [0, 1];
   return [Math.min(...nums), Math.max(...nums)];
 }
@@ -108,7 +124,15 @@ export function renderFigure(container, figure, strings) {
   const labelTraces = traces.length > 1;
   const palette = [tokens.kinds.uniform, "#d29922", "#8250df", tokens.kinds.accelerate];
   traces.forEach((trace, index) => {
-    const points = trace.samples.map(([x, y]) => [Number(x), Number(y)]);
+    const points = trace.samples.map(([x, y]) => [toNumber(x), toNumber(y)]);
+    // A coordinate the browser cannot read is a broken payload, not an empty graph: say so
+    // in the console instead of drawing nothing (observed: Number("21/4") is NaN, and the
+    // whole trace silently vanished while the legend still listed it).
+    const unreadable = trace.samples.filter(([x, y]) => !Number.isFinite(toNumber(x)) || !Number.isFinite(toNumber(y)));
+    if (unreadable.length) {
+      console.error(`figure: unreadable coordinates in trace "${trace.kind ?? index}"`, unreadable.slice(0, 3));
+      return;
+    }
     const stroke = tokens.kinds[trace.kind] ?? palette[index % palette.length];
     for (let i = 1; i < points.length; i += 1) {
       board.create("segment", [points[i - 1], points[i]], {
@@ -126,7 +150,7 @@ export function renderFigure(container, figure, strings) {
   // the vertices of the broken line: white-centred dots ringed in the segment's colour,
   // large enough to read from the back of a classroom
   (figure.vertices ?? []).forEach((vertex) => {
-    const [x, y] = vertex.at.map(Number);
+    const [x, y] = vertex.at.map(toNumber);
     board.create("point", [x, y], {
       size: 6,
       face: "circle",
@@ -141,7 +165,7 @@ export function renderFigure(container, figure, strings) {
 
   // dashed dividers between motion segments
   (figure.guides ?? []).forEach((guide) => {
-    const x = Number(guide.at);
+    const x = toNumber(guide.at);
     board.create("segment", [[x, yMin], [x, yMax]], {
       strokeColor: tokens.guide,
       strokeWidth: 1,
@@ -151,7 +175,7 @@ export function renderFigure(container, figure, strings) {
   });
 
   markers.forEach((marker) => {
-    const [x, y] = marker.at.map(Number);
+    const [x, y] = marker.at.map(toNumber);
     board.create("point", [x, y], {
       size: 7,
       face: "circle",

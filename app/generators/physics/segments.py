@@ -178,16 +178,20 @@ class SegmentMotion:
             elif kind == UNIFORM:
                 v_end = v if v > 0 else Fraction(rng.randint(max(2, floor), max(ceiling, 2)))
             elif kind == ACCELERATE:
-                # a ramp needs room above; if the ceiling is reached, one step is still
-                # honest, and the velocity never drops below the floor
+                # Δv is a whole multiple of the duration, so the acceleration is an integer
+                # m/s² and every drawn coordinate is a terminating decimal: a school graph
+                # shows v = 1, 2, 3 m/s, not v = 5/3 m/s
                 headroom = min(6, ceiling - int(v))
-                v_end = v + Fraction(rng.randint(1, headroom)) if headroom >= 1 else v + 1
+                step = max(1, rng.randint(1, headroom)) if headroom >= 1 else 1
+                v_end = v + Fraction(step) * duration
             else:                                           # decelerate
                 if int(v) - floor < 1:
                     # nothing to lose at this height: raise the speed so the segment the
                     # operator asked for really decelerates, instead of drawing a negative one
                     v = Fraction(rng.randint(floor + 1, max(floor + 1, ceiling)))
-                v_end = max(v - Fraction(rng.randint(1, min(6, int(v) - floor))), Fraction(floor))
+                headroom = max(1, int(v) - floor)
+                step = max(1, rng.randint(1, min(headroom, 3)))
+                v_end = max(v - Fraction(step) * duration, Fraction(floor))
             segments.append(Segment(kind, duration, v, v_end))
             v = v_end
 

@@ -17,6 +17,7 @@ def _pairs(samples: list[tuple[Fraction, Fraction]]) -> list[list[str]]:
 
 
 def _num(value: Fraction) -> str:
+    """Canonical exact rational string ("7/2"): the client parses it, it never rounds it."""
     value = Fraction(value)
     return str(value.numerator) if value.denominator == 1 else f"{value.numerator}/{value.denominator}"
 
