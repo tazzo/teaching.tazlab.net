@@ -8,11 +8,12 @@ import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import VERSION, router
-from app.logging_setup import configure_logging, set_request_id, startup_banner
+from app.logging_setup import configure_logging, get_request_id, set_request_id, startup_banner
 
 configure_logging()
 logger = logging.getLogger("teaching")
@@ -89,6 +90,30 @@ def _client_ip(request: Request) -> str:
     if forwarded and peer.startswith("10.244."):
         return forwarded.split(",")[0].strip()
     return peer
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    """FastAPI's own validation answers 422; the documented contract is 400 invalid_parameter.
+
+    A bad parameter is a client error, not an incident: WARN, with the offending field named.
+    """
+    fields = [".".join(str(part) for part in err.get("loc", ())) for err in exc.errors()]
+    logger.warning(
+        "invalid request parameters",
+        extra={"path": request.url.path, "fields": fields},
+    )
+    return JSONResponse(
+        status_code=400,
+        content={
+            "error": {
+                "code": "invalid_parameter",
+                "message_key": "error.invalid_parameter",
+                "detail": ", ".join(fields),
+            }
+        },
+        headers={"x-request-id": get_request_id()},
+    )
 
 
 app.include_router(router)

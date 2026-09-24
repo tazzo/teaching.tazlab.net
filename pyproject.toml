@@ -20,7 +20,10 @@ dependencies = [
 [tool.setuptools]
 # Explicit: flat-layout auto-discovery is a heuristic and would break the image
 # build the moment a second top-level directory appears.
-packages = ["app", "app.api", "app.generators"]
+packages = ["app", "app.api", "app.core", "app.generators", "app.generators.math"]
+
+[project.optional-dependencies]
+dev = ["pytest==8.4.2", "httpx==0.28.1"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

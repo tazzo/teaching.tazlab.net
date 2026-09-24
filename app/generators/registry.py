@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from app.generators.math.first_degree import TOPIC as FIRST_DEGREE
+
 
 class Topic(Protocol):
     id: str
@@ -13,5 +15,6 @@ class Topic(Protocol):
     scenarios: tuple[str, ...]
 
 
-# Populated by the topic modules (Phase C).
-TOPICS: dict[str, Topic] = {}
+TOPICS: dict[str, Topic] = {
+    FIRST_DEGREE.id: FIRST_DEGREE,
+}

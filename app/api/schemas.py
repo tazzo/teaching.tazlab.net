@@ -1,4 +1,4 @@
-"""Wire models (STRUCTURE §4.1). Numbers cross the wire as exact strings."""
+"""Wire models (STRUCTURE §4.1-§4.3). Numbers cross the wire as exact strings."""
 
 from __future__ import annotations
 
@@ -22,3 +22,45 @@ class Catalog(BaseModel):
 class Health(BaseModel):
     status: str = "ok"
     version: str
+
+
+class WireStatement(BaseModel):
+    key: str
+    params: dict[str, str]
+
+
+class WireStep(BaseModel):
+    label_key: str
+    latex: str
+    note_key: str | None = None
+
+
+class WireAnswer(BaseModel):
+    latex: str
+    kind: str
+    payload: dict[str, list[str]] = Field(default_factory=dict)
+
+
+class WireItem(BaseModel):
+    index: int
+    statement: WireStatement
+    steps: list[WireStep]
+    answer: WireAnswer
+    figure: dict | None = None
+
+
+class GenerateResponse(BaseModel):
+    topic: str
+    difficulty: str
+    seed: int
+    items: list[WireItem]
+
+
+class ErrorBody(BaseModel):
+    code: str
+    message_key: str
+    detail: str | None = None
+
+
+class ErrorResponse(BaseModel):
+    error: ErrorBody
