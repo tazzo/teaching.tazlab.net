@@ -80,7 +80,8 @@ class LinearSystem2x2:
     scenarios: tuple[str, ...] = ()
 
     # ---------------------------------------------------------------- generate
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         if difficulty == "easy":
             key, params, solution, steps = self._easy(rng)
         elif difficulty == "medium":
@@ -224,7 +225,8 @@ class LinearQuadraticSystem:
     scenarios: tuple[str, ...] = ()
 
     # ---------------------------------------------------------------- generate
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         if difficulty == "medium":
             points, params, steps = self._integer(rng)
         elif rng.random() < 0.5:

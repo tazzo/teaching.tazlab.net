@@ -27,7 +27,8 @@ class UniformMotion:
     scenarios = ("uniform_one_object", "uniform_unit_conversion", "uniform_graph_reading", "uniform_sound_distance")
 
     # ---------------------------------------------------------------- generate
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         if difficulty == "easy":
             # everyday scale: v 1-25 m/s, t 1-60 s
             v = Fraction(rng.randint(2, 20))

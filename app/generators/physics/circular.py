@@ -114,7 +114,8 @@ class CircularMotion:
     scenarios = ("circular_speed", "circular_acceleration", "circular_angular")
 
     # ---------------------------------------------------------------- generate
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         radius = Fraction(rng.choice(_RADII))
 
         if difficulty == "easy":

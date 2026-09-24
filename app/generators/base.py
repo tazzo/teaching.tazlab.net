@@ -44,8 +44,13 @@ class Topic(Protocol):
     label_key: str
     scenarios: tuple[str, ...]
 
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item: ...
+    # `options` carries the page configurator's choices (STRUCTURE §4.2). Topics that
+    # expose a configurator validate them through `validate_options`; every other topic
+    # accepts the argument and ignores it, so one call site serves both kinds.
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item: ...
     def verify(self, item: Item) -> VerificationResult: ...
+    def validate_options(self, options: dict) -> dict: ...
 
 
 def wire_params(params: dict[str, Fraction]) -> dict[str, str]:

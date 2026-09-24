@@ -53,3 +53,27 @@ def fmt(value: Fraction) -> str:
     """Exact textual form: integers stay integers, fractions stay fractions."""
     value = Fraction(value)
     return str(value.numerator) if value.denominator == 1 else f"{value.numerator}/{value.denominator}"
+
+
+# A measured quantity is read as a decimal: 7/2 s is not how a textbook writes 3,5 s. The
+# value stays an exact Fraction — only its rendering changes, and only when the decimal
+# terminates, so nothing is ever rounded away.
+_MAX_DECIMALS = 6
+
+
+def fmt_reading(value: Fraction) -> str:
+    """Exact textual form for a *measured* quantity: decimal if it terminates, else the
+    fraction. Never a float: ``Fraction(7, 2)`` prints 3.5 but is still exactly 7/2."""
+    value = Fraction(value)
+    if value.denominator == 1:
+        return str(value.numerator)
+    for digits in range(1, _MAX_DECIMALS + 1):
+        if (10 ** digits) % value.denominator == 0:
+            break
+    else:
+        return f"{value.numerator}/{value.denominator}"
+    sign = "-" if value < 0 else ""
+    scaled = abs(value.numerator) * (10 ** digits) // value.denominator
+    whole, fraction = divmod(scaled, 10 ** digits)
+    text = f"{whole}.{fraction:0{digits}d}".rstrip("0").rstrip(".")
+    return f"{sign}{text}"

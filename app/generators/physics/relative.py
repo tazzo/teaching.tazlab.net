@@ -102,7 +102,8 @@ class RelativeMotion:
     scenarios = ("same_direction", "opposite_direction", "delayed_start")
 
     # ---------------------------------------------------------------- generate
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         window, meet_time = _meeting(rng)
 
         if difficulty == "easy":

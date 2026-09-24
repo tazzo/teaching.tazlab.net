@@ -44,12 +44,16 @@ def cartesian_trace(
         "kind": KINEMATICS,
         "x_unit": x_unit,
         "y_unit": y_unit,
+        # graphs start at the origin: the axes meet in the bottom-left corner
+        "origin": "corner",
         "domain": {"t_min": "0", "t_max": _num(t_max)},
         "phases": [{"label_key": phase_label, "t_from": "0", "t_to": _num(t_max), "style": "solid"}],
         "traces": traces,
         "markers": [
             {"label_key": label, "at": [_num(x), _num(y)]} for x, y, label in markers or []
         ],
+        # dashed vertical dividers marking where one motion segment ends and the next begins
+        "guides": [],
         "vectors": [],
         "annotations": [],
     }

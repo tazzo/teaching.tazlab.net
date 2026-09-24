@@ -36,12 +36,19 @@ class Page:
     difficulty: str | None = None   # None = the page exposes the difficulty selector
     label_key: str = ""
     order: int = 0
+    # True when the backing topic exposes `configurer()`; the catalogue then serves its
+    # control descriptor and the client renders the form generically (no per-page code).
+    configurable: bool = False
 
 
 PAGES: tuple[Page, ...] = (
     # --- Fisica / Cinematica -------------------------------------------------
+    # The graph-reading page is backed by the piecewise-motion generator and exposes a
+    # configurator: the student chooses the segments, the plotted quantity, the units and
+    # what must be read off the graph (STRUCTURE §4.2).
     Page("cinematica-grafici-lettura", "fisica", "cinematica", GRAPH_READING,
-         "physics.kinematics.uniform", "hard", "page.cinematica.graph_reading", 10),
+         "physics.kinematics.segments", None, "page.cinematica.graph_reading", 10,
+         configurable=True),
     Page("cinematica-grafici-completamento", "fisica", "cinematica", GRAPH_FILLING,
          "physics.kinematics.uniform", "easy", "page.cinematica.graph_filling", 20),
     Page("cinematica-problemi", "fisica", "cinematica", PROBLEM,

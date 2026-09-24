@@ -1,50 +1,313 @@
-.page-header { display: flex; align-items: baseline; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.page-header h1 { margin: 0; font-size: 1.5rem; }
-.page-header h1 a { color: inherit; text-decoration: none; }
-.topnav { display: flex; gap: 1rem; }
-.topnav a { color: var(--muted); text-decoration: none; padding: .25rem .5rem; border-radius: .35rem; }
-.topnav a:hover { background: #eef2f6; }
-.topnav a.active { color: var(--ink); font-weight: 600; background: #e7edf5; }
-.page { background: #fff; border: 1px solid var(--line); border-radius: .6rem; padding: 1.25rem; }
-.crumbs { color: var(--muted); font-size: .9rem; margin-bottom: .75rem; display: flex; gap: .4rem; flex-wrap: wrap; }
-.crumbs a { color: var(--accent); text-decoration: none; }
-.crumb-sep { color: var(--line); }
-.areas { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; margin-top: 1rem; }
-.area-card { display: block; border: 1px solid var(--line); border-radius: .5rem; padding: 1rem; text-decoration: none; color: inherit; }
-.area-card:hover { border-color: var(--accent); }
-.area-card h3 { margin: 0 0 .4rem; }
-.area-card p { margin: 0; color: var(--muted); font-size: .9rem; }
-.link-list { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .5rem; }
-.link-list a { display: block; padding: .6rem .75rem; border: 1px solid var(--line); border-radius: .4rem; text-decoration: none; color: var(--ink); }
-.link-list a:hover { border-color: var(--accent); background: #f6f9ff; }
-:root { color-scheme: light; --ink: #1b1f24; --muted: #57606a; --line: #d8dee4; --accent: #1f6feb; }
+/* =============================================================================
+   TazLab Didattica — single stylesheet for every page.
+   Structure: 1) design tokens  2) base  3) shell & navigation  4) controls and
+   configurator  5) exercise cards  6) graphs  7) print.
+   Re-skinning the site means editing section 1 only: no page carries its own colour,
+   spacing or type value.
+   ============================================================================= */
+
+/* --- 1. design tokens ------------------------------------------------------ */
+:root {
+  color-scheme: light;
+
+  /* type */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --size-xs: 0.8125rem;
+  --size-sm: 0.9rem;
+  --size-base: 1rem;
+  --size-md: 1.0625rem;
+  --size-lg: 1.25rem;
+  --size-xl: 1.5rem;
+  --size-2xl: 1.9rem;
+
+  /* graph text: read by figure.js, so the plot's labels scale with the stylesheet */
+  --graph-font: 20px;
+  --graph-axis-font: 22px;
+
+  /* colour */
+  --ink: #1b1f24;
+  --muted: #57606a;
+  --line: #d8dee4;
+  --line-strong: #b8c1ca;
+  --accent: #1f6feb;
+  --accent-dark: #1a5fd0;
+  --accent-soft: #eef4ff;
+  --surface: #fff;
+  --surface-alt: #f6f8fa;
+  --surface-sunken: #eef2f6;
+  --success: #1a7f37;
+  --warning: #9a6700;
+  --danger: #c0392b;
+
+  /* segment kinds — the same three colours figure.js paints with */
+  --kind-uniform: #1f6feb;
+  --kind-accelerate: #1a7f37;
+  --kind-decelerate: #bf8700;
+
+  /* space, radius, elevation */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --radius-sm: 0.35rem;
+  --radius-md: 0.6rem;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgb(27 31 36 / 6%);
+  --shadow-md: 0 4px 12px rgb(27 31 36 / 8%);
+  --measure: 62rem;
+}
+
+/* --- 2. base --------------------------------------------------------------- */
 * { box-sizing: border-box; }
-body { margin: 0; padding: 1.5rem; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #f6f8fa; }
-.page-header h1 { margin: 0 0 1rem; font-size: 1.5rem; }
-.controls { display: grid; grid-template-columns: minmax(14rem, 2fr) minmax(9rem, 1fr) minmax(7rem, 1fr) minmax(9rem, 1fr) auto; gap: .5rem 1rem; align-items: end; background: #fff; border: 1px solid var(--line); border-radius: .6rem; padding: 1rem; margin-bottom: 1rem; }
-.controls label { font-size: .8rem; color: var(--muted); display: block; margin-bottom: .25rem; }
-.controls select, .controls input { width: 100%; min-width: 0; padding: .4rem .5rem; border: 1px solid var(--line); border-radius: .35rem; font: inherit; }
+body {
+  margin: 0;
+  padding: var(--space-5);
+  font-family: var(--font-sans);
+  font-size: var(--size-base);
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--surface-alt);
+}
+h1, h2, h3 { line-height: 1.25; }
+a { color: var(--accent); }
+
+/* --- 3. shell and navigation ---------------------------------------------- */
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+  max-width: var(--measure);
+}
+.page-header h1 { margin: 0; font-size: var(--size-xl); }
+.page-header h1 a { color: inherit; text-decoration: none; }
+
+.topnav { display: flex; gap: var(--space-4); }
+.topnav a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.topnav a:hover { background: var(--surface-sunken); }
+.topnav a.active { color: var(--ink); font-weight: 600; background: var(--accent-soft); }
+
+.page {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  max-width: var(--measure);
+}
+.crumbs {
+  color: var(--muted);
+  font-size: var(--size-sm);
+  margin-bottom: var(--space-3);
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+.crumbs a { color: var(--accent); text-decoration: none; }
+.crumb-sep { color: var(--line-strong); }
+
+.areas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.area-card {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+}
+.area-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+.area-card h3 { margin: 0 0 var(--space-1); }
+.area-card p { margin: 0; color: var(--muted); font-size: var(--size-sm); }
+
+.link-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.link-list a {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--surface);
+}
+.link-list a:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+/* --- 4. controls and configurator ---------------------------------------- */
+.controls {
+  display: grid;
+  grid-template-columns: minmax(9rem, 2fr) minmax(6rem, 1fr) minmax(5rem, 1fr) minmax(6rem, 1fr) auto;
+  gap: var(--space-2) var(--space-4);
+  align-items: end;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  max-width: var(--measure);
+}
+.controls label { font-size: var(--size-xs); color: var(--muted); display: block; margin-bottom: var(--space-1); }
+.controls select,
+.controls input {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  background: var(--surface);
+}
 .controls select { text-overflow: ellipsis; }
-.controls button { padding: .5rem 1rem; border: 0; border-radius: .35rem; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
-.controls button:hover { background: #1a5fd0; }
+.controls button {
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.controls button:hover { background: var(--accent-dark); }
 .status { color: var(--muted); min-height: 1.25rem; }
-#results { display: grid; gap: 1rem; }
-.card { background: #fff; border: 1px solid var(--line); border-radius: .6rem; padding: 1rem; }
-.card-header { display: flex; gap: .6rem; align-items: baseline; }
+.status.bad { color: var(--danger); }
+
+/* the configurator spans its own row inside the control bar */
+.configurator {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3) var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.config-field { display: block; }
+.config-label { display: block; font-size: var(--size-xs); color: var(--muted); margin-bottom: var(--space-1); }
+.config-select {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  background: var(--surface);
+}
+.config-segments { display: grid; gap: var(--space-1); }
+.config-rows { display: grid; gap: var(--space-1); }
+.config-row { display: grid; grid-template-columns: 1.5rem 1fr auto; gap: var(--space-2); align-items: center; }
+.config-row-index {
+  color: var(--muted);
+  font-size: var(--size-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.config-add,
+.config-remove {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: inherit;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+}
+.config-add { justify-self: start; font-size: var(--size-sm); }
+.config-remove { line-height: 1; padding: 0 var(--space-2); color: var(--muted); }
+.config-add:hover:not(:disabled),
+.config-remove:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.config-add:disabled,
+.config-remove:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* --- 5. exercise cards ---------------------------------------------------- */
+#results, .results { display: grid; gap: var(--space-4); max-width: var(--measure); }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+.card-header { display: flex; gap: var(--space-2); align-items: baseline; }
 .badge { color: var(--muted); font-variant-numeric: tabular-nums; }
-.statement { margin: .2rem 0; font-size: 1.05rem; }
-.figure { width: 100%; height: 22rem; margin: .75rem 0; }
-.steps { margin: .5rem 0; }
+.statement { margin: 0.2rem 0; font-size: var(--size-md); }
+.steps { margin: var(--space-2) 0; }
 .steps summary { cursor: pointer; color: var(--muted); }
-.step { display: flex; gap: .75rem; align-items: baseline; padding: .25rem 0; }
-.step-label { color: var(--muted); font-size: .85rem; min-width: 14rem; }
-.answer { border-top: 1px solid var(--line); padding-top: .6rem; display: flex; gap: .75rem; align-items: baseline; }
-.answer-label { color: var(--muted); font-size: .85rem; }
-.formula-error { color: #c0392b; }
-.kind-tag { display: inline-block; font-size: .75rem; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: .1rem .6rem; margin: 0 0 .75rem; }
-.hint { display: block; color: var(--muted); font-size: .85rem; margin-top: .25rem; }
-.page-actions { display: flex; gap: .5rem; margin: .6rem 0; }
-.page-actions button { padding: .4rem .9rem; border: 1px solid var(--line); border-radius: .35rem; background: #fff; font: inherit; cursor: pointer; }
+.step { display: flex; gap: var(--space-3); align-items: baseline; padding: var(--space-1) 0; }
+.step-label { color: var(--muted); font-size: var(--size-sm); min-width: 14rem; }
+.answer {
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-2);
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+}
+.answer-label { color: var(--muted); font-size: var(--size-sm); }
+.formula-error { color: var(--danger); }
+.kind-tag {
+  display: inline-block;
+  font-size: var(--size-xs);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 0.1rem var(--space-2);
+  margin: 0 0 var(--space-3);
+}
+.hint { display: block; color: var(--muted); font-size: var(--size-xs); margin-top: var(--space-1); }
+.page-actions { display: flex; gap: var(--space-2); margin: var(--space-2) 0; }
+.page-actions button {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: inherit;
+  cursor: pointer;
+}
 .page-actions button:hover { border-color: var(--accent); }
-.status.bad { color: #c0392b; }
 .fillable { cursor: crosshair; }
+
+/* --- 6. graphs ------------------------------------------------------------ */
+.figure { width: 100%; height: 24rem; margin: var(--space-3) 0; }
+
+.figure-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  padding: 0;
+  margin: 0 0 var(--space-3);
+  font-size: var(--size-sm);
+}
+.legend-item { display: flex; align-items: center; gap: var(--space-2); }
+.legend-swatch {
+  width: 1.5rem;
+  height: 0.25rem;
+  border-radius: var(--radius-pill);
+  background: var(--muted);
+}
+.kind-uniform .legend-swatch { background: var(--kind-uniform); }
+.kind-accelerate .legend-swatch { background: var(--kind-accelerate); }
+.kind-decelerate .legend-swatch { background: var(--kind-decelerate); }
+.legend-range { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* --- 7. print ------------------------------------------------------------- */
+@media print {
+  body { padding: 0; background: #fff; }
+  .topnav, .controls, .status, .page-actions { display: none; }
+  .page, .card { border: 0; box-shadow: none; max-width: none; padding: 0; }
+  .card { break-inside: avoid; }
+}

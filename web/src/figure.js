@@ -7,6 +7,30 @@ import "../vendor/jsxgraph.css";
 // the plotted line lands outside the visible box (observed: an empty grid).
 const PAD = 0.08;
 
+// Graph text must be legible on a classroom projector and in a printed worksheet: the
+// JSXGraph defaults (12 px) are too small on the axis ticks, which is where the student
+// actually reads the numbers. The values live in the stylesheet (styles.css §1), so the
+// whole site's graphs are resized from one place.
+function cssToken(name, fallback) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
+function graphTokens() {
+  return {
+    font: parseFloat(cssToken("--graph-font", "20")) || 20,
+    axisFont: parseFloat(cssToken("--graph-axis-font", "22")) || 22,
+    danger: cssToken("--danger", "#c0392b"),
+    guide: cssToken("--line-strong", "#b8c1ca"),
+    // one colour per motion-segment kind, matching the legend the page draws
+    kinds: {
+      uniform: cssToken("--kind-uniform", "#1f6feb"),
+      accelerate: cssToken("--kind-accelerate", "#1a7f37"),
+      decelerate: cssToken("--kind-decelerate", "#bf8700"),
+    },
+  };
+}
+
 function extent(values) {
   const nums = values.map(Number).filter((n) => Number.isFinite(n));
   if (!nums.length) return [0, 1];
@@ -19,6 +43,13 @@ function label(strings, key, fallback) {
 
 export function renderFigure(container, figure, strings) {
   if (!figure) return null;              // algebra items have no figure
+  const tokens = graphTokens();
+  const GRAPH_FONT = tokens.font;
+  const AXIS_FONT = tokens.axisFont;
+  // Set once per render: tick labels, axis names and every element label inherit this.
+  JXG.Options.text.fontSize = GRAPH_FONT;
+  JXG.Options.text.highlightStrokeWidth = 1;
+  JXG.Options.label.fontSize = GRAPH_FONT;
   const traces = figure.traces ?? [];
   const markers = figure.markers ?? [];
   // An empty graph (graph_filling pages) still needs axes, so only a missing figure
@@ -35,14 +66,17 @@ export function renderFigure(container, figure, strings) {
   // A hidden figure carries the intended y scale so the student's grid is meaningful.
   let [yMin, yMax] = extent(ys.length ? ys : figure.y_range ?? ["0", "1"]);
   // always show the origin, so the graph reads as a physical plot
-  xMin = Math.min(0, xMin);
-  yMin = Math.min(0, yMin);
+  // "corner" figures start at the origin, so only the far sides get padding and the axes
+  // sit exactly in the bottom-left corner.
+  const corner = figure.origin === "corner";
+  xMin = corner ? 0 : Math.min(0, xMin);
+  yMin = corner ? 0 : Math.min(0, yMin);
   const padX = (xMax - xMin || 1) * PAD;
   const padY = (yMax - yMin || 1) * PAD;
 
   const board = JXG.JSXGraph.initBoard(container, {
     // [left, top, right, bottom] in data units
-    boundingbox: [xMin - padX, yMax + padY, xMax + padX, yMin - padY],
+    boundingbox: [corner ? 0 : xMin - padX, yMax + padY, xMax + padX, corner ? 0 : yMin - padY],
     keepaspectratio: false,
     axis: true,
     showNavigation: false,
@@ -50,11 +84,17 @@ export function renderFigure(container, figure, strings) {
     pan: { enabled: false },
     zoom: { enabled: false },
     defaultAxes: {
-      x: { name: `t [${figure.x_unit}]`, withLabel: true, label: { position: "rt", offset: [-40, 20] } },
+      x: {
+        name: `t [${figure.x_unit}]`,
+        withLabel: true,
+        label: { position: "rt", offset: [-46, 26], fontSize: AXIS_FONT },
+        ticks: { label: { fontSize: GRAPH_FONT }, strokeColor: "#57606a" },
+      },
       y: {
         name: `${quantity ? `${quantity} ` : ""}[${figure.y_unit}]`,
         withLabel: true,
-        label: { position: "rt", offset: [10, -10] },
+        label: { position: "rt", offset: [14, -12], fontSize: AXIS_FONT },
+        ticks: { label: { fontSize: GRAPH_FONT }, strokeColor: "#57606a" },
       },
     },
   });
@@ -62,27 +102,39 @@ export function renderFigure(container, figure, strings) {
   // With a single trace the y-axis already names the quantity, so labelling the curve too
   // would print "s(t) [m]" and "s(t)" next to each other; labels distinguish multiple traces.
   const labelTraces = traces.length > 1;
+  const palette = [tokens.kinds.uniform, "#d29922", "#8250df", tokens.kinds.accelerate];
   traces.forEach((trace, index) => {
     board.create("curve", [trace.samples.map(([x]) => Number(x)), trace.samples.map(([, y]) => Number(y))], {
-      strokeColor: index === 0 ? "#1f6feb" : "#d29922",
+      strokeColor: tokens.kinds[trace.kind] ?? palette[index % palette.length],
       strokeWidth: 3,
       name: label(strings, trace.label_key, trace.label_key),
-      withLabel: labelTraces,
-      label: { position: "rt", offset: [6, -6] },
+      withLabel: labelTraces && traces.length <= 2,
+      label: { position: "rt", offset: [10, -10], fontSize: GRAPH_FONT },
+    });
+  });
+
+  // dashed dividers between motion segments
+  (figure.guides ?? []).forEach((guide) => {
+    const x = Number(guide.at);
+    board.create("segment", [[x, yMin], [x, yMax]], {
+      strokeColor: tokens.guide,
+      strokeWidth: 1,
+      dash: 2,
+      fixed: true,
     });
   });
 
   markers.forEach((marker) => {
     const [x, y] = marker.at.map(Number);
     board.create("point", [x, y], {
-      size: 4,
+      size: 5,
       face: "cross",
-      strokeColor: "#c0392b",
+      strokeColor: tokens.danger,
       strokeWidth: 3,
       fixed: true,
       name: label(strings, marker.label_key, marker.label_key),
       withLabel: true,
-      label: { offset: [-30, 18] },
+      label: { offset: [-40, 24], fontSize: GRAPH_FONT },
     });
   });
 

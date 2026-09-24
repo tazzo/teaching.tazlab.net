@@ -150,7 +150,8 @@ class MultiPhaseMotion:
     scenarios = ("two_phases", "three_phases", "unknown_duration")
 
     # ---------------------------------------------------------------- generate
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         v1 = Fraction(rng.randint(2, 21))
         t1 = Fraction(rng.choice(_FIRST_DURATIONS))
         params: dict[str, Fraction] = {"v1": v1, "t1": t1}

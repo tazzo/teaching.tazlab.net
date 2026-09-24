@@ -52,6 +52,22 @@ class WireItem(BaseModel):
     figure: dict | None = None
 
 
+class ConfigControl(BaseModel):
+    """One field of a page configurator, described by the topic that consumes it."""
+    id: str
+    kind: str                      # "select" | "segment_list"
+    label_key: str
+    hint_key: str | None = None
+    min: int | None = None
+    max: int | None = None
+    choices: list["ConfigChoice"] = []
+
+
+class ConfigChoice(BaseModel):
+    value: str
+    label_key: str
+
+
 class PageInfo(BaseModel):
     id: str
     macro: str
@@ -63,6 +79,8 @@ class PageInfo(BaseModel):
     difficulty: str | None = None
     difficulties: list[str] = Field(default_factory=list)
     label_key: str
+    config: list[ConfigControl] = []
+    defaults: dict = {}
 
 
 class PagesResponse(BaseModel):
@@ -76,6 +94,8 @@ class GenerateResponse(BaseModel):
     difficulty: str
     seed: int
     items: list[WireItem]
+    # echoed back resolved, so the client can show what was actually generated
+    options: dict = {}
 
 
 class VariantsRequest(BaseModel):

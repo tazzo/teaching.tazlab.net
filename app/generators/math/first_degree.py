@@ -27,7 +27,8 @@ class FirstDegree:
     scenarios: tuple[str, ...] = ()
 
     # ---------------------------------------------------------------- generate
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         if difficulty == "easy":
             a = rng.randint(1, 5)
             x0 = rng.randint(-5, 5)

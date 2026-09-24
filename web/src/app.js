@@ -1,4 +1,5 @@
 // SPA: macro -> sub-topic -> page. Everything is driven by GET /api/pages, so the
+import { renderConfigurator } from "./config.js";
 // navigation tree lives on the server and the client only renders it.
 import { renderItemForKind, el } from "./pages.js";
 
@@ -90,6 +91,13 @@ function controls(page, reload) {
   const form = el("form", "controls");
   form.onsubmit = (event) => event.preventDefault();
 
+  // A page whose topic declares a configurator gets one: the fields come from the
+  // descriptor served by /api/pages, so this function stays page-agnostic.
+  const configurator = (page.config ?? []).length
+    ? renderConfigurator(page.config, page.defaults, strings)
+    : null;
+  if (configurator) form.append(configurator.node);
+
   let difficulty = page.difficulty;
   if (!difficulty) {
     const label = el("label", null, t("ui.difficulty"));
@@ -130,15 +138,17 @@ function controls(page, reload) {
     difficulty: difficulty ?? form.querySelector("#difficulty")?.value ?? page.difficulties?.[0],
     seed: Number(seed.value) || 1,
     count: Number(count.value) || 3,
+    options: configurator ? configurator.read() : null,
   });
 
   submit.addEventListener("click", () => reload(read()));
   return { form, read };
 }
 
-async function fetchItems(topic, difficulty, seed, count, figureMode) {
+async function fetchItems(topic, difficulty, seed, count, figureMode, options) {
+  const config = options ? `&options=${encodeURIComponent(JSON.stringify(options))}` : "";
   const url = `/api/generate?topic=${encodeURIComponent(topic)}&difficulty=${difficulty}` +
-    `&seed=${seed}&count=${count}&figure=${figureMode}`;
+    `&seed=${seed}&count=${count}&figure=${figureMode}${config}`;
   const response = await fetch(url);
   const body = await response.json();
   if (!response.ok) throw new Error(body?.error?.code ?? String(response.status));
@@ -157,16 +167,16 @@ function renderPage(macro, sub, page) {
   const status = el("p", "status");
   const results = el("main", "results");
 
-  const { form, read } = controls(page, async ({ difficulty, seed, count }) => {
+  const { form, read } = controls(page, async ({ difficulty, seed, count, options }) => {
     status.textContent = t("ui.loading");
     status.classList.remove("bad");
     results.replaceChildren();
     try {
       const mode = page.kind === "graph_filling" ? "hidden" : "full";
-      const items = await fetchItems(page.topic, difficulty, seed, count, mode);
+      const items = await fetchItems(page.topic, difficulty, seed, count, mode, options);
       if (page.kind === "graph_filling" && items.length) {
         // the model for the same item: same topic/difficulty/seed/index, full figure
-        const model = (await fetchItems(page.topic, difficulty, seed, 1, "full"))[0];
+        const model = (await fetchItems(page.topic, difficulty, seed, 1, "full", options))[0];
         status.textContent = "";
         results.append(renderItemForKind(page.kind, items[0], 0, { strings, model }));
         return;

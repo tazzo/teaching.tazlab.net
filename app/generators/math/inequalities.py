@@ -222,7 +222,8 @@ class FirstDegreeInequality:
     label_key = "topic.inequalities_first_degree"
     scenarios: tuple[str, ...] = ()
 
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         if difficulty == "easy":
             a = rng.randint(2, 6)
             boundary = rng.choice([value for value in range(-8, 9) if value != 0])
@@ -277,7 +278,8 @@ class SecondDegreeInequality:
     label_key = "topic.inequalities_second_degree"
     scenarios: tuple[str, ...] = ()
 
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         if difficulty == "easy":
             r1 = rng.randint(1, 4)
             r2 = r1 + rng.randint(1, 4)
@@ -357,7 +359,8 @@ class RationalInequality:
     label_key = "topic.inequalities_rational"
     scenarios: tuple[str, ...] = ()
 
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         if difficulty == "easy":
             p, q = rng.sample(range(1, 7), 2)
             key = _RAT_EASY

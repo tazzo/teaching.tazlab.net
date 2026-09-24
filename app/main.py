@@ -7,7 +7,7 @@ import os
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -112,6 +112,26 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
                 "detail": ", ".join(fields),
             }
         },
+        headers={"x-request-id": get_request_id()},
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_error_handler(request: Request, exc: HTTPException):
+    """One error contract for the whole API: ``{"error": {code, message_key, detail}}``.
+
+    FastAPI's default would nest this under ``detail``, which the client does not read, so
+    every route error (unknown topic, invalid difficulty, refused options) would reach the
+    page as a bare status number. The 4xx path stays a WARN; a 5xx is an incident.
+    """
+    body = exc.detail if isinstance(exc.detail, dict) else {}
+    error = body.get("error", {"code": str(exc.detail), "message_key": "error.internal"})
+    log = logger.warning if exc.status_code < 500 else logger.error
+    log("request refused", extra={"path": request.url.path, "status": exc.status_code,
+                                  "code": error.get("code")})
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": error},
         headers={"x-request-id": get_request_id()},
     )
 

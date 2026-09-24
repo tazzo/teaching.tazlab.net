@@ -64,9 +64,30 @@ export function renderGraphReadingPage(item, index, context) {
     const host = el("div", "figure");
     card.append(host);
     renderFigure(host, item.figure, strings);
+    const legend = segmentLegend(item.figure, t);
+    if (legend) card.append(legend);
   }
   card.append(stepsBlock(item, t), answerBlock(item, t));
   return card;
+}
+
+/**
+ * A figure built from segments names them: the colours match the traces, so the student
+ * can tell which part of the graph the statement is talking about.
+ */
+function segmentLegend(figure, t) {
+  const phases = figure?.phases ?? [];
+  if (phases.length < 2) return null;              // one segment needs no legend
+  const list = el("ul", "figure-legend");
+  phases.forEach((phase) => {
+    const item_ = el("li", `legend-item kind-${phase.kind}`);
+    item_.append(el("span", "legend-swatch", ""));
+    item_.append(el("span", null, t(phase.label_key, phase.kind)));
+    item_.append(el("span", "legend-range",
+      `${phase.t_from}–${phase.t_to} ${figure.x_unit}`));
+    list.append(item_);
+  });
+  return list;
 }
 
 /**

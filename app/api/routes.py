@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import time
@@ -116,6 +117,12 @@ def _hidden_figure(figure: dict) -> dict:
     return hidden
 
 
+def _configurer(topic) -> list[dict]:
+    """The topic's own description of its configurator; topics without one return []."""
+    configurer = getattr(topic, "configurer", None)
+    return configurer() if configurer is not None else []
+
+
 @router.get("/pages", response_model=PagesResponse)
 async def pages() -> PagesResponse:
     """The information architecture: macros -> sub-topics -> pages."""
@@ -128,7 +135,13 @@ async def pages() -> PagesResponse:
             PageInfo(id=p.id, macro=p.macro, sub=p.sub, kind=p.kind, topic=p.topic,
                      difficulty=p.difficulty,
                      difficulties=list(TOPICS[p.topic].difficulties) if p.topic in known else [],
-                     label_key=p.label_key)
+                     label_key=p.label_key,
+                     # the configurator a page exposes, described by its own topic
+                     config=(_configurer(TOPICS[p.topic]) if p.configurable and p.topic in known
+                             else []),
+                     defaults=(TOPICS[p.topic].default_options()
+                               if p.configurable and p.topic in known
+                               and hasattr(TOPICS[p.topic], "default_options") else {}))
             for p in available
         ],
     )
@@ -164,12 +177,34 @@ async def generate(
     # which is what a "fill in the empty graph" page needs (the solution is fetched
     # separately from the same seed, so the two calls describe the same item).
     figure: str = Query("full", pattern="^(full|hidden)$"),
+    # The page configurator's choices, as a JSON object (STRUCTURE §4.2). Part of the
+    # item's identity: the same seed with different options is a different exercise.
+    options: str | None = Query(None, max_length=512),
 ) -> GenerateResponse:
     impl = TOPICS.get(topic)
     if impl is None:
         raise _fail(400, "unknown_topic", topic)
     if difficulty not in impl.difficulties:
         raise _fail(400, "invalid_difficulty", difficulty)
+
+    raw_options: dict = {}
+    if options:
+        try:
+            raw_options = json.loads(options)
+        except json.JSONDecodeError as exc:
+            raise _fail(400, "invalid_options_json", str(exc)) from exc
+        if not isinstance(raw_options, dict):
+            raise _fail(400, "invalid_options_json", "options must be a JSON object")
+    validator = getattr(impl, "validate_options", None)
+    if validator is None:
+        if raw_options:
+            raise _fail(400, "options_not_supported", topic)
+        resolved_options: dict = {}
+    else:
+        try:
+            resolved_options = validator(raw_options)
+        except ValueError as exc:
+            raise _fail(400, "invalid_options", str(exc)) from exc
 
     started = time.perf_counter()
     items: list[WireItem] = []
@@ -180,7 +215,7 @@ async def generate(
         last_reason = "no_attempt"
         for attempt in range(MAX_ATTEMPTS):
             rng = make_rng(seed, topic, difficulty, index, attempt)
-            candidate = impl.generate(rng, difficulty, seed, index)
+            candidate = impl.generate(rng, difficulty, seed, index, resolved_options)
             result = impl.verify(candidate)
             if result.ok:
                 item = candidate
@@ -209,9 +244,11 @@ async def generate(
         raise _fail(503, "generation_failed", ",".join(discarded))
 
     logger.info("generated", extra={"topic": topic, "difficulty": difficulty, "seed": seed,
+                                    "options": resolved_options or None,
                                     "count": len(items),
                                     "duration_ms": round((time.perf_counter() - started) * 1000, 2)})
-    return GenerateResponse(topic=topic, difficulty=difficulty, seed=seed, items=items)
+    return GenerateResponse(topic=topic, difficulty=difficulty, seed=seed, items=items,
+                            options=resolved_options)
 
 
 @router.post("/variants", response_model=VariantsResponse)

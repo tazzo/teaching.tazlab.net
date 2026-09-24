@@ -22,7 +22,8 @@ class AcceleratedMotion:
     label_key = "topic.accelerated"
     scenarios = ("accelerated_from_rest", "accelerated_with_v0", "accelerated_derive_a")
 
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         if difficulty == "easy":
             a = Fraction(rng.randint(1, 6))
             t = Fraction(rng.randint(2, 12))

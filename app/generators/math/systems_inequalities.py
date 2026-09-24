@@ -268,7 +268,8 @@ class InequalitySystem2x2:
     scenarios: tuple[str, ...] = ()
 
     # ---------------------------------------------------------------- generate
-    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int) -> Item:
+    def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
+                 options: dict | None = None) -> Item:
         if difficulty == "easy":
             key, params, vertices, rays, constraints = self._quadrant(rng)
         elif difficulty == "medium":
