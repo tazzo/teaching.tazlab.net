@@ -396,6 +396,13 @@ class SegmentMotion:
                    else self._velocity_at(segments, t_ask))
             markers.append({"label_key": "marker.asked_instant",
                             "at": [fmt(t_ask), fmt(raw * y_scale)]})
+        elif ask == ACCELERATION and seg_index is not None:
+            # the statement says "the segment shown on the graph": mark it, or the student
+            # is asked about a segment the drawing never singles out
+            samples = traces[seg_index]["samples"]
+            middle = samples[(len(samples) - 1) // 2]
+            markers.append({"label_key": "marker.asked_segment",
+                            "at": [middle[0], middle[1]]})
 
         guides = []
         boundary = Fraction(0)

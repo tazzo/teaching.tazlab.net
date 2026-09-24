@@ -25,7 +25,7 @@ from sympy import Rational as SymRational
 from sympy import pi, sqrt
 
 from app.core.latex import to_latex
-from app.core.units import fmt
+from app.core.units import unit_latex, fmt
 from app.core.verify import VerificationResult, no_floats
 from app.generators.base import Answer, Item, Step
 from app.render.figure import cartesian_trace, linear_samples
@@ -48,7 +48,7 @@ _PERIODS = tuple(
 _RATES_PER_MINUTE = (6, 10, 12, 15, 20, 24, 30, 36, 40, 45, 48, 60, 72, 90, 120)
 _OMEGAS = tuple(Fraction(numerator, 2) for numerator in (2, 3, 4, 5, 6, 7))
 
-_UNIT_LATEX = {"m/s": "\\text{m/s}", "m/s^2": "\\text{m/s}^2", "s": "\\text{s}"}
+
 
 
 def _sym(value: Fraction) -> SymRational:
@@ -61,7 +61,7 @@ def pi_times(coefficient: Fraction, power: int = 1) -> str:
 
 
 def _value_latex(coefficient: Fraction, power: int, unit: str) -> str:
-    return f"{pi_times(coefficient, power)}\\,{_UNIT_LATEX[unit]}"
+    return f"{pi_times(coefficient, power)}\\,{unit_latex(unit)}"
 
 
 def _result_latex(symbol: str, coefficient: Fraction, power: int, unit: str) -> str:

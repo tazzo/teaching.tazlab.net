@@ -77,3 +77,19 @@ def fmt_reading(value: Fraction) -> str:
     whole, fraction = divmod(scaled, 10 ** digits)
     text = f"{whole}.{fraction:0{digits}d}".rstrip("0").rstrip(".")
     return f"{sign}{text}"
+
+
+# Unit label -> LaTeX: the caret must sit outside \text{}, or KaTeX refuses the formula
+# (observed live: `1\,\text{m/s^2}` rendered as a red parse error).
+_UNIT_LATEX = {
+    "m": "\\text{m}", "km": "\\text{km}", "s": "\\text{s}", "min": "\\text{min}",
+    "m/s": "\\text{m/s}", "km/h": "\\text{km/h}", "m/s^2": "\\text{m/s}^2",
+}
+
+
+def unit_latex(unit: str) -> str:
+    """LaTeX for a unit label; an unmapped unit is a programming error, not user input."""
+    try:
+        return _UNIT_LATEX[unit]
+    except KeyError as exc:
+        raise KeyError(f"no LaTeX form for unit: {unit}") from exc
