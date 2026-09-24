@@ -17,6 +17,146 @@
     "x = -3",
     "x = -3"
   ],
+  "math.equations.fractional|easy": [
+    "x - 39 = 4\\,(x - 6)",
+    "x = -5",
+    "x \\ne 6",
+    "x = -5"
+  ],
+  "math.equations.fractional|hard": [
+    "\\left(x - 3\\right) \\left(x - 1\\right) + 1 = 2 x - 4",
+    "\\left(x - 2\\right)^{2} = 2 x - 4",
+    "\\left(x - 4\\right) \\left(x - 2\\right) = 0",
+    "x \\ne 2, \\; x \\ne 1",
+    "x = 4",
+    "x = 4"
+  ],
+  "math.equations.fractional|medium": [
+    "4\\,(4 x - 2) = 4\\,(x - 6)",
+    "x = - \\frac{4}{3}",
+    "x \\ne 6",
+    "x = - \\frac{4}{3}"
+  ],
+  "math.equations.second_degree|easy": [
+    "\\Delta = (-1)^2 - 4 \\cdot 1 \\cdot (-6) = 25",
+    "x = \\frac{1 \\pm \\sqrt{25}}{2} = \\frac{1}{2} \\pm \\frac{5}{2}",
+    "x_{1} = -2, \\quad x_{2} = 3",
+    "x_{1} = -2, \\quad x_{2} = 3"
+  ],
+  "math.equations.second_degree|hard": [
+    "\\Delta = 6^2 - 4 \\cdot 1 \\cdot (-3) = 48",
+    "x = \\frac{-6 \\pm \\sqrt{48}}{2} = -3 \\pm 2 \\sqrt{3}",
+    "x_{1} = -3 + 2 \\sqrt{3}, \\quad x_{2} = - 2 \\sqrt{3} - 3",
+    "x_{1} = -3 + 2 \\sqrt{3}, \\quad x_{2} = - 2 \\sqrt{3} - 3"
+  ],
+  "math.equations.second_degree|medium": [
+    "\\Delta = 2^2 - 4 \\cdot 2 \\cdot (-12) = 100",
+    "x = \\frac{-2 \\pm \\sqrt{100}}{4} = - \\frac{1}{2} \\pm \\frac{5}{2}",
+    "x_{1} = -3, \\quad x_{2} = 2",
+    "x_{1} = -3, \\quad x_{2} = 2"
+  ],
+  "math.inequalities.first_degree|easy": [
+    "x > 8",
+    "\\left(8, \\infty\\right)",
+    "\\left(8, \\infty\\right)"
+  ],
+  "math.inequalities.first_degree|hard": [
+    "-6 < 3 x < -2",
+    "\\left(-2, - \\frac{2}{3}\\right)",
+    "\\left(-2, - \\frac{2}{3}\\right)"
+  ],
+  "math.inequalities.first_degree|medium": [
+    "x < \\frac{16}{9}",
+    "\\left(-\\infty, \\frac{16}{9}\\right)",
+    "\\left(-\\infty, \\frac{16}{9}\\right)"
+  ],
+  "math.inequalities.rational|easy": [
+    "x = 1, \\; x = 3",
+    "x < 1 \\;\\vee\\; x > 3",
+    "\\left(-\\infty, 1\\right) \\cup \\left(3, \\infty\\right)",
+    "\\left(-\\infty, 1\\right) \\cup \\left(3, \\infty\\right)"
+  ],
+  "math.inequalities.rational|hard": [
+    "x = 4, \\; x = 5, \\; x = 7",
+    "x \\ne 7",
+    "\\left(4, 5\\right) \\cup \\left(7, \\infty\\right)",
+    "\\left(4, 5\\right) \\cup \\left(7, \\infty\\right)"
+  ],
+  "math.inequalities.rational|medium": [
+    "x = \\frac{10}{3}, \\; x \\ne 6",
+    "3 x - 10 \\ge 0 \\;\\wedge\\; x \\ne 6",
+    "\\left(-\\infty, \\frac{10}{3}\\right] \\cup \\left(6, \\infty\\right)",
+    "\\left(-\\infty, \\frac{10}{3}\\right] \\cup \\left(6, \\infty\\right)"
+  ],
+  "math.inequalities.second_degree|easy": [
+    "\\Delta = 9^2 - 4 \\cdot 20 = 1",
+    "\\left(x - 5\\right) \\left(x - 4\\right) > 0",
+    "\\left(-\\infty, 4\\right) \\cup \\left(5, \\infty\\right)",
+    "\\left(-\\infty, 4\\right) \\cup \\left(5, \\infty\\right)"
+  ],
+  "math.inequalities.second_degree|hard": [
+    "\\Delta = 7^2 - 4 \\cdot 3 \\cdot 6 = -23",
+    "\\Delta < 0 \\Rightarrow 3 x^{2} - 7 x + 6 > 0",
+    "\\emptyset",
+    "\\emptyset"
+  ],
+  "math.inequalities.second_degree|medium": [
+    "\\Delta = 12^2 - 4 \\cdot 3 \\cdot 9 = 36",
+    "\\left(x - 3\\right) \\left(3 x - 3\\right) < 0",
+    "\\left(1, 3\\right)",
+    "\\left(1, 3\\right)"
+  ],
+  "math.systems.inequalities_2x2|easy": [
+    "x = -3, \\; y = -1",
+    "\\left(-3, -1\\right)",
+    "\\left(-3, -1\\right) + \\lambda_{1} \\left(0, 1\\right) + \\lambda_{2} \\left(1, 0\\right), \\; \\lambda_{1}, \\lambda_{2} \\ge 0",
+    "\\left(-3, -1\\right) + \\lambda_{1} \\left(0, 1\\right) + \\lambda_{2} \\left(1, 0\\right), \\; \\lambda_{1}, \\lambda_{2} \\ge 0"
+  ],
+  "math.systems.inequalities_2x2|hard": [
+    "2x + 5y = 22, \\; 9x - 2y = 1, \\; 2x + 4y = -22, \\; 9x - 3y = 48",
+    "\\left(6, 2\\right), \\; \\left(1, 4\\right), \\; \\left(-1, -5\\right), \\; \\left(3, -7\\right)",
+    "\\left(6, 2\\right), \\quad \\left(1, 4\\right), \\quad \\left(-1, -5\\right), \\quad \\left(3, -7\\right)",
+    "\\left(6, 2\\right), \\quad \\left(1, 4\\right), \\quad \\left(-1, -5\\right), \\quad \\left(3, -7\\right)"
+  ],
+  "math.systems.inequalities_2x2|medium": [
+    "3x + 1y = 11, \\; 1x + 1y = 5",
+    "\\left(3, 2\\right)",
+    "\\left(3, 2\\right) + \\lambda_{1} \\left(-1, 1\\right) + \\lambda_{2} \\left(1, -3\\right), \\; \\lambda_{1}, \\lambda_{2} \\ge 0",
+    "\\left(3, 2\\right) + \\lambda_{1} \\left(-1, 1\\right) + \\lambda_{2} \\left(1, -3\\right), \\; \\lambda_{1}, \\lambda_{2} \\ge 0"
+  ],
+  "math.systems.linear_2x2|easy": [
+    "10 x + 3 = 63",
+    "10 x = 60",
+    "x = 6, \\; y = 13",
+    "\\left(6, 13\\right)"
+  ],
+  "math.systems.linear_2x2|hard": [
+    "3 \\cdot (3 x + y) - 3 \\cdot (3 x + 4 y) = - \\frac{15}{2} - 15",
+    "- 9 y = - \\frac{45}{2} \\;\\Rightarrow\\; y = \\frac{5}{2}",
+    "x = - \\frac{5}{3}",
+    "\\left(- \\frac{5}{3}, \\frac{5}{2}\\right)"
+  ],
+  "math.systems.linear_2x2|medium": [
+    "2 \\cdot (5 x + y) - 5 \\cdot (2 x + 5 y) = 46 - 115",
+    "- 23 y = -69 \\;\\Rightarrow\\; y = 3",
+    "x = 4",
+    "\\left(4, 3\\right)"
+  ],
+  "math.systems.linear_quadratic|hard": [
+    "x^{2} - 4 x + 3 = 2 x - 3",
+    "x^{2} - 6 x + 6 = 0",
+    "x = \\frac{6 \\pm 2 \\sqrt{3}}{2}",
+    "\\left(3 - \\sqrt{3}, 3 - 2 \\sqrt{3}\\right), \\quad \\left(\\sqrt{3} + 3, 3 + 2 \\sqrt{3}\\right)",
+    "\\left(3 - \\sqrt{3}, 3 - 2 \\sqrt{3}\\right), \\quad \\left(\\sqrt{3} + 3, 3 + 2 \\sqrt{3}\\right)"
+  ],
+  "math.systems.linear_quadratic|medium": [
+    "x^{2} - x + 11 = 4 x + 7",
+    "x^{2} - 5 x + 4 = 0",
+    "\\left(x - 4\\right) \\left(x - 1\\right) = 0",
+    "x = 1, \\; x = 4",
+    "\\left(1, 11\\right), \\quad \\left(4, 23\\right)",
+    "\\left(1, 11\\right), \\quad \\left(4, 23\\right)"
+  ],
   "physics.kinematics.accelerated|easy": [
     "v = a \\cdot t",
     "v = 5 \\cdot 6",

@@ -32,12 +32,13 @@ _B0 = "stmt.second_degree_b0"
 _B0_NEG = "stmt.second_degree_b0_neg"
 _C0 = "stmt.second_degree_c0"
 
-_SIGNS: dict[tuple[bool, bool], str] = {
-    (True, True): "pp",
-    (True, False): "pm",
-    (False, True): "mp",
-    (False, False): "mm",
+_PATTERNS: dict[str, tuple[int, int]] = {
+    "pp": (1, 1),
+    "pm": (1, -1),
+    "mp": (-1, 1),
+    "mm": (-1, -1),
 }
+_SIGNS = {(sign_b > 0, sign_c > 0): name for name, (sign_b, sign_c) in _PATTERNS.items()}
 
 def _statement_key(monic: bool, b: Fraction, c: Fraction) -> str:
     return f"{_MONIC if monic else _NON_MONIC}_{_SIGNS[(b > 0, c > 0)]}"
@@ -57,8 +58,7 @@ def _rebuild(key: str, params: dict[str, Fraction]) -> tuple[Fraction, Fraction,
         prefix = f"{name}_"
         if not key.startswith(prefix):
             continue
-        signs = {"pp": (1, 1), "pm": (1, -1), "mp": (-1, 1), "mm": (-1, -1)}
-        sign_pair = signs.get(key[len(prefix):])
+        sign_pair = _PATTERNS.get(key[len(prefix):])
         if sign_pair is None:
             return None
         a = Fraction(1) if monic else params.get("a", Fraction(0))
@@ -241,7 +241,7 @@ class SecondDegree:
         return (
             discriminant,
             Step(
-                "step.formula",
+                "step.quadratic_formula",
                 f"{to_latex(X)} = \\frac{{{to_latex(_exact(-b))} \\pm \\sqrt{{{to_latex(_exact(delta))}}}}}{{{to_latex(_exact(2 * a))}}}"
                 f" = {to_latex(centre)} \\pm {to_latex(half)}",
             ),

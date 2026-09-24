@@ -59,12 +59,15 @@ export function renderFigure(container, figure, strings) {
     },
   });
 
+  // With a single trace the y-axis already names the quantity, so labelling the curve too
+  // would print "s(t) [m]" and "s(t)" next to each other; labels distinguish multiple traces.
+  const labelTraces = traces.length > 1;
   traces.forEach((trace, index) => {
     board.create("curve", [trace.samples.map(([x]) => Number(x)), trace.samples.map(([, y]) => Number(y))], {
       strokeColor: index === 0 ? "#1f6feb" : "#d29922",
       strokeWidth: 3,
       name: label(strings, trace.label_key, trace.label_key),
-      withLabel: true,
+      withLabel: labelTraces,
       label: { position: "rt", offset: [6, -6] },
     });
   });

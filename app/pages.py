@@ -63,6 +63,24 @@ PAGES: tuple[Page, ...] = (
     # --- Matematica / Equazioni ---------------------------------------------
     Page("equazioni-primo-grado", "matematica", "equazioni", PROBLEM,
          "math.equations.first_degree", None, "page.equazioni.first_degree", 10),
+    Page("equazioni-secondo-grado", "matematica", "equazioni", PROBLEM,
+         "math.equations.second_degree", None, "page.equazioni.second_degree", 20),
+    Page("equazioni-frazionarie", "matematica", "equazioni", PROBLEM,
+         "math.equations.fractional", None, "page.equazioni.fractional", 30),
+    # --- Matematica / Disequazioni ------------------------------------------
+    Page("disequazioni-primo-grado", "matematica", "disequazioni", PROBLEM,
+         "math.inequalities.first_degree", None, "page.disequazioni.first_degree", 10),
+    Page("disequazioni-secondo-grado", "matematica", "disequazioni", PROBLEM,
+         "math.inequalities.second_degree", None, "page.disequazioni.second_degree", 20),
+    Page("disequazioni-frazionarie", "matematica", "disequazioni", PROBLEM,
+         "math.inequalities.rational", None, "page.disequazioni.rational", 30),
+    # --- Matematica / Sistemi ------------------------------------------------
+    Page("sistemi-lineari", "matematica", "sistemi", PROBLEM,
+         "math.systems.linear_2x2", None, "page.sistemi.linear", 10),
+    Page("sistemi-lineare-quadratica", "matematica", "sistemi", PROBLEM,
+         "math.systems.linear_quadratic", None, "page.sistemi.linear_quadratic", 20),
+    Page("sistemi-disequazioni", "matematica", "sistemi", PROBLEM,
+         "math.systems.inequalities_2x2", None, "page.sistemi.inequalities", 30),
 )
 
 MACROS: tuple[str, ...] = ("matematica", "fisica")

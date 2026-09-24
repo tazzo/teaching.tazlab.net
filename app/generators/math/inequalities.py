@@ -1,10 +1,14 @@
 """Inequalities — first degree, second degree, rational (DESIGN §2.10).
 
-Answers are real *sets*, produced by :mod:`sympy` from the same tuple the statement is
-printed from, and checked three ways: an independent ``solveset`` recomputation, a LaTeX
-comparison against the recomputed set, and a deterministic sampler that walks integers,
-halves and the claimed boundaries — including the endpoints themselves, which is what
-makes an open/closed corruption visible.
+The answer is **constructed first**: the parameter tuple fixes the critical points (zeros
+and poles), a sign table over them decides which cells and which endpoints belong to the
+solution, and the steps are printed from the same tuple. ``solveset`` is the *second*
+opinion, never the source: an item is rejected unless the constructive set, the solved set
+and the rendered LaTeX all agree.
+
+On top of that the verifier runs a deterministic sampler over integers, halves and every
+claimed boundary — including the endpoints themselves, which is what makes an open/closed
+corruption visible.
 
 Interval versus finite set is carried in ``Answer.kind``; the machine-readable form of the
 claim is ``srepr`` of the set, so the verifier compares sets rather than strings.
@@ -16,7 +20,8 @@ import random
 from fractions import Fraction
 
 from sympy import (ConditionSet, EmptySet, FiniteSet, Ge, Gt, Integer, Interval, Le, Lt,
-                   Rational, Reals, S, Set, Symbol, Union, nan, oo, solveset, sympify, zoo)
+                   Rational, Reals, S, Set, Symbol, Union, nan, oo, solveset, srepr,
+                   sympify, zoo)
 
 from app.core.latex import to_latex
 from app.core.verify import VerificationResult, no_floats
@@ -80,12 +85,64 @@ def _solve(expr, op: str) -> Set | None:
     return None if isinstance(result, ConditionSet) else result
 
 
-def _model_solution(model: list[tuple[object, str]]) -> Set:
+def _test_point(left, right):
+    if left is None and right is None:
+        return Integer(0)
+    if left is None:
+        return right - 1
+    if right is None:
+        return left + 1
+    return (left + right) / 2
+
+
+def _constraint_solution(expr, op: str, zeros: list, poles: list) -> Set:
+    """Sign table over the critical points: the answer is *constructed*, not solved for.
+
+    The cells between consecutive critical points are kept when a probe inside them
+    satisfies the relation, and the critical points themselves are kept when the relation
+    holds there (never at a pole — the substitution is undefined, which ``_holds`` reports
+    as ``False``). Consecutive kept cells merge into one maximal interval, so the set is
+    built the way a student builds it, and ``solveset`` stays a second, independent opinion.
+    """
+    criticals = sorted(set(zeros) | set(poles))
+    atoms: list[tuple] = []
+    bounds = [None, *criticals, None]
+    for index, (left, right) in enumerate(zip(bounds, bounds[1:])):
+        atoms.append((left, right, False, _holds(expr, op, _test_point(left, right))))
+        if index < len(criticals):
+            point = criticals[index]
+            atoms.append((point, point, True, _holds(expr, op, point)))
+
+    pieces: list[Set] = []
+    run: list[tuple] = []
+    for atom in [*atoms, None]:
+        if atom is not None and atom[3]:
+            run.append(atom)
+            continue
+        if not run:
+            continue
+        first, last = run[0], run[-1]
+        if first[2] and last[2]:
+            pieces.append(FiniteSet(first[0]))
+        else:
+            pieces.append(
+                Interval(
+                    -oo if first[0] is None else first[0],
+                    oo if last[1] is None else last[1],
+                    not first[2],
+                    not last[2],
+                )
+            )
+        run = []
+    return Union(*pieces) if pieces else EmptySet
+
+
+def _solution(key: str, params: dict[str, Fraction], criticals: list[tuple[list, list]]) -> Set:
+    model = _model(key, params)
+    assert model is not None and len(model) == len(criticals), key
     solution: Set = Reals
-    for expr, op in model:
-        part = _solve(expr, op)
-        assert part is not None, (expr, op)
-        solution = solution.intersect(part)
+    for (expr, op), (zeros, poles) in zip(model, criticals):
+        solution = solution.intersect(_constraint_solution(expr, op, zeros, poles))
     return solution
 
 
@@ -154,8 +211,6 @@ def _verify_inequality(item: Item, model: list[tuple[object, str]] | None) -> Ve
 
 
 def _answer(solution: Set) -> Answer:
-    from sympy import srepr
-
     kind = "set" if solution in (EmptySet, Reals) else "interval"
     return Answer(latex=to_latex(solution), kind=kind, payload={"set": [srepr(solution)]})
 
@@ -173,17 +228,15 @@ class FirstDegreeInequality:
             boundary = rng.choice([value for value in range(-8, 9) if value != 0])
             key = _FIRST_GT
             params = {"a": Fraction(a), "b": Fraction(a * boundary)}
-            steps = (
-                Step("step.divide", f"{to_latex(X)} > {to_latex(Integer(boundary))}"),
-            )
+            criticals = [([Fraction(boundary)], [])]
+            steps = (Step("step.divide", f"{to_latex(X)} > {to_latex(Integer(boundary))}"),)
         elif difficulty == "medium":
             a = rng.randint(2, 9)
             b = rng.choice([value for value in range(-20, 21) if value % a != 0])
             key = _FIRST_NEG
             params = {"a": Fraction(a), "b": Fraction(b)}
-            steps = (
-                Step("step.sign_flip", f"{to_latex(X)} < {to_latex(_q(Fraction(-b, a)))}"),
-            )
+            criticals = [([Fraction(-b, a)], [])]
+            steps = (Step("step.sign_flip", f"{to_latex(X)} < {to_latex(_q(Fraction(-b, a)))}"),)
         else:
             a = rng.randint(2, 5)
             b = rng.randint(1, 8)
@@ -191,15 +244,17 @@ class FirstDegreeInequality:
             upper = lower + rng.randint(2, 8)
             key = _FIRST_CHAIN
             params = {"p": Fraction(lower), "a": Fraction(a), "b": Fraction(b), "q": Fraction(upper)}
+            criticals = [
+                ([Fraction(lower - b, a)], []),
+                ([Fraction(upper - b, a)], []),
+            ]
             steps = (
                 Step(
                     "step.subtract",
                     f"{to_latex(_q(Fraction(lower - b)))} < {to_latex(Integer(a) * X)} < {to_latex(_q(Fraction(upper - b)))}",
                 ),
             )
-        model = _model(key, params)
-        assert model is not None, key
-        solution = _model_solution(model)
+        solution = _solution(key, params, criticals)
         return Item(
             topic=self.id,
             difficulty=difficulty,
@@ -229,6 +284,7 @@ class SecondDegreeInequality:
             b, c = r1 + r2, r1 * r2
             key = _SECOND_MONIC
             params = {"b": Fraction(b), "c": Fraction(c)}
+            criticals = [([Fraction(r1), Fraction(r2)], [])]
             steps = (
                 Step("step.discriminant", f"\\Delta = {to_latex(Integer(b))}^2 - 4 \\cdot {to_latex(Integer(c))} = {to_latex(Integer((r1 - r2) ** 2))}"),
                 Step("step.factorise", f"{to_latex((X - r1) * (X - r2))} > 0"),
@@ -240,6 +296,7 @@ class SecondDegreeInequality:
             b, c = a * (r1 + r2), a * r1 * r2
             key = _SECOND_GEN
             params = {"a": Fraction(a), "b": Fraction(b), "c": Fraction(c)}
+            criticals = [([Fraction(r1), Fraction(r2)], [])]
             if r1 == r2:
                 steps = (
                     Step("step.discriminant", "\\Delta = 0"),
@@ -259,6 +316,7 @@ class SecondDegreeInequality:
             c = b * b // (4 * a) + rng.randint(1, 6)
             key = _SECOND_NEG
             params = {"a": Fraction(a), "b": Fraction(b), "c": Fraction(c)}
+            criticals = [([], [])]
             steps = (
                 Step(
                     "step.discriminant",
@@ -271,13 +329,12 @@ class SecondDegreeInequality:
             q = p + rng.randint(1, 4)
             key = _SECOND_FACTORED
             params = {"p": Fraction(p), "q": Fraction(q)}
+            criticals = [([Fraction(p), Fraction(q)], [])]
             steps = (
                 Step("step.factorise", f"{to_latex((X - p) * (X - q))} > 0"),
                 Step("step.sign_analysis", f"{to_latex(X)} < {to_latex(Integer(p))} \\;\\vee\\; {to_latex(X)} > {to_latex(Integer(q))}"),
             )
-        model = _model(key, params)
-        assert model is not None, key
-        solution = _model_solution(model)
+        solution = _solution(key, params, criticals)
         return Item(
             topic=self.id,
             difficulty=difficulty,
@@ -305,6 +362,7 @@ class RationalInequality:
             p, q = rng.sample(range(1, 7), 2)
             key = _RAT_EASY
             params = {"p": Fraction(p), "q": Fraction(q)}
+            criticals = [([Fraction(p)], [Fraction(q)])]
             low, high = sorted([p, q])
             steps = (
                 Step("step.critical_points", f"{to_latex(X)} = {to_latex(Integer(low))}, \\; {to_latex(X)} = {to_latex(Integer(high))}"),
@@ -316,6 +374,7 @@ class RationalInequality:
             q = rng.choice([value for value in range(1, 8) if value * a != b])
             key = _RAT_MEDIUM
             params = {"a": Fraction(a), "b": Fraction(b), "q": Fraction(q)}
+            criticals = [([Fraction(b, a)], [Fraction(q)])]
             steps = (
                 Step("step.critical_points", f"{to_latex(X)} = {to_latex(_q(Fraction(b, a)))}, \\; {to_latex(X)} \\ne {to_latex(Integer(q))}"),
                 Step("step.sign_analysis", f"{to_latex(Integer(a) * X - b)} \\ge 0 \\;\\wedge\\; {to_latex(X)} \\ne {to_latex(Integer(q))}"),
@@ -326,19 +385,19 @@ class RationalInequality:
             critical = ", \\; ".join(f"{to_latex(X)} = {to_latex(Integer(value))}" for value in sorted([p, q, r]))
             if rng.random() < 0.5:
                 key = _RAT_HARD_NUM
+                criticals = [([Fraction(p), Fraction(q)], [Fraction(r)])]
                 steps = (
                     Step("step.critical_points", critical),
                     Step("step.sign_analysis", f"{to_latex(X)} \\ne {to_latex(Integer(r))}"),
                 )
             else:
                 key = _RAT_HARD_DEN
+                criticals = [([Fraction(p)], [Fraction(q), Fraction(r)])]
                 steps = (
                     Step("step.critical_points", critical),
                     Step("step.sign_analysis", f"{to_latex(X)} \\ne {to_latex(Integer(q))}, \\; {to_latex(X)} \\ne {to_latex(Integer(r))}"),
                 )
-        model = _model(key, params)
-        assert model is not None, key
-        solution = _model_solution(model)
+        solution = _solution(key, params, criticals)
         return Item(
             topic=self.id,
             difficulty=difficulty,

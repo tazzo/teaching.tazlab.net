@@ -116,7 +116,7 @@ class LinearSystem2x2:
         solution = Tuple(Integer(x0), Integer(y0))
         steps = (
             Step(
-                "step.substitute",
+                "step.substitute_equation",
                 f"{to_latex(Integer(a) * X + Integer(b) * (Integer(m) * X + Integer(q)))} = {to_latex(Integer(c))}",
             ),
             Step("step.solve_x", f"{to_latex(Integer(a + b * m) * X)} = {to_latex(Integer(c - b * q))}"),
@@ -265,7 +265,7 @@ class LinearQuadraticSystem:
         params = {"b": Fraction(b), "c": Fraction(c), "m": Fraction(m), "n": Fraction(n)}
         points = [Tuple(Integer(x1), Integer(m * x1 + n)), Tuple(Integer(x2), Integer(m * x2 + n))]
         steps = (
-            Step("step.substitute", f"{to_latex(X**2 - b * X + c)} = {to_latex(m * X + n)}"),
+            Step("step.substitute_equation", f"{to_latex(X**2 - b * X + c)} = {to_latex(m * X + n)}"),
             Step("step.normal_form", f"{to_latex(X**2 - (b + m) * X + (c - n))} = 0"),
             Step("step.factorise", f"{to_latex((X - x1) * (X - x2))} = 0"),
             Step("step.solve_x", ", \\; ".join(f"{to_latex(X)} = {to_latex(Integer(root))}" for root in (x1, x2))),
@@ -295,10 +295,10 @@ class LinearQuadraticSystem:
             Tuple(Rational(t, 2) + radical / 2, Rational(m * t, 2) + n + m * radical / 2),
         ]
         steps = (
-            Step("step.substitute", f"{to_latex(X**2 - b * X + _q(c))} = {to_latex(m * X + _q(n))}"),
+            Step("step.substitute_equation", f"{to_latex(X**2 - b * X + _q(c))} = {to_latex(m * X + _q(n))}"),
             Step("step.normal_form", f"{to_latex(X**2 - t * X + _q(difference))} = 0"),
             Step(
-                "step.formula",
+                "step.quadratic_formula",
                 f"{to_latex(X)} = \\frac{{{to_latex(Integer(t))} \\pm {to_latex(radical)}}}{{2}}",
             ),
             Step("step.solutions", _answers_latex(points)),
@@ -314,7 +314,7 @@ class LinearQuadraticSystem:
         params = {"b": Fraction(b), "c": Fraction(c), "m": Fraction(m), "n": Fraction(n)}
         point = Tuple(Integer(x0), Integer(m * x0 + n))
         steps = (
-            Step("step.substitute", f"{to_latex(X**2 - b * X + c)} = {to_latex(m * X + n)}"),
+            Step("step.substitute_equation", f"{to_latex(X**2 - b * X + c)} = {to_latex(m * X + n)}"),
             Step("step.normal_form", f"{to_latex((X - x0) ** 2)} = 0"),
             Step("step.double_root", f"{to_latex(X)} = {to_latex(Integer(x0))}"),
             Step("step.solutions", _answers_latex([point])),
