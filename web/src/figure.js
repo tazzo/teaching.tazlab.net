@@ -101,18 +101,26 @@ export function renderFigure(container, figure, strings) {
     },
   });
 
-  // With a single trace the y-axis already names the quantity, so labelling the curve too
-  // would print "s(t) [m]" and "s(t)" next to each other; labels distinguish multiple traces.
+  // The traces are drawn as explicit straight segments between consecutive samples, not as
+  // a JSXGraph `curve`: with a handful of coordinates at the ends of its sampling range the
+  // curve emits a path of `M` commands only — a path that strokes nothing — which is how a
+  // graph came out empty next to a correct legend. Segments always draw.
   const labelTraces = traces.length > 1;
   const palette = [tokens.kinds.uniform, "#d29922", "#8250df", tokens.kinds.accelerate];
   traces.forEach((trace, index) => {
-    board.create("curve", [trace.samples.map(([x]) => Number(x)), trace.samples.map(([, y]) => Number(y))], {
-      strokeColor: tokens.kinds[trace.kind] ?? palette[index % palette.length],
-      strokeWidth: 4,
-      name: label(strings, trace.label_key, trace.label_key),
-      withLabel: labelTraces && traces.length <= 2,
-      label: { position: "rt", offset: [10, -10], fontSize: GRAPH_FONT },
-    });
+    const points = trace.samples.map(([x, y]) => [Number(x), Number(y)]);
+    const stroke = tokens.kinds[trace.kind] ?? palette[index % palette.length];
+    for (let i = 1; i < points.length; i += 1) {
+      board.create("segment", [points[i - 1], points[i]], {
+        strokeColor: stroke,
+        strokeWidth: 4,
+        fixed: true,
+        highlight: false,
+        // the legend names every segment, so only a two-trace plot labels its lines
+        name: labelTraces && traces.length <= 2 ? label(strings, trace.label_key, trace.label_key) : "",
+        withLabel: false,
+      });
+    }
   });
 
   // the vertices of the broken line: white-centred dots ringed in the segment's colour,
