@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from fractions import Fraction
 
 from sympy import ConditionSet, Expr, Float, S, Symbol, checksol, solveset
 from sympy.core.sorting import default_sort_key
@@ -22,9 +23,20 @@ class VerificationResult:
     reason: str | None = None
 
 
-def no_floats(*exprs: Expr) -> bool:
-    """Exact arithmetic only: a single float leaks into the printed answer."""
-    return not any(e.atoms(Float) for e in exprs)
+def no_floats(*values) -> bool:
+    """Exact arithmetic only: a single float leaks into the printed answer.
+
+    Accepts both SymPy expressions and plain ``Fraction`` values — a Fraction is exact
+    by construction, so it is skipped rather than converted (an earlier version called
+    ``.atoms()`` on Fractions and blew up).
+    """
+    for value in values:
+        if isinstance(value, Fraction):
+            continue
+        atoms = getattr(value, "atoms", None)
+        if atoms is not None and atoms(Float):
+            return False
+    return True
 
 
 def satisfies(expr: Expr, symbol: Symbol, value: Expr) -> bool:

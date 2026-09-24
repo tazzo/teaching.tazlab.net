@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import Protocol
 
 from app.generators.math.first_degree import TOPIC as FIRST_DEGREE
+from app.generators.physics.accelerated import TOPIC as ACCELERATED
+from app.generators.physics.uniform import TOPIC as UNIFORM
 
 
 class Topic(Protocol):
@@ -17,4 +19,6 @@ class Topic(Protocol):
 
 TOPICS: dict[str, Topic] = {
     FIRST_DEGREE.id: FIRST_DEGREE,
+    UNIFORM.id: UNIFORM,
+    ACCELERATED.id: ACCELERATED,
 }

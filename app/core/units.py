@@ -1,0 +1,55 @@
+"""Labelled scalars and an exponent-vector unit table (DESIGN §2.5).
+
+Deliberately NOT ``sympy.physics.units``: it does not enforce dimensions on the answer
+path (``3*meter + 2*second`` builds silently), carries a live ``convert_to`` bug class,
+never evaluates ``sin(30*degree)``, and prints ``hour`` where ``h`` is expected. Here a
+quantity is an exact ``Fraction`` plus a unit label; conversions are exact rational
+scales, so 36 km/h is exactly 10 m/s and never 9.999999.
+"""
+
+from __future__ import annotations
+
+from fractions import Fraction
+
+# Base dimensions: metre, second, kilogram, radian.
+DIMENSIONS = ("m", "s", "kg", "rad")
+
+# Exact conversion factors to SI (multiply the value by the factor).
+_TO_SI: dict[str, Fraction] = {
+    "m": Fraction(1), "km": Fraction(1000), "cm": Fraction(1, 100),
+    "s": Fraction(1), "min": Fraction(60), "h": Fraction(3600),
+    "kg": Fraction(1), "g": Fraction(1, 1000),
+    "m/s": Fraction(1), "km/h": Fraction(5, 18),
+    "m/s^2": Fraction(1),
+    "rad": Fraction(1),
+    "Hz": Fraction(1),
+}
+
+_SPEED_OF_SOUND = Fraction(343)  # m/s in air at 20 °C — a named constant, never a draw
+
+
+def speed_of_sound() -> Fraction:
+    return _SPEED_OF_SOUND
+
+
+def to_si(value: Fraction, unit: str) -> Fraction:
+    """Convert to SI exactly. Unknown units are a programming error, not user input."""
+    if unit not in _TO_SI:
+        raise KeyError(f"unknown unit: {unit}")
+    return Fraction(value) * _TO_SI[unit]
+
+
+def convert(value: Fraction, frm: str, to: str) -> Fraction:
+    """Exact conversion between compatible units (e.g. 36 km/h -> 10 m/s)."""
+    if frm == to:
+        return Fraction(value)
+    si = to_si(value, frm)
+    if to not in _TO_SI:
+        raise KeyError(f"unknown unit: {to}")
+    return si / _TO_SI[to]
+
+
+def fmt(value: Fraction) -> str:
+    """Exact textual form: integers stay integers, fractions stay fractions."""
+    value = Fraction(value)
+    return str(value.numerator) if value.denominator == 1 else f"{value.numerator}/{value.denominator}"

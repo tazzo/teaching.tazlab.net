@@ -3,14 +3,33 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Didattica — TazLab</title>
+    <title>Didattica</title>
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <main id="app">
-      <h1>Didattica</h1>
-      <p>Generatore di esercizi e problemi — in costruzione.</p>
-    </main>
+    <header class="page-header">
+      <h1 id="title">Didattica</h1>
+    </header>
+
+    <form class="controls" onsubmit="return false;">
+      <label for="topic">Argomento</label>
+      <select id="topic"></select>
+
+      <label for="difficulty">Difficoltà</label>
+      <select id="difficulty"></select>
+
+      <label for="seed">Seed</label>
+      <input id="seed" type="number" min="0" step="1" value="1" />
+
+      <label for="count">Numero di esercizi</label>
+      <input id="count" type="number" min="1" max="20" step="1" value="3" />
+
+      <button id="generate" type="button">Genera</button>
+    </form>
+
+    <p id="status" class="status"></p>
+    <main id="results"></main>
+
     <script type="module" src="/src/app.js"></script>
   </body>
 </html>
