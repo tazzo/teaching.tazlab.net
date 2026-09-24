@@ -65,9 +65,10 @@ export function renderFigure(container, figure, strings) {
   let [xMin, xMax] = extent(xs.length ? xs : [domain.t_min ?? "0", domain.t_max ?? "1"]);
   // A hidden figure carries the intended y scale so the student's grid is meaningful.
   let [yMin, yMax] = extent(ys.length ? ys : figure.y_range ?? ["0", "1"]);
-  // always show the origin, so the graph reads as a physical plot
-  // "corner" figures start at the origin, so only the far sides get padding and the axes
-  // sit exactly in the bottom-left corner.
+  // "corner" figures start at zero: no negative time, so the axes meet in the bottom-left.
+  // The padding stays on EVERY side, because JSXGraph draws tick numbers *outside* the
+  // axes: with the viewport ending exactly at zero they are clipped away and the graph
+  // loses its scale (observed live: an empty-looking plot with a correct legend).
   const corner = figure.origin === "corner";
   xMin = corner ? 0 : Math.min(0, xMin);
   yMin = corner ? 0 : Math.min(0, yMin);
@@ -76,7 +77,8 @@ export function renderFigure(container, figure, strings) {
 
   const board = JXG.JSXGraph.initBoard(container, {
     // [left, top, right, bottom] in data units
-    boundingbox: [corner ? 0 : xMin - padX, yMax + padY, xMax + padX, corner ? 0 : yMin - padY],
+    // [left, top, right, bottom]: the small margin is what the tick numbers are drawn in
+    boundingbox: [xMin - padX, yMax + padY, xMax + padX, yMin - padY],
     keepaspectratio: false,
     axis: true,
     showNavigation: false,
