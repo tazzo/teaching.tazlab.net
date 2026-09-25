@@ -186,7 +186,8 @@ export function renderFigure(container, figure, strings) {
       fixed: true,
       name: label(strings, marker.label_key, marker.label_key),
       withLabel: true,
-      label: { position: "rt", offset: [12, 14], fontSize: GRAPH_FONT },
+      // clear of its own dot: the label used to touch the marker it names
+      label: { position: "rt", offset: [20, 30], fontSize: GRAPH_FONT },
     });
   });
 
