@@ -293,7 +293,7 @@ class SegmentMotion:
             steps=self._steps(segments, ask, seg_index, t_ask, converted, quantity),
             answer=Answer(
                 # the caret in m/s^2 cannot live inside \text{}: KaTeX refuses the formula
-                latex=f"{fmt_reading(value)}\\,\\text{{{answer_unit}}}",
+                latex=f"{fmt_reading(value)}\\,{unit_latex(answer_unit)}",
                 kind="scalar_with_unit",
                 payload={"value": [fmt_reading(value)], "unit": [answer_unit]},
             ),
