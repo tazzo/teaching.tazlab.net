@@ -6,7 +6,49 @@ on:
       - master
 
 jobs:
+  # The suite runs before anything is published, and the image job depends on it: a green
+  # pipeline must mean "the exercises are correct", not merely "the image built". Four
+  # rendering defects once reached the live site through this pipeline — every one of them
+  # would have been caught here (TD-077).
+  test:
+    runs-on: ubuntu-latest
+    # The interpreter the service itself runs on: a test job on a different Python could
+    # pass while production fails, which is the failure mode this job exists to prevent.
+    container: python:3.14-slim
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Install the libraries the rendering path needs
+        # Pango/cairo/gdk-pixbuf are WeasyPrint's dependencies (the PDF renderer);
+        # Node runs KaTeX server-side, so screen and PDF share one LaTeX source.
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 shared-mime-info \
+            nodejs npm
+          rm -rf /var/lib/apt/lists/*
+          # Debian ships the binary as `nodejs`; the renderer looks for `node` on PATH
+          command -v node >/dev/null || ln -s "$(command -v nodejs)" /usr/local/bin/node
+          node --version
+
+      - name: Install the Python dependencies
+        # Read from pyproject so the workflow and the image cannot drift apart.
+        run: |
+          pip install --no-cache-dir --upgrade pip
+          pip install --no-cache-dir -e '.[dev]'
+
+      - name: Install KaTeX
+        # Only the runtime dependency is needed: app/render/pdf.py locates
+        # web/node_modules/katex/dist, the same copy the image vendors at /opt/katex.
+        working-directory: web
+        run: npm ci --omit=dev --no-audit --no-fund
+
+      - name: Run the test suite
+        run: python -m pytest tests -q
+
   build-and-push:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
