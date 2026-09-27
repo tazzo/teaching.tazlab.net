@@ -57,6 +57,76 @@ function label(strings, key, fallback) {
   return strings?.[key] ?? fallback ?? key;
 }
 
+/**
+ * Tick numbers and axis names are drawn OUTSIDE the axes, so they need a margin in PIXELS;
+ * the 8 % of the range reserved above is a comfortable inset on a desktop and a handful of
+ * pixels on a phone, where the y label "100" ran off the left edge of the plot and read as
+ * "00" (measured at 390 px: 14 px cut, plus 4 px under the x tick numbers). Measure where
+ * the labels actually landed and grow the viewport by what they need — on a container that
+ * has the room already, every measurement is zero and the box is left as computed.
+ *
+ * A card is built detached and appended only afterwards, so at this point the container has
+ * no box and JSXGraph has not drawn its labels yet: wait for the first real layout rather
+ * than measuring zeros. (JSXGraph sizes itself from the same resize signal.)
+ */
+function reserveLabelRoom(board, container) {
+  if (measureLabelRoom(board, container)) return;
+  // A card is built detached and only then appended, and JSXGraph draws its SVG off a
+  // resize signal of its own: until both have happened there is nothing to measure. Watch
+  // for either event; the observers go away the moment a measurement succeeds.
+  const cancel = [];
+  const attempt = () => {
+    if (!measureLabelRoom(board, container)) return;
+    cancel.forEach((stop) => stop());
+  };
+  if (typeof ResizeObserver === "function") {
+    const observer = new ResizeObserver(attempt);
+    observer.observe(container);
+    cancel.push(() => observer.disconnect());
+  }
+  if (typeof MutationObserver === "function") {
+    const observer = new MutationObserver(attempt);
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["width", "height", "style"],
+    });
+    cancel.push(() => observer.disconnect());
+  }
+}
+
+/** @returns {boolean} true once a laid-out plot with rendered labels has been measured */
+function measureLabelRoom(board, container) {
+  const frame = container.getBoundingClientRect();
+  const svg = container.querySelector("svg");
+  if (!frame.width || !frame.height || !svg || !svg.getBoundingClientRect().width) return false;
+  for (let pass = 0; pass < 2; pass += 1) {
+    const need = { left: 0, top: 0, right: 0, bottom: 0 };
+    container.querySelectorAll("text").forEach((text) => {
+      const rect = text.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      need.left = Math.max(need.left, frame.left - rect.left);
+      need.top = Math.max(need.top, frame.top - rect.top);
+      need.right = Math.max(need.right, rect.right - frame.right);
+      need.bottom = Math.max(need.bottom, rect.bottom - frame.bottom);
+    });
+    if (!(need.left > 0 || need.top > 0 || need.right > 0 || need.bottom > 0)) return true;
+    const [left, top, right, bottom] = board.getBoundingBox();
+    const slack = 2;                       // the glyph box is tight around the digits
+    const scaleX = (right - left) / frame.width;
+    const scaleY = (bottom - top) / frame.height;
+    board.setBoundingBox([
+      left - (need.left + slack) * scaleX,
+      top + (need.top + slack) * scaleY,
+      right + (need.right + slack) * scaleX,
+      bottom - (need.bottom + slack) * scaleY,
+    ], false);
+    board.update();
+  }
+  return true;
+}
+
 export function renderFigure(container, figure, strings) {
   if (!figure) return null;              // algebra items have no figure
   const tokens = graphTokens();
@@ -192,5 +262,6 @@ export function renderFigure(container, figure, strings) {
   });
 
   board.update();
+  reserveLabelRoom(board, container);
   return board;
 }

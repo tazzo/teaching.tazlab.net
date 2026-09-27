@@ -7,12 +7,12 @@
 
 import { el } from "./pages.js";
 
-function field(labelText, control, hint) {
-  const label = el("label", "config-field");
-  label.append(el("span", "config-label", labelText));
-  label.append(control);
-  if (hint) label.append(el("span", "hint", hint));
-  return label;
+function field(labelText, control, hint, tag = "label") {
+  const wrapper = el(tag, "config-field");
+  wrapper.append(el("span", "config-label", labelText));
+  wrapper.append(control);
+  if (hint) wrapper.append(el("span", "hint", hint));
+  return wrapper;
 }
 
 function selectFrom(choices, t, selected) {
@@ -36,7 +36,7 @@ function segmentList(control, t, defaults) {
     const row = el("div", "config-row");
     row.append(el("span", "config-row-index", String(rows.children.length + 1)));
     row.append(selectFrom(control.choices, t, value));
-    const remove = el("button", "config-remove", "×");
+    const remove = el("button", "btn btn-icon config-remove", "\u00d7");
     remove.type = "button";
     remove.title = t("config.remove_segment");
     remove.addEventListener("click", () => {
@@ -61,7 +61,7 @@ function segmentList(control, t, defaults) {
   };
 
   initial.forEach(addRow);
-  const add = el("button", "config-add", `+ ${t("config.add_segment")}`);
+  const add = el("button", "btn btn-quiet config-add", `+ ${t("config.add_segment")}`);
   add.type = "button";
   add.addEventListener("click", () => {
     // a new segment continues the motion in the most teachable way: uniform
@@ -80,19 +80,24 @@ function segmentList(control, t, defaults) {
  */
 export function renderConfigurator(descriptor, defaults = {}, strings) {
   const t = (key, fallback) => strings?.[key] ?? fallback ?? key;
-  const form = el("form", "configurator");
-  form.onsubmit = (event) => event.preventDefault();
+  // A div, not a form: the configurator is appended inside the page's own form, and a
+  // form nested in a form is not valid markup — the outer form already owns submission.
+  const group = el("div", "configurator");
   const readers = [];
 
   (descriptor ?? []).forEach((control) => {
     const hint = control.hint_key ? t(control.hint_key) : null;
     if (control.kind === "select") {
       const select = selectFrom(control.choices, t, defaults[control.id]);
-      form.append(field(t(control.label_key, control.id), select, hint));
+      group.append(field(t(control.label_key, control.id), select, hint));
       readers.push(() => ({ [control.id]: select.value }));
     } else if (control.kind === "segment_list") {
       const list = segmentList(control, t, defaults[control.id]);
-      form.append(field(t(control.label_key, control.id), list.node, hint));
+      // its own block, not a label: a button inside a label would activate the select
+      const block = field(t(control.label_key, control.id), list.node, hint, "div");
+      // the structure of the motion is the main choice and carries a hint: give it room
+      block.classList.add("config-field-wide");
+      group.append(block);
       readers.push(() => ({ [control.id]: list.read() }));
     } else {
       console.warn(`configurator: unknown control kind "${control.kind}" (${control.id})`);
@@ -100,5 +105,5 @@ export function renderConfigurator(descriptor, defaults = {}, strings) {
   });
 
   const read = () => Object.assign({}, ...readers.map((reader) => reader()));
-  return { node: form, read };
+  return { node: group, read };
 }

@@ -111,8 +111,8 @@ export function renderGraphFillingPage(item, index, context) {
   const placed = [];
   const status = el("p", "status");
   const hint = el("p", "hint", t("ui.fill_hint"));
-  const checkButton = el("button", null, t("ui.check"));
-  const revealButton = el("button", null, t("ui.reveal"));
+  const checkButton = el("button", "btn btn-quiet", t("ui.check"));
+  const revealButton = el("button", "btn btn-quiet", t("ui.reveal"));
   checkButton.type = "button";
   revealButton.type = "button";
   const actions = el("div", "page-actions");
