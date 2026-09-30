@@ -1,0 +1,461 @@
+{
+  "macros": [
+    "matematica",
+    "fisica"
+  ],
+  "subs": {
+    "matematica": [
+      "equazioni",
+      "disequazioni",
+      "sistemi"
+    ],
+    "fisica": [
+      "cinematica"
+    ]
+  },
+  "pages": [
+    {
+      "id": "cinematica-grafici-lettura",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "graph_reading",
+      "topic": "physics.kinematics.segments",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.graph_reading",
+      "count": 1,
+      "show_statement": false,
+      "config": [
+        {
+          "id": "count",
+          "kind": "select",
+          "label_key": "config.segment_count",
+          "hint_key": "config.segment_count_hint",
+          "count_from": null,
+          "choices": [
+            {
+              "value": "3",
+              "label_key": "config.count.3"
+            },
+            {
+              "value": "4",
+              "label_key": "config.count.4"
+            },
+            {
+              "value": "5",
+              "label_key": "config.count.5"
+            }
+          ]
+        },
+        {
+          "id": "kinds",
+          "kind": "segment_kinds",
+          "label_key": "config.segments",
+          "hint_key": "config.segments_hint",
+          "count_from": "count",
+          "choices": [
+            {
+              "value": "random",
+              "label_key": "config.kind.random"
+            },
+            {
+              "value": "uniform",
+              "label_key": "phase.uniform"
+            },
+            {
+              "value": "accelerate",
+              "label_key": "phase.accelerated"
+            },
+            {
+              "value": "decelerate",
+              "label_key": "phase.decelerated"
+            }
+          ]
+        },
+        {
+          "id": "quantity",
+          "kind": "select",
+          "label_key": "config.quantity",
+          "hint_key": "config.quantity_hint",
+          "count_from": null,
+          "choices": [
+            {
+              "value": "random",
+              "label_key": "config.quantity.random"
+            },
+            {
+              "value": "velocity",
+              "label_key": "config.quantity.velocity"
+            },
+            {
+              "value": "position",
+              "label_key": "config.quantity.position"
+            }
+          ]
+        },
+        {
+          "id": "units",
+          "kind": "select",
+          "label_key": "config.units",
+          "hint_key": "config.units_hint",
+          "count_from": null,
+          "choices": [
+            {
+              "value": "random",
+              "label_key": "config.units.random"
+            },
+            {
+              "value": "si",
+              "label_key": "config.units.si"
+            },
+            {
+              "value": "kmh",
+              "label_key": "config.units.kmh"
+            },
+            {
+              "value": "cm",
+              "label_key": "config.units.cm"
+            }
+          ]
+        }
+      ],
+      "defaults": {
+        "count": 3,
+        "kinds": [
+          "random",
+          "random",
+          "random"
+        ],
+        "quantity": "random",
+        "units": "random"
+      }
+    },
+    {
+      "id": "cinematica-grafici-completamento",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "graph_filling",
+      "topic": "physics.kinematics.uniform",
+      "difficulty": "easy",
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.graph_filling",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "cinematica-problemi",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "problem",
+      "topic": "physics.kinematics.uniform",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.problems",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "cinematica-accelerato-problemi",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "problem",
+      "topic": "physics.kinematics.accelerated",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.accelerated_problems",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "cinematica-accelerato-grafici",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "graph_reading",
+      "topic": "physics.kinematics.accelerated",
+      "difficulty": "medium",
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.accelerated_graphs",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "cinematica-multifase-problemi",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "problem",
+      "topic": "physics.kinematics.multi_phase",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.multiphase_problems",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "cinematica-multifase-grafici",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "graph_reading",
+      "topic": "physics.kinematics.multi_phase",
+      "difficulty": "easy",
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.multiphase_graphs",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "cinematica-relativo-problemi",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "problem",
+      "topic": "physics.kinematics.relative",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.relative_problems",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "cinematica-relativo-grafici",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "graph_reading",
+      "topic": "physics.kinematics.relative",
+      "difficulty": "easy",
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.relative_graphs",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "cinematica-circolare-problemi",
+      "macro": "fisica",
+      "sub": "cinematica",
+      "kind": "problem",
+      "topic": "physics.kinematics.circular",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.cinematica.circular_problems",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "equazioni-primo-grado",
+      "macro": "matematica",
+      "sub": "equazioni",
+      "kind": "problem",
+      "topic": "math.equations.first_degree",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.equazioni.first_degree",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "equazioni-secondo-grado",
+      "macro": "matematica",
+      "sub": "equazioni",
+      "kind": "problem",
+      "topic": "math.equations.second_degree",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.equazioni.second_degree",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "equazioni-frazionarie",
+      "macro": "matematica",
+      "sub": "equazioni",
+      "kind": "problem",
+      "topic": "math.equations.fractional",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.equazioni.fractional",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "disequazioni-primo-grado",
+      "macro": "matematica",
+      "sub": "disequazioni",
+      "kind": "problem",
+      "topic": "math.inequalities.first_degree",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.disequazioni.first_degree",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "disequazioni-secondo-grado",
+      "macro": "matematica",
+      "sub": "disequazioni",
+      "kind": "problem",
+      "topic": "math.inequalities.second_degree",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.disequazioni.second_degree",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "disequazioni-frazionarie",
+      "macro": "matematica",
+      "sub": "disequazioni",
+      "kind": "problem",
+      "topic": "math.inequalities.rational",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.disequazioni.rational",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "sistemi-lineari",
+      "macro": "matematica",
+      "sub": "sistemi",
+      "kind": "problem",
+      "topic": "math.systems.linear_2x2",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.sistemi.linear",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "sistemi-lineare-quadratica",
+      "macro": "matematica",
+      "sub": "sistemi",
+      "kind": "problem",
+      "topic": "math.systems.linear_quadratic",
+      "difficulty": null,
+      "difficulties": [
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.sistemi.linear_quadratic",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "sistemi-disequazioni",
+      "macro": "matematica",
+      "sub": "sistemi",
+      "kind": "problem",
+      "topic": "math.systems.inequalities_2x2",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.sistemi.inequalities",
+      "count": null,
+      "show_statement": true,
+      "config": [],
+      "defaults": {}
+    }
+  ]
+}
