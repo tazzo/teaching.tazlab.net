@@ -1,0 +1,532 @@
+{
+  "hidden": {
+    "url": "/api/generate?topic=physics.kinematics.segments&difficulty=easy&seed=4242&count=1&figure=hidden&options={\"count\":\"3\",\"kinds\":[\"random\",\"random\",\"random\"],\"quantity\":\"random\",\"units\":\"random\"}",
+    "body": {
+      "topic": "physics.kinematics.segments",
+      "difficulty": "easy",
+      "seed": 4242,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "stmt.segments_velocity_at_velocity",
+            "params": {
+              "n": "3",
+              "seg": "3",
+              "t_ask": "18",
+              "t_total": "22",
+              "value": "1350",
+              "value_si": "27/2"
+            }
+          },
+          "steps": [
+            {
+              "label_key": "step.read_segments",
+              "latex": "n = 3",
+              "note_key": null
+            },
+            {
+              "label_key": "step.read_points",
+              "latex": "t = 18\\,\\text{s}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.read_value",
+              "latex": "v = 1350\\,\\text{cm/s}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "1350\\,\\text{cm/s}",
+            "kind": "scalar_with_unit",
+            "payload": {
+              "value": [
+                "1350"
+              ],
+              "unit": [
+                "cm/s"
+              ]
+            }
+          },
+          "figure": {
+            "kind": "kinematics",
+            "origin": "corner",
+            "x_unit": "s",
+            "y_unit": "cm/s",
+            "y_label": "phase.decelerated",
+            "domain": {
+              "t_min": "0",
+              "t_max": "22"
+            },
+            "traces": [],
+            "vertices": [
+              {
+                "at": [
+                  "0",
+                  "300"
+                ],
+                "kind": "decelerate"
+              },
+              {
+                "at": [
+                  "6",
+                  "150"
+                ],
+                "kind": "decelerate"
+              },
+              {
+                "at": [
+                  "14",
+                  "950"
+                ],
+                "kind": "accelerate"
+              },
+              {
+                "at": [
+                  "22",
+                  "1750"
+                ],
+                "kind": "accelerate"
+              }
+            ],
+            "markers": [],
+            "guides": [
+              {
+                "at": "6",
+                "label_key": "guide.segment"
+              },
+              {
+                "at": "14",
+                "label_key": "guide.segment"
+              }
+            ],
+            "phases": [
+              {
+                "label_key": "phase.decelerated",
+                "kind": "decelerate",
+                "t_from": "0",
+                "t_to": "6"
+              },
+              {
+                "label_key": "phase.accelerated",
+                "kind": "accelerate",
+                "t_from": "6",
+                "t_to": "14"
+              },
+              {
+                "label_key": "phase.accelerated",
+                "kind": "accelerate",
+                "t_from": "14",
+                "t_to": "22"
+              }
+            ],
+            "vectors": [],
+            "y_range": [
+              "150",
+              "1750"
+            ]
+          }
+        }
+      ],
+      "options": {
+        "count": 3,
+        "kinds": [
+          "random",
+          "random",
+          "random"
+        ],
+        "quantity": "random",
+        "units": "random"
+      }
+    }
+  },
+  "full": {
+    "url": "/api/generate?topic=physics.kinematics.segments&difficulty=easy&seed=4242&count=1&figure=full&options={\"count\":\"3\",\"kinds\":[\"random\",\"random\",\"random\"],\"quantity\":\"random\",\"units\":\"random\"}",
+    "body": {
+      "topic": "physics.kinematics.segments",
+      "difficulty": "easy",
+      "seed": 4242,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "stmt.segments_velocity_at_velocity",
+            "params": {
+              "n": "3",
+              "seg": "3",
+              "t_ask": "18",
+              "t_total": "22",
+              "value": "1350",
+              "value_si": "27/2"
+            }
+          },
+          "steps": [
+            {
+              "label_key": "step.read_segments",
+              "latex": "n = 3",
+              "note_key": null
+            },
+            {
+              "label_key": "step.read_points",
+              "latex": "t = 18\\,\\text{s}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.read_value",
+              "latex": "v = 1350\\,\\text{cm/s}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "1350\\,\\text{cm/s}",
+            "kind": "scalar_with_unit",
+            "payload": {
+              "value": [
+                "1350"
+              ],
+              "unit": [
+                "cm/s"
+              ]
+            }
+          },
+          "figure": {
+            "kind": "kinematics",
+            "origin": "corner",
+            "x_unit": "s",
+            "y_unit": "cm/s",
+            "y_label": "trace.velocity",
+            "domain": {
+              "t_min": "0",
+              "t_max": "22"
+            },
+            "traces": [
+              {
+                "label_key": "phase.decelerated",
+                "kind": "decelerate",
+                "samples": [
+                  [
+                    "0",
+                    "300"
+                  ],
+                  [
+                    "3/2",
+                    "525/2"
+                  ],
+                  [
+                    "3",
+                    "225"
+                  ],
+                  [
+                    "9/2",
+                    "375/2"
+                  ],
+                  [
+                    "6",
+                    "150"
+                  ]
+                ]
+              },
+              {
+                "label_key": "phase.accelerated",
+                "kind": "accelerate",
+                "samples": [
+                  [
+                    "6",
+                    "150"
+                  ],
+                  [
+                    "8",
+                    "350"
+                  ],
+                  [
+                    "10",
+                    "550"
+                  ],
+                  [
+                    "12",
+                    "750"
+                  ],
+                  [
+                    "14",
+                    "950"
+                  ]
+                ]
+              },
+              {
+                "label_key": "phase.accelerated",
+                "kind": "accelerate",
+                "samples": [
+                  [
+                    "14",
+                    "950"
+                  ],
+                  [
+                    "16",
+                    "1150"
+                  ],
+                  [
+                    "18",
+                    "1350"
+                  ],
+                  [
+                    "20",
+                    "1550"
+                  ],
+                  [
+                    "22",
+                    "1750"
+                  ]
+                ]
+              }
+            ],
+            "vertices": [
+              {
+                "at": [
+                  "0",
+                  "300"
+                ],
+                "kind": "decelerate"
+              },
+              {
+                "at": [
+                  "6",
+                  "150"
+                ],
+                "kind": "decelerate"
+              },
+              {
+                "at": [
+                  "14",
+                  "950"
+                ],
+                "kind": "accelerate"
+              },
+              {
+                "at": [
+                  "22",
+                  "1750"
+                ],
+                "kind": "accelerate"
+              }
+            ],
+            "markers": [
+              {
+                "label_key": "marker.asked_instant",
+                "at": [
+                  "18",
+                  "1350"
+                ]
+              }
+            ],
+            "guides": [
+              {
+                "at": "6",
+                "label_key": "guide.segment"
+              },
+              {
+                "at": "14",
+                "label_key": "guide.segment"
+              }
+            ],
+            "phases": [
+              {
+                "label_key": "phase.decelerated",
+                "kind": "decelerate",
+                "t_from": "0",
+                "t_to": "6"
+              },
+              {
+                "label_key": "phase.accelerated",
+                "kind": "accelerate",
+                "t_from": "6",
+                "t_to": "14"
+              },
+              {
+                "label_key": "phase.accelerated",
+                "kind": "accelerate",
+                "t_from": "14",
+                "t_to": "22"
+              }
+            ]
+          }
+        }
+      ],
+      "options": {
+        "count": 3,
+        "kinds": [
+          "random",
+          "random",
+          "random"
+        ],
+        "quantity": "random",
+        "units": "random"
+      }
+    }
+  },
+  "problem": {
+    "url": "/api/generate?topic=math.equations.first_degree&difficulty=easy&seed=4242&count=2",
+    "body": {
+      "topic": "math.equations.first_degree",
+      "difficulty": "easy",
+      "seed": 4242,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "stmt.first_degree",
+            "params": {
+              "a": "4",
+              "b": "-20",
+              "solution": "5"
+            }
+          },
+          "steps": [
+            {
+              "label_key": "step.isolate_term",
+              "latex": "4 x = 20",
+              "note_key": null
+            },
+            {
+              "label_key": "step.divide",
+              "latex": "x = \\frac{20}{4}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.simplify",
+              "latex": "x = 5",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "x = 5",
+            "kind": "value",
+            "payload": {
+              "solutions": [
+                "5"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 1,
+          "statement": {
+            "key": "stmt.first_degree",
+            "params": {
+              "a": "3",
+              "b": "15",
+              "solution": "-5"
+            }
+          },
+          "steps": [
+            {
+              "label_key": "step.isolate_term",
+              "latex": "3 x = -15",
+              "note_key": null
+            },
+            {
+              "label_key": "step.divide",
+              "latex": "x = \\frac{-15}{3}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.simplify",
+              "latex": "x = -5",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "x = -5",
+            "kind": "value",
+            "payload": {
+              "solutions": [
+                "-5"
+              ]
+            }
+          },
+          "figure": null
+        }
+      ],
+      "options": {}
+    }
+  },
+  "uniform": {
+    "url": "/api/generate?topic=physics.kinematics.uniform&difficulty=easy&seed=4242&count=1&figure=hidden",
+    "body": {
+      "topic": "physics.kinematics.uniform",
+      "difficulty": "easy",
+      "seed": 4242,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "stmt.uniform_easy",
+            "params": {
+              "s": "315",
+              "t": "21",
+              "v": "15"
+            }
+          },
+          "steps": [
+            {
+              "label_key": "step.formula",
+              "latex": "s = v \\cdot t",
+              "note_key": null
+            },
+            {
+              "label_key": "step.substitute",
+              "latex": "s = 15\\,\\text{m/s} \\cdot 21\\,\\text{s}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.result",
+              "latex": "s = 315\\,\\text{m}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "315\\,\\text{m}",
+            "kind": "scalar_with_unit",
+            "payload": {
+              "value": [
+                "315"
+              ],
+              "unit": [
+                "m"
+              ]
+            }
+          },
+          "figure": {
+            "kind": "kinematics",
+            "x_unit": "s",
+            "y_unit": "m",
+            "origin": "corner",
+            "domain": {
+              "t_min": "0",
+              "t_max": "21"
+            },
+            "phases": [
+              {
+                "label_key": "phase.uniform",
+                "t_from": "0",
+                "t_to": "21",
+                "style": "solid"
+              }
+            ],
+            "traces": [],
+            "markers": [],
+            "guides": [],
+            "vectors": [],
+            "annotations": [],
+            "y_label": "trace.position",
+            "y_range": [
+              "0",
+              "315"
+            ]
+          }
+        }
+      ],
+      "options": {}
+    }
+  }
+}

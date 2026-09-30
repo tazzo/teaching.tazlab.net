@@ -7,9 +7,11 @@ on:
 
 jobs:
   # The suite runs before anything is published, and the image job depends on it: a green
-  # pipeline must mean "the exercises are correct", not merely "the image built". Four
-  # rendering defects once reached the live site through this pipeline — every one of them
-  # would have been caught here (TD-077).
+  # pipeline must mean "the exercises are correct AND the page that renders them is
+  # correct", not merely "the image built". Four rendering defects once reached the live
+  # site through this pipeline — every one of them would have been caught here (TD-077) —
+  # and a merge conflict sat unresolved in web/src/config.js and app.js until a human
+  # read both versions, which the JavaScript step below now prevents (TD-110).
   test:
     runs-on: ubuntu-latest
     # The interpreter the service itself runs on: a test job on a different Python could
@@ -38,11 +40,21 @@ jobs:
           pip install --no-cache-dir --upgrade pip
           pip install --no-cache-dir -e '.[dev]'
 
-      - name: Install KaTeX
-        # Only the runtime dependency is needed: app/render/pdf.py locates
+      - name: Install the frontend dependencies
+        # KaTeX is the runtime dependency app/render/pdf.py locates at
         # web/node_modules/katex/dist, the same copy the image vendors at /opt/katex.
+        # The dev dependencies come too: the suite below needs the runner and the DOM.
         working-directory: web
-        run: npm ci --omit=dev --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
+
+      - name: Run the frontend test suite
+        # The gate over the renderer itself. `config.js` and `app.js` build the page a
+        # classroom reads, and a build check cannot see a behavioural regression in
+        # either — a wrong resolution of a merge conflict compiles cleanly. It must fail
+        # here, before the image: build-and-push needs this job, so a red suite stops
+        # the publish.
+        working-directory: web
+        run: npm test
 
       - name: Run the test suite
         run: python -m pytest tests -q

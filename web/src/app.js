@@ -262,6 +262,16 @@ async function main() {
   render();
 }
 
-main().catch((error) => {
-  document.getElementById("view").textContent = `Avvio: ${error}`;
-});
+// The bootstrap is deferred behind a guard so the module can be imported without
+// starting the app: the suite drives `main` against a jsdom document and a stubbed
+// fetch, and a module that fired on import would race the test for the same DOM.
+// Vite folds the flag away in a build, so the browser runs exactly what it ran before.
+if (!import.meta.env?.VITEST) {
+  main().catch((error) => {
+    document.getElementById("view").textContent = `Avvio: ${error}`;
+  });
+}
+
+// What the suite needs to reach; everything else it exercises through `main` and the
+// DOM, which is the path a teacher takes.
+export { main, parseRoute, pagesOf, findPage };
