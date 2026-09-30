@@ -44,10 +44,15 @@ function linkList(entries) {
   const list = el("ul", "link-list");
   entries.forEach(([label, target, hint]) => {
     const item = el("li");
-    const link = el("a", null, label);
+    const link = el("a");
     link.href = target;
+    // label and hint share one block, so the row's chevron stays on the trailing edge even
+    // when the hint wraps to a line of its own on a phone
+    const text = el("span", "link-text");
+    text.append(el("span", "link-label", label));
+    if (hint) text.append(el("span", "link-hint", hint));
+    link.append(text);
     item.append(link);
-    if (hint) item.append(el("span", "hint", hint));
     list.append(item);
   });
   return list;
@@ -87,6 +92,16 @@ function renderSub(macro, sub) {
 }
 
 // ---------------------------------------------------------------- page itself
+/** One labelled control. The label wraps the control, so the pair is a single column and
+ *  the field is free of the id/first-column coupling a table-like grid forces on it. */
+function controlField(labelText, control, id) {
+  const field = el("label", "control-field");
+  if (id) field.htmlFor = id;
+  field.append(el("span", "control-label", labelText));
+  field.append(control);
+  return field;
+}
+
 function controls(page, reload) {
   const form = el("form", "controls");
   form.onsubmit = (event) => event.preventDefault();
@@ -100,8 +115,6 @@ function controls(page, reload) {
 
   let difficulty = page.difficulty;
   if (!difficulty) {
-    const label = el("label", null, t("ui.difficulty"));
-    label.htmlFor = "difficulty";
     const select = el("select");
     select.id = "difficulty";
     // exactly the difficulties the topic declares: not every topic has an easy level
@@ -111,14 +124,12 @@ function controls(page, reload) {
       select.append(option);
     });
     if (select.options.length) select.value = select.options[0].value;
-    form.append(label, select);
+    form.append(controlField(t("ui.difficulty"), select, "difficulty"));
   }
 
   // The seed is the operator's dice: "random" (the default) draws a new one on every
   // click, so each press of Genera is a different exercise; a number pins it, and the
   // same number always comes back to the same exercise.
-  const seedModeLabel = el("label", null, t("ui.seed"));
-  seedModeLabel.htmlFor = "seed-mode";
   const seedMode = el("select");
   seedMode.id = "seed-mode";
   [[t("ui.seed_random"), "random"], [t("ui.seed_number"), "number"]].forEach(([label, value]) => {
@@ -127,8 +138,6 @@ function controls(page, reload) {
     seedMode.append(option);
   });
 
-  const seedLabel = el("label", null, t("ui.seed_number"));
-  seedLabel.htmlFor = "seed";
   const seed = el("input");
   seed.id = "seed";
   seed.type = "number";
@@ -143,14 +152,11 @@ function controls(page, reload) {
   count.max = "20";
   count.value = String(page.count ?? (page.kind === "graph_filling" ? 1 : 3));
 
-  const submit = el("button", null, t("ui.generate"));
+  const submit = el("button", "btn btn-primary controls-submit", t("ui.generate"));
   submit.type = "button";
-  form.append(seedModeLabel, seedMode, seedLabel, seed);
-  if (!page.count) {
-    const countLabel = el("label", null, t("ui.count"));
-    countLabel.htmlFor = "count";
-    form.append(countLabel, count);
-  }
+  form.append(controlField(t("ui.seed"), seedMode, "seed-mode"));
+  form.append(controlField(t("ui.seed_number"), seed, "seed"));
+  if (!page.count) form.append(controlField(t("ui.count"), count, "count"));
   form.append(submit);
 
   const randomSeed = () => {
@@ -248,7 +254,9 @@ function render() {
 async function main() {
   strings = await (await fetch("/api/i18n")).json();
   document.title = t("ui.title");
-  document.getElementById("title").textContent = t("ui.title");
+  // write the label into the anchor, not over it: the title is the way back home
+  const brand = document.querySelector("#title a") ?? document.getElementById("title");
+  brand.textContent = t("ui.title");
   state.nav = await (await fetch("/api/pages")).json();
   window.addEventListener("hashchange", render);
   render();

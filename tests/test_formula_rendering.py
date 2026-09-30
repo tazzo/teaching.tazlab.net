@@ -33,25 +33,30 @@ def item_options(topic):
     controls = configurer()
     values = {control["id"]: [choice["value"] for choice in control["choices"]]
               for control in controls if control["kind"] == "select"}
-    segment_control = next((c for c in controls if c["kind"] == "segment_list"), None)
+    segment_control = next((c for c in controls if c["kind"] == "segment_kinds"), None)
     if segment_control is None:
-        kind_lists = [None]
+        shapes = [(count, None) for count in values.get("count", [None])]
     else:
+        # one selector per segment: a kind list is only valid at the length the count
+        # select says, so the two travel together, taken from the descriptor's own
+        # `count_from`. Every kind on its own, then a motion that mixes them.
+        counts = values[segment_control["count_from"]]
         kinds = [choice["value"] for choice in segment_control["choices"]]
-        kind_lists = [[kind] for kind in kinds] + [kinds[:2]]     # single segments, then a mix
+        shapes = [(count, [kind] * int(count)) for count in counts for kind in kinds]
+        shapes += [(count, [kinds[i % len(kinds)] for i in range(int(count))])
+                   for count in counts]
 
     options = []
-    for kind_list in kind_lists:
+    for count, kind_list in shapes:
         for quantity in values.get("quantity", [None]):
             for units in values.get("units", [None]):
-                for ask in values.get("ask", [None]):
-                    candidate = {name: value for name, value in
-                                 (("kinds", kind_list), ("quantity", quantity),
-                                  ("units", units), ("ask", ask)) if value is not None}
-                    try:
-                        options.append(topic.validate_options(candidate))
-                    except ValueError:
-                        continue            # a combination the topic refuses by design
+                candidate = {name: value for name, value in
+                             (("count", count), ("kinds", kind_list),
+                              ("quantity", quantity), ("units", units)) if value is not None}
+                try:
+                    options.append(topic.validate_options(candidate))
+                except ValueError:
+                    continue            # a combination the topic refuses by design
     return options
 
 

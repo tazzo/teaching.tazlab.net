@@ -6,12 +6,12 @@
 
 import { el } from "./pages.js";
 
-function field(labelText, control, hint) {
-  const label = el("label", "config-field");
-  label.append(el("span", "config-label", labelText));
-  label.append(control);
-  if (hint) label.append(el("span", "hint", hint));
-  return label;
+function field(labelText, control, hint, tag = "label") {
+  const wrapper = el(tag, "config-field");
+  wrapper.append(el("span", "config-label", labelText));
+  wrapper.append(control);
+  if (hint) wrapper.append(el("span", "hint", hint));
+  return wrapper;
 }
 
 function selectFrom(choices, t, selected) {
@@ -60,8 +60,9 @@ function segmentKinds(control, t, defaults, countSelect) {
  */
 export function renderConfigurator(descriptor, defaults = {}, strings) {
   const t = (key, fallback) => strings?.[key] ?? fallback ?? key;
-  const form = el("form", "configurator");
-  form.onsubmit = (event) => event.preventDefault();
+  // A div, not a form: the configurator is appended inside the page's own form, and a
+  // form nested in a form is not valid markup — the outer form already owns submission.
+  const group = el("div", "configurator");
   const readers = [];
   const nodes = {};
 
@@ -75,11 +76,16 @@ export function renderConfigurator(descriptor, defaults = {}, strings) {
   (descriptor ?? []).forEach((control) => {
     const hint = control.hint_key ? t(control.hint_key) : null;
     if (control.kind === "select") {
-      form.append(field(t(control.label_key, control.id), nodes[control.id], hint));
+      group.append(field(t(control.label_key, control.id), nodes[control.id], hint));
       readers.push(() => ({ [control.id]: nodes[control.id].value }));
     } else if (control.kind === "segment_kinds") {
       const list = segmentKinds(control, t, defaults[control.id], nodes[control.count_from]);
-      form.append(field(t(control.label_key, control.id), list.node, hint));
+      // its own block, not a label: the rows are read as one set, and a label would bind
+      // its own text to whichever row the browser picks as the control
+      const block = field(t(control.label_key, control.id), list.node, hint, "div");
+      // the structure of the motion is the main choice and carries a hint: give it room
+      block.classList.add("config-field-wide");
+      group.append(block);
       readers.push(() => ({ [control.id]: list.read() }));
     } else {
       console.warn(`configurator: unknown control kind "${control.kind}" (${control.id})`);
@@ -87,5 +93,5 @@ export function renderConfigurator(descriptor, defaults = {}, strings) {
   });
 
   const read = () => Object.assign({}, ...readers.map((reader) => reader()));
-  return { node: form, read };
+  return { node: group, read };
 }
