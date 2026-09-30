@@ -239,22 +239,21 @@
     "30\\,\\text{m}"
   ],
   "physics.kinematics.segments|easy": [
-    "n = 1",
-    "t = 3\\,\\text{s}",
-    "v = 6\\,\\text{m/s}",
-    "6\\,\\text{m/s}"
+    "n = 3",
+    "t = 18\\,\\text{s}",
+    "v = 1350\\,\\text{cm/s}",
+    "1350\\,\\text{cm/s}"
   ],
   "physics.kinematics.segments|hard": [
-    "n = 1",
-    "t = 3\\,\\text{s}",
-    "v = 5\\,\\text{m/s}",
-    "5\\,\\text{m/s}"
+    "n = 3",
+    "t = 7\\,\\text{s}",
+    "v = \\frac{\\Delta s}{\\Delta t} = 26\\,\\text{m/s}",
+    "26\\,\\text{m/s}"
   ],
   "physics.kinematics.segments|medium": [
-    "n = 1",
-    "t = 3\\,\\text{s}",
-    "v = 4\\,\\text{m/s}",
-    "4\\,\\text{m/s}"
+    "n = 3",
+    "\\Delta s = 0.08025\\,\\text{km}",
+    "0.08025\\,\\text{km}"
   ],
   "physics.kinematics.uniform|easy": [
     "s = v \\cdot t",

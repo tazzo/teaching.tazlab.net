@@ -39,16 +39,22 @@ class Page:
     # True when the backing topic exposes `configurer()`; the catalogue then serves its
     # control descriptor and the client renders the form generically (no per-page code).
     configurable: bool = False
+    # How many graphs one click produces. None = the client offers the count selector; a
+    # page whose point is "give me one graph I can question a student on" pins it to 1.
+    count: int | None = None
+    # Some pages are read by the teacher, not the student: with no student to state the
+    # problem to, the statement above the graph is noise, so the page drops it.
+    show_statement: bool = True
 
 
 PAGES: tuple[Page, ...] = (
     # --- Fisica / Cinematica -------------------------------------------------
     # The graph-reading page is backed by the piecewise-motion generator and exposes a
-    # configurator: the student chooses the segments, the plotted quantity, the units and
-    # what must be read off the graph (STRUCTURE §4.2).
+    # configurator that is all "random" by default: the teacher clicks and gets one graph
+    # to build oral questions on (STRUCTURE §4.2).
     Page("cinematica-grafici-lettura", "fisica", "cinematica", GRAPH_READING,
          "physics.kinematics.segments", None, "page.cinematica.graph_reading", 10,
-         configurable=True),
+         configurable=True, count=1, show_statement=False),
     Page("cinematica-grafici-completamento", "fisica", "cinematica", GRAPH_FILLING,
          "physics.kinematics.uniform", "easy", "page.cinematica.graph_filling", 20),
     Page("cinematica-problemi", "fisica", "cinematica", PROBLEM,

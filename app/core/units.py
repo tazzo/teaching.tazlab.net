@@ -19,7 +19,7 @@ _TO_SI: dict[str, Fraction] = {
     "m": Fraction(1), "km": Fraction(1000), "cm": Fraction(1, 100),
     "s": Fraction(1), "min": Fraction(60), "h": Fraction(3600),
     "kg": Fraction(1), "g": Fraction(1, 1000),
-    "m/s": Fraction(1), "km/h": Fraction(5, 18),
+    "m/s": Fraction(1), "km/h": Fraction(5, 18), "cm/s": Fraction(1, 100),
     "m/s^2": Fraction(1),
     "rad": Fraction(1),
     "Hz": Fraction(1),
@@ -82,8 +82,10 @@ def fmt_reading(value: Fraction) -> str:
 # Unit label -> LaTeX: the caret must sit outside \text{}, or KaTeX refuses the formula
 # (observed live: `1\,\text{m/s^2}` rendered as a red parse error).
 _UNIT_LATEX = {
-    "m": "\\text{m}", "km": "\\text{km}", "s": "\\text{s}", "min": "\\text{min}",
-    "m/s": "\\text{m/s}", "km/h": "\\text{km/h}", "m/s^2": "\\text{m/s}^2",
+    "m": "\\text{m}", "km": "\\text{km}", "cm": "\\text{cm}", "s": "\\text{s}",
+    "min": "\\text{min}",
+    "m/s": "\\text{m/s}", "km/h": "\\text{km/h}", "cm/s": "\\text{cm/s}",
+    "m/s^2": "\\text{m/s}^2",
 }
 
 

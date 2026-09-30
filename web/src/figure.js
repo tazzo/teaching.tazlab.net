@@ -177,6 +177,10 @@ export function renderFigure(container, figure, strings) {
 
   markers.forEach((marker) => {
     const [x, y] = marker.at.map(toNumber);
+    // The label sits beside its own dot, on the side that still has plot left: anchored to
+    // the right, a marker near the end of the domain pushed its label outside the box and
+    // the board clipped it (observed: "istante richiesto" cut to "richie").
+    const atRight = x > (xMin + xMax) / 2;
     board.create("point", [x, y], {
       size: 7,
       face: "circle",
@@ -187,7 +191,11 @@ export function renderFigure(container, figure, strings) {
       name: label(strings, marker.label_key, marker.label_key),
       withLabel: true,
       // clear of its own dot: the label used to touch the marker it names
-      label: { position: "rt", offset: [20, 30], fontSize: GRAPH_FONT },
+      label: {
+        position: atRight ? "lt" : "rt",
+        offset: atRight ? [-12, 30] : [20, 30],
+        fontSize: GRAPH_FONT,
+      },
     });
   });
 

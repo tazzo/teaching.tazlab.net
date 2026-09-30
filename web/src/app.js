@@ -114,32 +114,63 @@ function controls(page, reload) {
     form.append(label, select);
   }
 
-  const seedLabel = el("label", null, t("ui.seed"));
+  // The seed is the operator's dice: "random" (the default) draws a new one on every
+  // click, so each press of Genera is a different exercise; a number pins it, and the
+  // same number always comes back to the same exercise.
+  const seedModeLabel = el("label", null, t("ui.seed"));
+  seedModeLabel.htmlFor = "seed-mode";
+  const seedMode = el("select");
+  seedMode.id = "seed-mode";
+  [[t("ui.seed_random"), "random"], [t("ui.seed_number"), "number"]].forEach(([label, value]) => {
+    const option = el("option", null, label);
+    option.value = value;
+    seedMode.append(option);
+  });
+
+  const seedLabel = el("label", null, t("ui.seed_number"));
   seedLabel.htmlFor = "seed";
   const seed = el("input");
   seed.id = "seed";
   seed.type = "number";
   seed.value = String(Math.floor(Math.random() * 1e6));
 
-  const countLabel = el("label", null, t("ui.count"));
-  countLabel.htmlFor = "count";
+  // A page that pins its count (a teacher asking for one graph to question a student on)
+  // shows no count field: one click, one graph.
   const count = el("input");
   count.id = "count";
   count.type = "number";
   count.min = "1";
   count.max = "20";
-  count.value = page.kind === "graph_filling" ? "1" : "3";
+  count.value = String(page.count ?? (page.kind === "graph_filling" ? 1 : 3));
 
   const submit = el("button", null, t("ui.generate"));
   submit.type = "button";
-  form.append(seedLabel, seed, countLabel, count, submit);
+  form.append(seedModeLabel, seedMode, seedLabel, seed);
+  if (!page.count) {
+    const countLabel = el("label", null, t("ui.count"));
+    countLabel.htmlFor = "count";
+    form.append(countLabel, count);
+  }
+  form.append(submit);
 
-  const read = () => ({
-    difficulty: difficulty ?? form.querySelector("#difficulty")?.value ?? page.difficulties?.[0],
-    seed: Number(seed.value) || 1,
-    count: Number(count.value) || 3,
-    options: configurator ? configurator.read() : null,
-  });
+  const randomSeed = () => {
+    seed.value = String(Math.floor(Math.random() * 1e6));
+  };
+  randomSeed();
+  const syncSeedField = () => { seed.disabled = seedMode.value === "random"; };
+  seedMode.addEventListener("change", syncSeedField);
+  syncSeedField();
+
+  const read = () => {
+    const random = seedMode.value === "random";
+    if (random) randomSeed();
+    return {
+      difficulty: difficulty ?? form.querySelector("#difficulty")?.value ?? page.difficulties?.[0],
+      seed: Number(seed.value) || 1,
+      count: page.count ?? (Number(count.value) || 3),
+      options: configurator ? configurator.read() : null,
+    };
+  };
 
   submit.addEventListener("click", () => reload(read()));
   return { form, read };
@@ -183,7 +214,7 @@ function renderPage(macro, sub, page) {
       }
       status.textContent = "";
       items.forEach((item, index) => {
-        results.append(renderItemForKind(page.kind, item, index, { strings }));
+        results.append(renderItemForKind(page.kind, item, index, { strings, page }));
       });
     } catch (error) {
       // log the real thing for the console, show a short message to the user

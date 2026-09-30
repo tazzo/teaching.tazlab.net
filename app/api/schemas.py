@@ -55,11 +55,12 @@ class WireItem(BaseModel):
 class ConfigControl(BaseModel):
     """One field of a page configurator, described by the topic that consumes it."""
     id: str
-    kind: str                      # "select" | "segment_list"
+    kind: str                      # "select" | "segment_kinds"
     label_key: str
     hint_key: str | None = None
-    min: int | None = None
-    max: int | None = None
+    # a list control renders one selector per value of the named control: the kinds are as
+    # many as the segment count the operator picked
+    count_from: str | None = None
     choices: list["ConfigChoice"] = []
 
 
@@ -79,6 +80,10 @@ class PageInfo(BaseModel):
     difficulty: str | None = None
     difficulties: list[str] = Field(default_factory=list)
     label_key: str
+    # how many exercises one click produces; null leaves the choice to the client
+    count: int | None = None
+    # false on a page read by the teacher: there is no student to state the problem to
+    show_statement: bool = True
     config: list[ConfigControl] = []
     defaults: dict = {}
 

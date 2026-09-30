@@ -53,13 +53,21 @@ export function renderProblemPage(item, index, context) {
 
 /** kind: graph_reading — the graph carries the answer; the steps show how to read it. */
 export function renderGraphReadingPage(item, index, context) {
-  const { strings } = context;
+  const { strings, page } = context;
   const t = translate(strings);
   const card = el("article", "card");
-  const { header, statement } = cardHeader(item, index);
-  statement.append(renderText(t(item.statement.key, item.statement.key), item.statement.params));
-  header.append(statement);
-  card.append(header);
+  if (page?.show_statement === false) {
+    // the teacher asks the question in person: a statement above the graph would state it
+    // for them, in the wording of a generator that never met the student
+    const header = el("header", "card-header");
+    header.append(el("span", "badge", `#${index + 1}`));
+    card.append(header);
+  } else {
+    const { header, statement } = cardHeader(item, index);
+    statement.append(renderText(t(item.statement.key, item.statement.key), item.statement.params));
+    header.append(statement);
+    card.append(header);
+  }
   if (item.figure) {
     const host = el("div", "figure");
     card.append(host);

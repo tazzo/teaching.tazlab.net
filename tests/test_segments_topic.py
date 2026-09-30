@@ -1,12 +1,15 @@
 """The configurable piecewise-motion topic (`physics.kinematics.segments`).
 
-Two properties matter here, and both are the kind that ship silently when unchecked:
+Three properties matter here, and all three are the kind that ship silently when unchecked:
 
 * the printed answer must follow from the graph **as drawn** — this topic is the one that
   shipped a statement and an answer that disagreed (x²+2x+8=0 answered x=-4, x=2), so the
   verifier reads the drawn samples back instead of trusting the generator's own numbers;
 * the configurator's choices must reach the generator: the same seed with different options
-  is a different exercise, and every combination the page can produce must verify.
+  is a different exercise, and every combination the page can produce must verify;
+* every `random` choice must resolve into a motion that verifies. The page now offers
+  "random" for the kinds, the quantity and the unit system, so the *default* page is a
+  random draw: a defect that only a random draw can reach is a defect the teacher hits.
 """
 
 from __future__ import annotations
@@ -20,11 +23,14 @@ from app.core.units import fmt_reading
 from app.generators.physics.segments import (
     ACCELERATION,
     ACCELERATE,
+    CM_SYSTEM,
     DECELERATE,
     DISTANCE,
+    KMH_SYSTEM,
     POSITION,
     RANDOM,
-    SI,
+    SEGMENT_COUNTS,
+    SI_SYSTEM,
     UNIFORM,
     VELOCITY,
     VELOCITY_AT,
@@ -33,43 +39,75 @@ from app.generators.physics.segments import (
 
 DIFFICULTIES = ("easy", "medium", "hard")
 KIND_SETS = (
-    [UNIFORM],
-    [ACCELERATE],
-    [DECELERATE],
-    [UNIFORM, ACCELERATE],
-    [DECELERATE, ACCELERATE],
+    [UNIFORM, ACCELERATE, DECELERATE],
+    [DECELERATE, DECELERATE, DECELERATE],
     [ACCELERATE, UNIFORM, DECELERATE, ACCELERATE],
-    [ACCELERATE, DECELERATE, UNIFORM],
+    [DECELERATE, ACCELERATE, UNIFORM, DECELERATE],
+    [ACCELERATE, DECELERATE, UNIFORM, DECELERATE, DECELERATE],
+    [UNIFORM, UNIFORM, UNIFORM, UNIFORM, ACCELERATE],
 )
 
 
-def make(kinds, quantity, units, ask, difficulty="medium", seed=11):
-    options = {"kinds": kinds, "quantity": quantity, "units": units, "ask": ask}
+def make(kinds, quantity, units, ask=None, difficulty="medium", seed=11, count=None):
+    options = {"count": len(kinds) if count is None else count,
+               "kinds": kinds, "quantity": quantity, "units": units}
+    if ask is not None:
+        options["ask"] = ask
     return TOPIC.generate(make_rng(seed, TOPIC.id, difficulty, 0), difficulty, seed, 0, options)
 
 
 def combinations():
     for kinds in KIND_SETS:
         for quantity in (VELOCITY, POSITION):
-            for units in (SI, RANDOM):
+            for system in (SI_SYSTEM, KMH_SYSTEM, CM_SYSTEM):
                 for ask in (VELOCITY_AT, DISTANCE, ACCELERATION):
                     if ask == ACCELERATION and all(kind == UNIFORM for kind in kinds):
                         continue
-                    yield kinds, quantity, units, ask
+                    yield kinds, quantity, system, ask
 
 
-@pytest.mark.parametrize("kinds,quantity,units,ask", list(combinations()))
-def test_every_configurator_combination_verifies(kinds, quantity, units, ask):
+@pytest.mark.parametrize("kinds,quantity,system,ask", list(combinations()))
+def test_every_configurator_combination_verifies(kinds, quantity, system, ask):
     """The page can produce these; none may be rejected, and none may disagree with its graph."""
     for difficulty in DIFFICULTIES:
-        item = make(kinds, quantity, units, ask, difficulty=difficulty, seed=7)
+        item = make(kinds, quantity, system.id, ask, difficulty=difficulty, seed=7)
         result = TOPIC.verify(item)
-        assert result.ok, f"{quantity}/{units}/{ask}/{difficulty}: {result.reason}"
+        assert result.ok, f"{quantity}/{system.id}/{ask}/{difficulty}: {result.reason}"
+
+
+@pytest.mark.parametrize("seed", range(1, 25))
+def test_the_default_page_random_draw_always_verifies(seed):
+    """What the page does with an untouched form: every seed, every difficulty, all random."""
+    for difficulty in DIFFICULTIES:
+        item = TOPIC.generate(make_rng(seed, TOPIC.id, difficulty, 0), difficulty, seed, 0, {})
+        result = TOPIC.verify(item)
+        assert result.ok, f"seed {seed}/{difficulty}: {result.reason}"
+
+
+def test_the_random_draw_really_varies():
+    """A "random" that always answered the same would make the page a fixed exercise."""
+    drawn = {(TOPIC.generate(make_rng(seed, TOPIC.id, "medium", 0), "medium", seed, 0, {})
+              .figure["y_unit"]) for seed in range(1, 30)}
+    assert len(drawn) > 1, "the unit system is drawn, not constant"
+
+
+@pytest.mark.parametrize("count", SEGMENT_COUNTS)
+def test_the_segment_count_reaches_the_graph(count):
+    item = make([UNIFORM] * count, VELOCITY, SI_SYSTEM.id, DISTANCE, count=count, seed=4)
+    assert len(item.figure["traces"]) == count
+    assert len(item.figure["guides"]) == count - 1, "n segments have n-1 internal boundaries"
+
+
+def test_a_random_kind_row_is_resolved_per_item():
+    item = make([RANDOM, UNIFORM, RANDOM], VELOCITY, SI_SYSTEM.id, DISTANCE, seed=2)
+    kinds = [trace["kind"] for trace in item.figure["traces"]]
+    assert kinds[1] == UNIFORM, "the pinned row stays what the operator chose"
+    assert all(kind != RANDOM for kind in kinds), "no row reaches the figure undrawn"
 
 
 def test_the_verifier_catches_an_answer_that_contradicts_the_graph():
     """The defect class this topic exists to prevent: a plausible answer, not the drawn one."""
-    item = make([UNIFORM, ACCELERATE], VELOCITY, SI, DISTANCE, seed=5)
+    item = make([UNIFORM, ACCELERATE, UNIFORM], VELOCITY, SI_SYSTEM.id, DISTANCE, seed=5)
     tampered = type(item)(**{**item.__dict__, "answer": type(item.answer)(
         latex=item.answer.latex, kind=item.answer.kind,
         payload={**item.answer.payload, "value": ["999"]})})
@@ -80,7 +118,7 @@ def test_the_verifier_catches_an_answer_that_contradicts_the_graph():
 
 def test_a_velocity_reading_lied_about_on_the_graph_is_rejected():
     """Moving the marker without moving the motion must break the answer's agreement."""
-    item = make([ACCELERATE], VELOCITY, SI, VELOCITY_AT, seed=3)
+    item = make([ACCELERATE] * 3, VELOCITY, SI_SYSTEM.id, VELOCITY_AT, seed=3)
     figure = {**item.figure, "markers": [{**item.figure["markers"][0], "at": ["0", "0"]}]}
     result = TOPIC.verify(type(item)(**{**item.__dict__, "figure": figure}))
     assert not result.ok, "a marker at the origin cannot still read the same velocity"
@@ -88,8 +126,8 @@ def test_a_velocity_reading_lied_about_on_the_graph_is_rejected():
 
 def test_the_figure_starts_at_the_origin_with_no_negative_time():
     """The operator's rule: graphs run from zero, so the axes meet in the bottom-left corner."""
-    for kinds, quantity, units, ask in combinations():
-        item = make(kinds, quantity, units, ask, seed=13)
+    for kinds, quantity, system, ask in combinations():
+        item = make(kinds, quantity, system.id, ask, seed=13)
         assert item.figure["origin"] == "corner"
         assert item.figure["domain"]["t_min"] == "0"
         first_times = [trace["samples"][0][0] for trace in item.figure["traces"]]
@@ -101,7 +139,7 @@ def test_the_figure_starts_at_the_origin_with_no_negative_time():
 
 def test_the_segments_are_drawn_as_separate_traces_with_a_guide_between_them():
     """The operator asked to *see* the division: one trace per segment, one dashed guide each."""
-    item = make([ACCELERATE, UNIFORM, DECELERATE], VELOCITY, SI, ACCELERATION, seed=9)
+    item = make([ACCELERATE, UNIFORM, DECELERATE], VELOCITY, SI_SYSTEM.id, ACCELERATION, seed=9)
     assert len(item.figure["traces"]) == 3
     assert len(item.figure["guides"]) == 2, "three segments have exactly two boundaries"
     boundaries = [Fraction(guide["at"]) for guide in item.figure["guides"]]
@@ -113,21 +151,72 @@ def test_the_segments_are_drawn_as_separate_traces_with_a_guide_between_them():
 
 def test_the_segments_are_continuous_where_they_meet():
     """A graph of one motion: the last sample of a segment is the first sample of the next."""
-    item = make([UNIFORM, ACCELERATE, DECELERATE], POSITION, SI, DISTANCE, seed=17)
-    traces = item.figure["traces"]
-    for previous, following in zip(traces, traces[1:]):
-        assert previous["samples"][-1][1] == following["samples"][0][1]
+    for kinds, quantity, system, ask in combinations():
+        item = make(kinds, quantity, system.id, ask, seed=17)
+        traces = item.figure["traces"]
+        for previous, following in zip(traces, traces[1:]):
+            assert previous["samples"][-1] == following["samples"][0], (
+                f"{kinds}/{quantity}/{system.id}/{ask} breaks the motion")
+
+
+def test_a_decelerating_segment_always_slows_down():
+    """A segment labelled "moto decelerato" that draws flat is a graph that lies about itself.
+
+    On a velocity graph that means the curve falls; on a position graph the speed is the
+    *slope*, so the second half of the segment has to climb less steeply than the first.
+    """
+    for kinds, quantity, system, ask in combinations():
+        item = make(kinds, quantity, system.id, ask, seed=23)
+        positions = item.figure["y_label"] == "trace.position"
+        for trace in item.figure["traces"]:
+            if trace["kind"] != DECELERATE:
+                continue
+            samples = [(Fraction(x), Fraction(y)) for x, y in trace["samples"]]
+            first, middle, last = samples[0], samples[len(samples) // 2], samples[-1]
+            if positions:
+                early = (middle[1] - first[1]) / (middle[0] - first[0])
+                late = (last[1] - middle[1]) / (last[0] - middle[0])
+                assert late < early, f"the speed did not fall: {trace['samples']}"
+            else:
+                assert last[1] < first[1], f"a decelerating segment did not slow down: {samples}"
 
 
 def test_an_acceleration_question_on_a_uniform_motion_is_refused_with_a_reason():
     with pytest.raises(ValueError, match="at least one accelerated"):
-        TOPIC.validate_options({"kinds": [UNIFORM, UNIFORM], "ask": ACCELERATION})
+        TOPIC.validate_options({"count": 3, "kinds": [UNIFORM] * 3, "ask": ACCELERATION})
+
+
+def test_a_draw_that_cannot_answer_an_explicit_acceleration_is_refused_with_a_reason():
+    """The kinds are drawn after validation, so the refusal has to survive the draw."""
+    for seed in range(1, 40):
+        try:
+            item = TOPIC.generate(make_rng(seed, TOPIC.id, "medium", 0), "medium", seed, 0,
+                                  {"count": 3, "kinds": [RANDOM] * 3, "quantity": VELOCITY,
+                                   "units": SI_SYSTEM.id, "ask": ACCELERATION})
+        except ValueError as exc:
+            assert "at least one accelerated" in str(exc)
+            continue
+        assert TOPIC.verify(item).ok
+
+
+def test_the_drawed_reading_is_one_the_motion_can_answer():
+    """Without an ask in the form, the reading must still be readable off the graph."""
+    for seed in range(1, 40):
+        item = TOPIC.generate(make_rng(seed, TOPIC.id, "medium", 0), "medium", seed, 0, {})
+        ask = item.statement_key.split("_")[1]
+        if ask == ACCELERATION:
+            segment = int(item.params["seg"]) - 1
+            trace = item.figure["traces"][segment]
+            assert trace["kind"] != UNIFORM, "an acceleration was asked of a uniform segment"
 
 
 @pytest.mark.parametrize("options,reason", [
-    ({"kinds": []}, "1\\.\\.4"),
-    ({"kinds": ["uniform"] * 5}, "1\\.\\.4"),
-    ({"kinds": ["hyperspace"]}, "unknown segment kinds"),
+    ({"count": 2}, "segment count must be one of"),
+    ({"count": 6}, "segment count must be one of"),
+    ({"count": "many"}, "segment count must be one of"),
+    ({"count": 4, "kinds": [UNIFORM, UNIFORM]}, "one entry per segment"),
+    ({"kinds": [UNIFORM, UNIFORM, UNIFORM, UNIFORM]}, "one entry per segment"),
+    ({"kinds": [UNIFORM, "hyperspace", UNIFORM]}, "unknown segment kinds"),
     ({"quantity": "acceleration"}, "unknown quantity"),
     ({"units": "imperial"}, "unknown unit system"),
     ({"ask": "colour"}, "unknown ask"),
@@ -138,21 +227,21 @@ def test_unusable_configurations_are_rejected_with_a_machine_reason(options, rea
 
 
 def test_the_same_seed_and_configuration_reproduce_the_same_exercise():
-    first = make([UNIFORM, ACCELERATE], VELOCITY, SI, DISTANCE, seed=20260924)
-    second = make([UNIFORM, ACCELERATE], VELOCITY, SI, DISTANCE, seed=20260924)
+    first = make([UNIFORM, ACCELERATE, UNIFORM], VELOCITY, SI_SYSTEM.id, DISTANCE, seed=20260924)
+    second = make([UNIFORM, ACCELERATE, UNIFORM], VELOCITY, SI_SYSTEM.id, DISTANCE, seed=20260924)
     assert first == second
 
 
 def test_changing_a_configuration_changes_the_exercise():
     """Options are part of the item's identity — otherwise the form would be a decoration."""
-    base = make([UNIFORM, ACCELERATE], VELOCITY, SI, DISTANCE, seed=20260924)
-    other = make([UNIFORM, ACCELERATE], POSITION, SI, DISTANCE, seed=20260924)
+    base = make([UNIFORM, ACCELERATE, UNIFORM], VELOCITY, SI_SYSTEM.id, DISTANCE, seed=20260924)
+    other = make([UNIFORM, ACCELERATE, UNIFORM], POSITION, SI_SYSTEM.id, DISTANCE, seed=20260924)
     assert base.figure["y_unit"] != other.figure["y_unit"]
 
 
 def test_a_reading_is_a_decimal_where_the_decimal_terminates():
     """7/2 m/s is not how a student reads a graph; the value stays exact either way."""
-    item = make([ACCELERATE], VELOCITY, SI, ACCELERATION, seed=1)
+    item = make([ACCELERATE] * 3, VELOCITY, SI_SYSTEM.id, ACCELERATION, seed=1)
     for step in item.steps:
         assert "}{" not in step.latex.split("\\frac")[0], "no raw fraction where a reading is shown"
     assert fmt_reading(Fraction(7, 2)) == "3.5"
@@ -160,14 +249,27 @@ def test_a_reading_is_a_decimal_where_the_decimal_terminates():
 
 
 def test_the_converted_units_are_exact_multiples_of_the_si_exercise():
-    """km/h and km are conversions of the same motion, never a redrawn one."""
-    si_item = make([UNIFORM, ACCELERATE], VELOCITY, SI, DISTANCE, seed=21)
-    conv_item = make([UNIFORM, ACCELERATE], VELOCITY, RANDOM, DISTANCE, seed=21)
+    """km and cm are conversions of the same motion, never a redrawn one."""
+    si_item = make([UNIFORM, ACCELERATE, UNIFORM], VELOCITY, SI_SYSTEM.id, DISTANCE, seed=21)
+    km_item = make([UNIFORM, ACCELERATE, UNIFORM], VELOCITY, KMH_SYSTEM.id, DISTANCE, seed=21)
     travelled_si = Fraction(si_item.answer.payload["value"][0].replace(",", ""))
-    travelled_km = Fraction(conv_item.answer.payload["value"][0].replace(",", ""))
+    travelled_km = Fraction(km_item.answer.payload["value"][0].replace(",", ""))
     assert abs(travelled_km * 1000 - travelled_si) < Fraction(1, 10), "same motion, converted"
+    cm_item = make([UNIFORM, ACCELERATE, UNIFORM], VELOCITY, CM_SYSTEM.id, DISTANCE, seed=21)
+    travelled_cm = Fraction(cm_item.answer.payload["value"][0].replace(",", ""))
+    assert abs(travelled_cm / 100 - travelled_si) < Fraction(1, 10), "same motion, converted"
+
+
+def test_a_velocity_read_off_a_converted_position_graph_is_labelled_with_its_own_unit():
+    """The step must carry the number the axis carries: 3.5 m/s is not 3.5 km/h."""
+    for system in (KMH_SYSTEM, CM_SYSTEM):
+        item = make([ACCELERATE] * 3, POSITION, system.id, VELOCITY_AT, seed=31)
+        step = next(step for step in item.steps if step.label_key == "step.convert")
+        value = Fraction(item.answer.payload["value"][0])
+        assert f"\\text{{{system.velocity_unit}}}" in step.latex
+        assert fmt_reading(value) in step.latex, "the answer's value is the one converted"
 
 
 def test_no_float_reaches_the_item():
-    item = make([ACCELERATE, DECELERATE], POSITION, RANDOM, ACCELERATION, seed=4)
+    item = make([ACCELERATE, DECELERATE, UNIFORM], POSITION, RANDOM, ACCELERATION, seed=4)
     assert all(isinstance(value, Fraction) for value in item.params.values())

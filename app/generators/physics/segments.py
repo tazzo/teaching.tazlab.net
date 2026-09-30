@@ -6,16 +6,25 @@ velocity or position, whether the units are SI or converted, and what must be re
 graph. The graph marks the division with dashed guides — "una linea segmentata che fa
 vedere questa cosa" — and starts at the origin, so the axes sit in the bottom-left corner.
 
+Operator's spec (2026-09-30): the page is no longer a form to fill but a graph mill — the
+teacher clicks and gets a graph to build oral questions on. So every choice defaults to
+`random` (segment kinds, plotted quantity, unit system), the number of segments is a
+plain 3/4/5 choice instead of an add/remove list, and the "what must the student read"
+control is gone: the generator draws the reading itself, one the drawn motion can actually
+answer. The statement stays out of the page for the same reason (the teacher asks), but it
+is still generated and still verified — the item is a normal exercise for every other
+consumer (PDF export, tests).
+
 Motion model: v(t) is piecewise linear in time, hence s(t) is piecewise quadratic. Each
 segment is `uniform` (v constant), `accelerate` (v rises) or `decelerate` (v falls, never
 below zero). Continuity is by construction: a segment's end velocity is the next segment's
 start velocity. All arithmetic is exact (Fraction); nothing is re-solved in the browser.
 
-Unit policy — one rule, stated once: **time is always in seconds**; the `random` system
-re-expresses velocity in km/h and position in km (the same motion, written the way a car
-dashboard does). The acceleration answer stays in m/s², so the converted variant makes the
-student convert before dividing; the steps show that conversion. The graph axes carry the
-units, and the statements deliberately do not repeat them.
+Unit policy — one rule, stated once: **time is always in seconds**; a unit system is a
+pair of exact scales (velocity, position) plus the labels the axes and the answer carry.
+The acceleration answer stays in m/s², so a converted variant makes the student convert
+before dividing; the steps show that conversion. The graph axes carry the units, and the
+statements deliberately do not repeat them.
 """
 
 from __future__ import annotations
@@ -37,22 +46,55 @@ VELOCITY = "velocity"
 POSITION = "position"
 QUANTITIES = (VELOCITY, POSITION)
 
-SI = "si"
 RANDOM = "random"
-UNIT_SYSTEMS = (SI, RANDOM)
+
+KMH_PER_MS = Fraction(18, 5)      # 1 m/s = 3.6 km/h, exactly
+
+
+@dataclass(frozen=True)
+class UnitSystem:
+    """A unit system is two exact scales plus the labels they carry.
+
+    `velocity_scale` maps an SI speed (m/s) onto `velocity_unit`, `position_scale` maps an
+    SI length (m) onto `position_unit`: a converted item is the *same* motion written
+    differently, never a redrawn one, and every conversion in the module is one multiply.
+    """
+
+    id: str
+    label_key: str
+    velocity_unit: str
+    velocity_scale: Fraction
+    position_unit: str
+    position_scale: Fraction
+
+    @property
+    def is_si(self) -> bool:
+        return self.velocity_scale == 1 and self.position_scale == 1
+
+
+SI_SYSTEM = UnitSystem("si", "config.units.si", "m/s", Fraction(1), "m", Fraction(1))
+KMH_SYSTEM = UnitSystem("kmh", "config.units.kmh", "km/h", KMH_PER_MS, "km",
+                        Fraction(1, 1000))
+CM_SYSTEM = UnitSystem("cm", "config.units.cm", "cm/s", Fraction(100), "cm", Fraction(100))
+UNIT_SYSTEMS = (SI_SYSTEM, KMH_SYSTEM, CM_SYSTEM)
+UNIT_SYSTEM_IDS = tuple(system.id for system in UNIT_SYSTEMS)
+SYSTEMS_BY_ID = {system.id: system for system in UNIT_SYSTEMS}
+# a drawn figure names its system by the unit it labels the axis with, and the verifier
+# reads the answer back from the figure alone — so the figure must lead back to a system
+SYSTEM_BY_VELOCITY_UNIT = {system.velocity_unit: system for system in UNIT_SYSTEMS}
+SYSTEM_BY_POSITION_UNIT = {system.position_unit: system for system in UNIT_SYSTEMS}
 
 VELOCITY_AT = "velocity_at"
 DISTANCE = "distance"
 ACCELERATION = "acceleration"
 ASKS = (VELOCITY_AT, DISTANCE, ACCELERATION)
 
-MAX_SEGMENTS = 4
+SEGMENT_COUNTS = (3, 4, 5)
+DEFAULT_SEGMENT_COUNT = SEGMENT_COUNTS[0]
+_COUNT_REASON = f"segment count must be one of {list(SEGMENT_COUNTS)}"
+
 PHASE_LABELS = {UNIFORM: "phase.uniform", ACCELERATE: "phase.accelerated",
                 DECELERATE: "phase.decelerated"}
-
-KMH_PER_MS = Fraction(18, 5)      # 1 m/s = 3.6 km/h, exactly
-SECONDS_PER_HOUR = Fraction(3600)
-
 
 @dataclass(frozen=True)
 class Segment:
@@ -79,60 +121,121 @@ class SegmentMotion:
 
     # ------------------------------------------------------------- options ---
     def default_options(self) -> dict:
-        return {"kinds": [UNIFORM], "quantity": VELOCITY, "units": SI, "ask": VELOCITY_AT}
+        """What the page shows before anyone touches it: everything drawn at random."""
+        return {
+            "count": DEFAULT_SEGMENT_COUNT,
+            "kinds": [RANDOM] * DEFAULT_SEGMENT_COUNT,
+            "quantity": RANDOM,
+            "units": RANDOM,
+        }
 
     def validate_options(self, options: dict) -> dict:
         """Normalise the configurator's choices; ValueError carries the machine reason."""
-        # an absent list means "the topic's default"; an *empty* list is a client bug and is
-        # rejected below rather than quietly replaced by a motion the page did not ask for
+        count = self._segment_count(options.get("count"))
+        # An absent list means "draw one kind per segment"; an empty one is a client bug,
+        # and a length that disagrees with the count is a form whose two fields contradict
+        # each other — both are refused rather than quietly replaced.
         raw_kinds = options.get("kinds")
         if raw_kinds is None:
-            raw_kinds = [UNIFORM]
-        if not isinstance(raw_kinds, list) or not 1 <= len(raw_kinds) <= MAX_SEGMENTS:
-            raise ValueError(f"kinds must list 1..{MAX_SEGMENTS} segments")
+            raw_kinds = [RANDOM] * count
+        if not isinstance(raw_kinds, list) or len(raw_kinds) != count:
+            raise ValueError(f"kinds must list one entry per segment ({count})")
         kinds = [str(kind) for kind in raw_kinds]
-        unknown = [kind for kind in kinds if kind not in SEGMENT_KINDS]
+        unknown = [kind for kind in kinds if kind not in SEGMENT_KINDS + (RANDOM,)]
         if unknown:
             raise ValueError(f"unknown segment kinds: {unknown}")
-        quantity = str(options.get("quantity", VELOCITY))
-        if quantity not in QUANTITIES:
+        quantity = str(options.get("quantity", RANDOM))
+        if quantity not in QUANTITIES + (RANDOM,):
             raise ValueError(f"unknown quantity: {quantity}")
-        units = str(options.get("units", SI))
-        if units not in UNIT_SYSTEMS:
+        units = str(options.get("units", RANDOM))
+        if units not in UNIT_SYSTEM_IDS + (RANDOM,):
             raise ValueError(f"unknown unit system: {units}")
-        ask = str(options.get("ask", VELOCITY_AT))
-        if ask not in ASKS:
-            raise ValueError(f"unknown ask: {ask}")
-        if ask == ACCELERATION and all(kind == UNIFORM for kind in kinds):
-            # a uniform-only motion has zero acceleration in every segment: there would be
-            # nothing to read. Rejected here with a reason the client can show.
-            raise ValueError("acceleration needs at least one accelerated or decelerated segment")
-        return {"kinds": kinds, "quantity": quantity, "units": units, "ask": ask}
+        # The page no longer offers the reading; a caller that names one still gets it,
+        # because the item's answer is that reading and the verifier reads it back.
+        ask = options.get("ask")
+        if ask is not None:
+            ask = str(ask)
+            if ask not in ASKS:
+                raise ValueError(f"unknown ask: {ask}")
+            if ask == ACCELERATION and all(kind == UNIFORM for kind in kinds):
+                # a uniform-only motion has zero acceleration in every segment: there would
+                # be nothing to read. Rejected here with a reason the client can show.
+                raise ValueError(
+                    "acceleration needs at least one accelerated or decelerated segment")
+        resolved = {"count": count, "kinds": kinds, "quantity": quantity, "units": units}
+        if ask is not None:
+            resolved["ask"] = ask
+        return resolved
+
+    @staticmethod
+    def _segment_count(raw) -> int:
+        """The number of segments, as the 3/4/5 a select offers (a string is a client)."""
+        if raw is None:
+            return DEFAULT_SEGMENT_COUNT
+        try:
+            count = int(str(raw).strip())
+        except ValueError:
+            raise ValueError(_COUNT_REASON) from None
+        if count not in SEGMENT_COUNTS:
+            raise ValueError(_COUNT_REASON)
+        return count
+
+    def resolve(self, rng: random.Random, options: dict) -> dict:
+        """Draw the `random` choices — per item, from that item's own rng.
+
+        Done here rather than in `validate_options` because a random choice belongs to the
+        exercise, not to the request: two items from one click may differ, and the same
+        seed must still reproduce each of them exactly.
+        """
+        resolved = dict(options)
+        resolved["kinds"] = [rng.choice(SEGMENT_KINDS) if kind == RANDOM else kind
+                             for kind in options["kinds"]]
+        resolved["quantity"] = (rng.choice(QUANTITIES) if options["quantity"] == RANDOM
+                                else options["quantity"])
+        resolved["units"] = (rng.choice(UNIT_SYSTEM_IDS) if options["units"] == RANDOM
+                             else options["units"])
+        # the reading is drawn too: one the drawn motion can actually answer
+        resolved["ask"] = options.get("ask") or self._draw_ask(rng, resolved["kinds"])
+        return resolved
+
+    @staticmethod
+    def _draw_ask(rng: random.Random, kinds: list[str]) -> str:
+        """A reading the motion supports: an acceleration needs a segment that changes."""
+        candidates = [VELOCITY_AT, DISTANCE]
+        if any(kind != UNIFORM for kind in kinds):
+            candidates.append(ACCELERATION)
+        return rng.choice(candidates)
 
     def configurer(self) -> list[dict]:
         """The page's configurator, described once so the client renders it generically."""
         return [
             {
-                "id": "kinds", "kind": "segment_list", "label_key": "config.segments",
-                "hint_key": "config.segments_hint", "min": 1, "max": MAX_SEGMENTS,
-                "choices": [{"value": kind, "label_key": PHASE_LABELS[kind]}
-                            for kind in SEGMENT_KINDS],
+                "id": "count", "kind": "select", "label_key": "config.segment_count",
+                "hint_key": "config.segment_count_hint",
+                "choices": [{"value": str(count), "label_key": f"config.count.{count}"}
+                            for count in SEGMENT_COUNTS],
+            },
+            {
+                # one selector per segment, as many as the count field says: a motion with
+                # random kinds in every segment is the default, and each row can be pinned
+                "id": "kinds", "kind": "segment_kinds", "label_key": "config.segments",
+                "hint_key": "config.segments_hint", "count_from": "count",
+                "choices": [{"value": RANDOM, "label_key": "config.kind.random"}]
+                + [{"value": kind, "label_key": PHASE_LABELS[kind]} for kind in SEGMENT_KINDS],
             },
             {
                 "id": "quantity", "kind": "select", "label_key": "config.quantity",
-                "choices": [{"value": VELOCITY, "label_key": "config.quantity.velocity"},
+                "hint_key": "config.quantity_hint",
+                "choices": [{"value": RANDOM, "label_key": "config.quantity.random"},
+                            {"value": VELOCITY, "label_key": "config.quantity.velocity"},
                             {"value": POSITION, "label_key": "config.quantity.position"}],
             },
             {
                 "id": "units", "kind": "select", "label_key": "config.units",
-                "choices": [{"value": SI, "label_key": "config.units.si"},
-                            {"value": RANDOM, "label_key": "config.units.random"}],
-            },
-            {
-                "id": "ask", "kind": "select", "label_key": "config.ask",
-                "choices": [{"value": VELOCITY_AT, "label_key": "config.ask.velocity_at"},
-                            {"value": DISTANCE, "label_key": "config.ask.distance"},
-                            {"value": ACCELERATION, "label_key": "config.ask.acceleration"}],
+                "hint_key": "config.units_hint",
+                "choices": [{"value": RANDOM, "label_key": "config.units.random"}]
+                + [{"value": system.id, "label_key": system.label_key}
+                   for system in UNIT_SYSTEMS],
             },
         ]
 
@@ -174,6 +277,16 @@ class SegmentMotion:
                         Fraction(rng.randint(d_lo, d_hi)))
             if index == pinned and pinned_a is not None and kind != UNIFORM:
                 span = Fraction(pinned_a) * duration
+                if kind == DECELERATE and v - span <= 0:
+                    # The pinned deceleration would take the motion to a stop or below.
+                    # Lifting the segments drawn so far by one constant is the only repair
+                    # that changes no Δv: their kinds, accelerations and the shared boundary
+                    # sample all survive, and the drawing continues above the answer's own
+                    # segment, which is the one the question points at.
+                    lift = span + 1 - v
+                    segments = [Segment(seg.kind, seg.duration, seg.v_start + lift,
+                                        seg.v_end + lift) for seg in segments]
+                    v = v + lift
                 v_end = v + span if kind == ACCELERATE else v - span
             elif kind == UNIFORM:
                 v_end = v if v > 0 else Fraction(rng.randint(max(2, floor), max(ceiling, 2)))
@@ -185,19 +298,26 @@ class SegmentMotion:
                 step = max(1, rng.randint(1, headroom)) if headroom >= 1 else 1
                 v_end = v + Fraction(step) * duration
             else:                                           # decelerate
-                if int(v) - floor < 1:
-                    # nothing to lose at this height: raise the speed so the segment the
-                    # operator asked for really decelerates, instead of drawing a negative one
-                    v = Fraction(rng.randint(floor + 1, max(floor + 1, ceiling)))
-                headroom = max(1, int(v) - floor)
-                step = max(1, rng.randint(1, min(headroom, 3)))
-                v_end = max(v - Fraction(step) * duration, Fraction(floor))
+                # The speed it gives up is at most 3 m/s and at most half of what it has:
+                # the segment always really decelerates and never reaches a speed the next
+                # one cannot continue from, so consecutive decelerating segments — which a
+                # random draw produces — stay continuous instead of restarting at a lift.
+                v_end = v - min(Fraction(3), v / 2)
+                if v_end == v:
+                    # nothing to give up (the motion is at rest): lift the start instead,
+                    # which touches nothing drawn before it because it is the first segment
+                    v = Fraction(rng.randint(floor + 1, max(floor + 1, min(4, ceiling))))
+                    v_end = v - min(Fraction(3), v / 2)
             segments.append(Segment(kind, duration, v, v_end))
             v = v_end
 
-        if all(seg.v_start == seg.v_end for seg in segments):   # nothing moving
-            first = segments[0]
-            segments[0] = Segment(first.kind, first.duration, first.v_start, first.v_start + 2)
+        if all(seg.v_start == seg.v_end == 0 for seg in segments):
+            # A motion that never leaves rest is a flat line on the axis: there is nothing
+            # to read off it. The whole motion is lifted by one constant rather than one
+            # segment being moved, because neighbouring segments share their boundary
+            # sample and that shared sample *is* the continuity the verifier checks.
+            segments = [Segment(seg.kind, seg.duration, seg.v_start + 2, seg.v_end + 2)
+                        for seg in segments]
         return segments
 
     @staticmethod
@@ -223,9 +343,14 @@ class SegmentMotion:
     # ------------------------------------------------------------ generate ---
     def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
                  options: dict | None = None) -> Item:
-        opts = self.validate_options(options or {})
-        kinds, quantity, units, ask = opts["kinds"], opts["quantity"], opts["units"], opts["ask"]
-        converted = units == RANDOM
+        opts = self.resolve(rng, self.validate_options(options or {}))
+        kinds, quantity, ask = opts["kinds"], opts["quantity"], opts["ask"]
+        system = SYSTEMS_BY_ID[opts["units"]]
+        if ask == ACCELERATION and all(kind == UNIFORM for kind in kinds):
+            # the caller named the reading but left the kinds random, and every drawn
+            # segment came out uniform: refuse rather than answer a question that has none
+            raise ValueError(
+                "acceleration needs at least one accelerated or decelerated segment")
         # The question names a segment (or none, for the total distance). For the two
         # asks that read an acceleration, the named segment is the first non-uniform one:
         # asking "what is the acceleration here" about a uniform segment has no answer,
@@ -263,16 +388,13 @@ class SegmentMotion:
             t_ask = total_time
             value_si = self._position_at(segments, total_time)
 
-        # the answer, in the unit the student will write (time stays in seconds)
-        if ask == VELOCITY_AT:
-            answer_unit = "km/h" if converted else "m/s"
-            value = value_si * KMH_PER_MS if converted else value_si
-        elif ask == DISTANCE:
-            answer_unit = "km" if converted else "m"
-            value = value_si / 1000 if converted else value_si
-        else:
-            answer_unit = "m/s^2"
-            value = value_si
+        # the answer, in the unit the student will write — the graph's own unit (time stays
+        # in seconds, and an acceleration is always SI, so it is the one reading that has
+        # to be converted before dividing)
+        value = (value_si * system.velocity_scale if ask == VELOCITY_AT
+                 else value_si * system.position_scale if ask == DISTANCE else value_si)
+        answer_unit = {"velocity_at": system.velocity_unit,
+                       "distance": system.position_unit}.get(ask, "m/s^2")
 
         params = {
             "n": Fraction(len(segments)),
@@ -290,19 +412,20 @@ class SegmentMotion:
             index=index,
             params=params,
             statement_key=statement_key,
-            steps=self._steps(segments, ask, seg_index, t_ask, converted, quantity),
+            steps=self._steps(segments, ask, seg_index, t_ask, system, quantity),
             answer=Answer(
                 # the caret in m/s^2 cannot live inside \text{}: KaTeX refuses the formula
                 latex=f"{fmt_reading(value)}\\,{unit_latex(answer_unit)}",
                 kind="scalar_with_unit",
                 payload={"value": [fmt_reading(value)], "unit": [answer_unit]},
             ),
-            figure=self._figure(segments, quantity, converted, t_ask, ask, seg_index),
+            figure=self._figure(segments, quantity, system, t_ask, ask, seg_index),
         )
 
-    def _steps(self, segments, ask, seg_index, t_ask, converted, quantity) -> tuple[Step, ...]:
+    def _steps(self, segments, ask, seg_index, t_ask, system, quantity) -> tuple[Step, ...]:
         """The derivation, in the units of the graph, with the conversion written out."""
-        unit_v = "km/h" if converted else "m/s"
+        unit_v, unit_s = system.velocity_unit, system.position_unit
+        converted = not system.is_si
         rows: list[Step] = [Step("step.read_segments", f"n = {len(segments)}")]
         if ask == ACCELERATION and seg_index is not None:
             seg = segments[seg_index]
@@ -314,13 +437,14 @@ class SegmentMotion:
                 half = seg.duration / 2
                 v_first = seg.v_start + seg.acceleration * half / 2     # m/s
                 v_second = seg.v_end + seg.acceleration * half / 2      # m/s
-                unit_slope = "km/s" if converted else "m/s"
-                divisor = 1000 if converted else 1
+                unit_slope = f"{unit_s}/s"
                 rows.append(Step("step.read_slopes",
                                  f"v_1 = \\frac{{\\Delta s_1}}{{\\Delta t_1}} = "
-                                 f"{fmt_reading(v_first / divisor)}\\,\\text{{{unit_slope}}},"
+                                 f"{fmt_reading(v_first * system.position_scale)}"
+                                 f"\\,\\text{{{unit_slope}}},"
                                  f"\\quad v_2 = \\frac{{\\Delta s_2}}{{\\Delta t_2}} = "
-                                 f"{fmt_reading(v_second / divisor)}\\,\\text{{{unit_slope}}}"))
+                                 f"{fmt_reading(v_second * system.position_scale)}"
+                                 f"\\,\\text{{{unit_slope}}}"))
                 if converted:
                     rows.append(Step("step.convert",
                                      f"v_1 = {fmt_reading(v_first)}\\,\\text{{m/s}},"
@@ -330,45 +454,58 @@ class SegmentMotion:
                                  f"\\frac{{{fmt_reading(v_second - v_first)}}}"
                                  f"{{{fmt_reading(half)}\\,\\text{{s}}}}"))
             else:
-                delta_v = (seg.v_end - seg.v_start) * (KMH_PER_MS if converted else 1)
+                delta_v = (seg.v_end - seg.v_start) * system.velocity_scale
                 rows.append(Step("step.read_points",
                                  f"\\Delta v = {fmt_reading(delta_v)}\\,\\text{{{unit_v}}},"
                                  f"\\quad \\Delta t = {fmt_reading(seg.duration)}\\,\\text{{s}}"))
                 if converted:
                     rows.append(Step("step.convert",
-                                     f"\\Delta v = {fmt_reading(delta_v / KMH_PER_MS)}\\,\\text{{m/s}}"))
+                                     f"\\Delta v = {fmt_reading(delta_v / system.velocity_scale)}"
+                                     "\\,\\text{m/s}"))
                 rows.append(Step("step.slope", "a = \\frac{\\Delta v}{\\Delta t}"))
         elif ask == VELOCITY_AT and t_ask is not None:
             rows.append(Step("step.read_points", f"t = {fmt_reading(t_ask)}\\,\\text{{s}}"))
+            velocity_si = self._velocity_at(segments, t_ask)
             if quantity == POSITION:
-                # the graph plots position: the velocity is the steepness of the curve there
+                # The graph plots position: the velocity is the steepness of the curve there,
+                # and the slope is read in the graph's own unit before it is re-expressed —
+                # printing the SI slope under a km/h label would be a wrong answer, not a
+                # different presentation of one.
+                slope_si = velocity_si
                 rows.append(Step("step.read_slope_at",
-                                 f"v = {fmt_reading(self._velocity_at(segments, t_ask))}"
-                                 f"\\,\\text{{{unit_v}}}"))
+                                 f"v = \\frac{{\\Delta s}}{{\\Delta t}} = "
+                                 f"{fmt_reading(slope_si * system.position_scale)}"
+                                 f"\\,\\text{{{unit_s}/s}}"))
+                if converted:
+                    rows.append(Step("step.convert",
+                                     f"v = {fmt_reading(slope_si)}\\,\\text{{m/s}} = "
+                                     f"{fmt_reading(velocity_si * system.velocity_scale)}"
+                                     f"\\,\\text{{{unit_v}}}"))
             else:
                 rows.append(Step("step.read_value",
-                                 f"v = {fmt_reading(self._velocity_at(segments, t_ask) * (KMH_PER_MS if converted else 1))}"
+                                 f"v = {fmt_reading(velocity_si * system.velocity_scale)}"
                                  f"\\,\\text{{{unit_v}}}"))
         elif quantity == POSITION:
             # a position graph answers "how far" by itself: read where the curve is at the end
             total_time = sum(seg.duration for seg in segments)
             travelled = self._position_at(segments, total_time)
             rows.append(Step("step.read_displacement",
-                             f"\\Delta s = {fmt_reading(travelled / (1000 if converted else 1))}"
-                             f"\\,\\text{{{'km' if converted else 'm'}}}"))
+                             f"\\Delta s = {fmt_reading(travelled * system.position_scale)}"
+                             f"\\,\\text{{{unit_s}}}"))
         else:
             rows.append(Step("step.area", "s = \\text{somma delle aree sotto il grafico } v(t)"))
             if converted:
+                # the factor that turns an area in (velocity unit x s) into the answer's unit
+                factor = system.position_scale / system.velocity_scale
                 rows.append(Step("step.convert",
-                                 "(\\text{km/h}) \\cdot \\text{s}: \\div\\, 3600 "
-                                 "\\Rightarrow \\text{km}"))
+                                 f"1\\,\\text{{{unit_v}}} \\cdot \\text{{s}} = "
+                                 f"{fmt(factor)}\\,\\text{{{unit_s}}}"))
         return tuple(rows)
 
-    def _figure(self, segments, quantity, converted, t_ask, ask, seg_index) -> dict:
+    def _figure(self, segments, quantity, system, t_ask, ask, seg_index) -> dict:
         """One trace per segment — the division is visible at a glance — plus the guides."""
-        y_unit = ("km" if converted else "m") if quantity == POSITION else ("km/h" if converted else "m/s")
-        y_scale = (Fraction(1, 1000) if converted else Fraction(1)) if quantity == POSITION \
-            else (KMH_PER_MS if converted else Fraction(1))
+        y_unit = system.position_unit if quantity == POSITION else system.velocity_unit
+        y_scale = system.position_scale if quantity == POSITION else system.velocity_scale
 
         traces, phases = [], []
         elapsed = Fraction(0)
@@ -499,20 +636,29 @@ class SegmentMotion:
     @staticmethod
     def _read_off_graph(item: Item, traces: list[dict]) -> Fraction | None:
         """Recompute the answer from the drawn samples, in the answer's own unit."""
-        converted = item.figure["y_unit"] in ("km/h", "km")
+        # the figure names its unit system on the y axis; that, not the options, is what
+        # the reading below must convert back from
+        positions = item.figure["y_label"] == "trace.position"
+        table = SYSTEM_BY_POSITION_UNIT if positions else SYSTEM_BY_VELOCITY_UNIT
+        system = table.get(item.figure["y_unit"])
+        if system is None:
+            return None
         ask = next(candidate for candidate in ASKS
                    if item.statement_key.startswith(f"stmt.segments_{candidate}_"))
 
         if ask == "distance":
-            if item.figure["y_label"] == "trace.position":
-                return Fraction(traces[-1]["samples"][-1][1]) - Fraction(traces[0]["samples"][0][1])
-            # trapezoid rule over the first trace's samples, across every segment
+            if positions:
+                # the drawn axis already carries the system's own unit, so the answer is the
+                # distance between the two drawn points: there is no scale to undo
+                return (Fraction(traces[-1]["samples"][-1][1])
+                        - Fraction(traces[0]["samples"][0][1]))
+            # trapezoid rule over the drawn samples, across every segment
             area = Fraction(0)
             for trace in traces:
                 samples = [(Fraction(x), Fraction(y)) for x, y in trace["samples"]]
                 for (x1, y1), (x2, y2) in zip(samples, samples[1:]):
                     area += (x2 - x1) * (y1 + y2) / 2
-            return area / 3600 if converted else area           # km/h · s -> km
+            return area * system.position_scale / system.velocity_scale   # (u_v · s) -> u_s
 
         if ask == "velocity_at":
             x_ask = Fraction(item.figure["markers"][0]["at"][0])
@@ -531,10 +677,10 @@ class SegmentMotion:
                 if at is None or at == 0 or at == len(samples) - 1:
                     return None
                 (xa, ya), (xb, yb) = samples[at - 1], samples[at + 1]
-                slope = (yb - ya) / (xb - xa)          # (m or km) per second
-                # the converted graph plots kilometres over seconds, while the answer is
-                # asked in km/h: the hour is the conversion, not an approximation
-                return slope * SECONDS_PER_HOUR if converted else slope
+                slope = (yb - ya) / (xb - xa)          # position unit per second
+                # the graph plots the position in its own unit while the answer is asked in
+                # the system's velocity unit: the conversion is exact, never an approximation
+                return slope * system.velocity_scale / system.position_scale
             return None
 
         # acceleration, from the segment the question names
@@ -544,7 +690,7 @@ class SegmentMotion:
         if item.figure["y_label"] == "trace.velocity":
             # a velocity graph: the acceleration IS the slope of the segment
             slope = (y2 - y1) / (x2 - x1)                            # y_unit per second
-            return slope / KMH_PER_MS if converted else slope        # -> m/s^2
+            return slope / system.velocity_scale                   # -> m/s^2
         # a position graph: the acceleration is the change of the *slope*. The average
         # velocity over each half is a secant, and their difference over half a segment is
         # the acceleration exactly — a parabola's curvature is constant.
@@ -552,8 +698,8 @@ class SegmentMotion:
         half = (x2 - x1) / 2
         v_first = (samples[mid][1] - y1) / half
         v_second = (y2 - samples[mid][1]) / half
-        curvature = (v_second - v_first) / half                      # (m or km) per second^2
-        return curvature * 1000 if converted else curvature          # km/s^2 -> m/s^2
+        curvature = (v_second - v_first) / half             # position unit per second^2
+        return curvature / system.position_scale            # -> m/s^2
 
 
 TOPIC = SegmentMotion()

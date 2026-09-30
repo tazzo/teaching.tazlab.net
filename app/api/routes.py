@@ -135,7 +135,7 @@ async def pages() -> PagesResponse:
             PageInfo(id=p.id, macro=p.macro, sub=p.sub, kind=p.kind, topic=p.topic,
                      difficulty=p.difficulty,
                      difficulties=list(TOPICS[p.topic].difficulties) if p.topic in known else [],
-                     label_key=p.label_key,
+                     label_key=p.label_key, count=p.count, show_statement=p.show_statement,
                      # the configurator a page exposes, described by its own topic
                      config=(_configurer(TOPICS[p.topic]) if p.configurable and p.topic in known
                              else []),
@@ -215,7 +215,14 @@ async def generate(
         last_reason = "no_attempt"
         for attempt in range(MAX_ATTEMPTS):
             rng = make_rng(seed, topic, difficulty, index, attempt)
-            candidate = impl.generate(rng, difficulty, seed, index, resolved_options)
+            try:
+                candidate = impl.generate(rng, difficulty, seed, index, resolved_options)
+            except ValueError as exc:
+                # options that pass validation can still turn out to be unsatisfiable once
+                # the random choices are drawn (asking for an acceleration on a motion whose
+                # every segment came out uniform). That is the caller's configuration, not
+                # a server fault: it gets the same 400 and the same machine reason.
+                raise _fail(400, "invalid_options", str(exc)) from exc
             result = impl.verify(candidate)
             if result.ok:
                 item = candidate
