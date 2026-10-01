@@ -117,6 +117,27 @@ def _hidden_figure(figure: dict) -> dict:
     return hidden
 
 
+def _bare_figure(figure: dict) -> dict:
+    """The drawing and its scale, with everything that names the reading taken away.
+
+    A mill page hands the teacher a graph to build oral questions on, so nothing in the
+    payload may answer one: no marker pointing at the asked instant or stretch, no phase
+    entry naming the kind of motion, and no per-kind code for the renderer to colour by
+    (the same information, spelled in colour instead of words). What the student has to
+    work out — which stretch is which, and what the whole motion does — is the graph's
+    shape, which is the one thing left in.
+    """
+    bare = {key: value for key, value in figure.items()
+            if key not in ("markers", "phases")}
+    return {
+        **bare,
+        "traces": [{key: value for key, value in trace.items() if key != "kind"}
+                   for trace in figure.get("traces", [])],
+        "vertices": [{key: value for key, value in vertex.items() if key != "kind"}
+                     for vertex in figure.get("vertices", [])],
+    }
+
+
 def _configurer(topic) -> list[dict]:
     """The topic's own description of its configurator; topics without one return []."""
     configurer = getattr(topic, "configurer", None)
@@ -135,7 +156,7 @@ async def pages() -> PagesResponse:
             PageInfo(id=p.id, macro=p.macro, sub=p.sub, kind=p.kind, topic=p.topic,
                      difficulty=p.difficulty,
                      difficulties=list(TOPICS[p.topic].difficulties) if p.topic in known else [],
-                     label_key=p.label_key, count=p.count, show_statement=p.show_statement,
+                     label_key=p.label_key, count=p.count, bare_graph=p.bare_graph,
                      # the configurator a page exposes, described by its own topic
                      config=(_configurer(TOPICS[p.topic]) if p.configurable and p.topic in known
                              else []),
@@ -175,8 +196,10 @@ async def generate(
     count: int = Query(5, ge=1, le=MAX_COUNT),
     # "full" draws the figure; "hidden" keeps the axes and drops every trace and marker,
     # which is what a "fill in the empty graph" page needs (the solution is fetched
-    # separately from the same seed, so the two calls describe the same item).
-    figure: str = Query("full", pattern="^(full|hidden)$"),
+    # separately from the same seed, so the two calls describe the same item); "bare" keeps
+    # the drawing but drops what would name the reading, for a page the teacher questions
+    # a student on in person.
+    figure: str = Query("full", pattern="^(full|hidden|bare)$"),
     # The page configurator's choices, as a JSON object (STRUCTURE §4.2). Part of the
     # item's identity: the same seed with different options is a different exercise.
     options: str | None = Query(None, max_length=512),
@@ -238,8 +261,11 @@ async def generate(
             discarded.append(f"{index}:{last_reason}")
             continue
         wire = _to_wire(item)
-        if figure == "hidden" and wire.figure:
-            wire.figure = _hidden_figure(wire.figure)
+        if wire.figure:
+            if figure == "hidden":
+                wire.figure = _hidden_figure(wire.figure)
+            elif figure == "bare":
+                wire.figure = _bare_figure(wire.figure)
         items.append(wire)
 
     if discarded:

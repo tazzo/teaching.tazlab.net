@@ -240,9 +240,9 @@
   ],
   "physics.kinematics.segments|easy": [
     "n = 3",
-    "t = 18\\,\\text{s}",
-    "v = 1350\\,\\text{cm/s}",
-    "1350\\,\\text{cm/s}"
+    "t = 16\\,\\text{s}",
+    "v = 1650\\,\\text{cm/s}",
+    "1650\\,\\text{cm/s}"
   ],
   "physics.kinematics.segments|hard": [
     "n = 3",
@@ -252,8 +252,8 @@
   ],
   "physics.kinematics.segments|medium": [
     "n = 3",
-    "\\Delta s = 0.08025\\,\\text{km}",
-    "0.08025\\,\\text{km}"
+    "s = \\lvert \\Delta s \\rvert = 0.05175\\,\\text{km}",
+    "0.05175\\,\\text{km}"
   ],
   "physics.kinematics.uniform|easy": [
     "s = v \\cdot t",

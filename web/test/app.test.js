@@ -32,8 +32,14 @@ function stubFetch(overrides = {}) {
     if (override) return override[1];
     if (path.startsWith("/api/i18n")) return ok(strings);
     if (path.startsWith("/api/pages")) return ok(catalogue);
-    const topic = new URL(path, "https://teaching.tazlab.net").searchParams.get("topic");
-    const fixture = Object.values(items).find((entry) => entry.body.topic === topic);
+    const target = new URL(path, "https://teaching.tazlab.net");
+    const topic = target.searchParams.get("topic");
+    const figure = target.searchParams.get("figure");
+    // the payload the URL asks for, when there is one: a mill page must be handed the bare
+    // drawing, or the suite would certify a page the server never serves
+    const fixture = (figure && items[figure]?.body.topic === topic
+      ? items[figure]
+      : Object.values(items).find((entry) => entry.body.topic === topic));
     if (!fixture) throw new Error(`no items fixture for topic "${topic}" (${path})`);
     return ok(fixture.body);
   });
@@ -181,17 +187,24 @@ describe("a page that configures its own generator", () => {
     expect(first.searchParams.get("difficulty")).toBe("easy");
     expect(first.searchParams.get("seed")).toBe("4242");
     expect(first.searchParams.get("count")).toBe("1");
-    // this is a graph_reading page, not graph_filling: one request, with the answer shown
-    expect(first.searchParams.get("figure")).toBe("full");
+    // a mill page asks for the drawing alone: the marker that named the asked instant and
+    // the labels that named the kind of motion are the server's to strip, not the client's
+    expect(first.searchParams.get("figure")).toBe("bare");
     expect(generate).toHaveLength(1);
     expect(JSON.parse(first.searchParams.get("options")))
       .toEqual({ count: "3", kinds: page.defaults.kinds.map(String),
                  quantity: quantity.value, units: "random" });
-    // the exercise is drawn, not just fetched: a card with a rendered graph on it
+    // the graph is drawn, and the card is the graph and nothing else: the teacher asks
     const card = host.querySelector("article.card");
     expect(card.querySelector("svg")).not.toBeNull();
-    expect(card.querySelectorAll(".steps .step").length).toBeGreaterThan(0);
-    expect(card.querySelector(".answer").textContent).not.toBe("");
+    expect(card.querySelector(".statement")).toBeNull();
+    expect(card.querySelector(".steps")).toBeNull();
+    expect(card.querySelector(".answer")).toBeNull();
+    expect(card.querySelector(".figure-legend")).toBeNull();
+    // and nothing on the graph either: the asked instant is the question, and there is none
+    const drawn = [...card.querySelectorAll("text")].map((node) => node.textContent);
+    expect(drawn).not.toContain(strings["marker.asked_instant"]);
+    expect(drawn).not.toContain(strings["marker.asked_segment"]);
   });
 
   test("a failed generation is reported, not swallowed", async () => {

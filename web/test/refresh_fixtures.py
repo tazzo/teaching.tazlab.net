@@ -45,14 +45,15 @@ def main() -> None:
     client = TestClient(app)
     write("pages.json", client.get("/api/pages").json())
 
-    # `figure=hidden` is what a graph_filling page asks for first, `figure=full` the
-    # model it reveals; the segments topic is the one the configurator suite drives
+    # the three figure modes a page can ask for: `hidden` is what a graph_filling page asks
+    # for first, `full` the model it reveals, and `bare` the drawing alone a mill page shows.
+    # The segments topic is the one the configurator suite drives.
     query = f"topic={SEGMENTS}&difficulty=easy&seed={SEED}&count=1"
     options = json.dumps(CLIENT_OPTIONS, separators=(",", ":"))
     items = {
         figure: {"url": f"/api/generate?{query}&figure={figure}&options={options}",
                  "body": None}
-        for figure in ("hidden", "full")
+        for figure in ("hidden", "bare", "full")
     }
     # the two pages the suite navigates to without a configurator: a problem page that
     # renders statement + steps + answer, and the graph_filling page's own topic

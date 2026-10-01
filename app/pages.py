@@ -42,9 +42,11 @@ class Page:
     # How many graphs one click produces. None = the client offers the count selector; a
     # page whose point is "give me one graph I can question a student on" pins it to 1.
     count: int | None = None
-    # Some pages are read by the teacher, not the student: with no student to state the
-    # problem to, the statement above the graph is noise, so the page drops it.
-    show_statement: bool = True
+    # Some pages are read by the teacher, not the student: there is nobody to state the
+    # problem to and nobody to solve it in front of. A mill page therefore shows the graph
+    # and nothing else — no statement, no steps, no solution, and nothing drawn on the
+    # graph that names the reading or the kind of motion.
+    bare_graph: bool = False
 
 
 PAGES: tuple[Page, ...] = (
@@ -54,7 +56,7 @@ PAGES: tuple[Page, ...] = (
     # to build oral questions on (STRUCTURE §4.2).
     Page("cinematica-grafici-lettura", "fisica", "cinematica", GRAPH_READING,
          "physics.kinematics.segments", None, "page.cinematica.graph_reading", 10,
-         configurable=True, count=1, show_statement=False),
+         configurable=True, count=1, bare_graph=True),
     Page("cinematica-grafici-completamento", "fisica", "cinematica", GRAPH_FILLING,
          "physics.kinematics.uniform", "easy", "page.cinematica.graph_filling", 20),
     Page("cinematica-problemi", "fisica", "cinematica", PROBLEM,
