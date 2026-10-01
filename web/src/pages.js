@@ -51,19 +51,24 @@ export function renderProblemPage(item, index, context) {
   return card;
 }
 
-/** kind: graph_reading — the graph carries the answer; the steps show how to read it. */
+/**
+ * kind: graph_reading — the graph carries the answer; the steps show how to read it.
+ *
+ * On a mill page (`page.bare_graph`) the teacher states the question in person, so the
+ * card is the drawing and nothing else. The figure arrives in its `bare` form, which is
+ * what keeps the rest away: no marker naming the asked instant, no phase naming the kind
+ * of motion (and so no legend), no per-kind colour code. What is left to read is the
+ * shape of the graph.
+ */
 export function renderGraphReadingPage(item, index, context) {
   const { strings, page } = context;
   const t = translate(strings);
   const card = el("article", "card");
-  if (page?.show_statement === false) {
-    // the teacher asks the question in person: a statement above the graph would state it
-    // for them, in the wording of a generator that never met the student
-    const header = el("header", "card-header");
-    header.append(el("span", "badge", `#${index + 1}`));
+  const bare = page?.bare_graph === true;
+  const { header, statement } = cardHeader(item, index);
+  if (bare) {
     card.append(header);
   } else {
-    const { header, statement } = cardHeader(item, index);
     statement.append(renderText(t(item.statement.key, item.statement.key), item.statement.params));
     header.append(statement);
     card.append(header);
@@ -75,7 +80,7 @@ export function renderGraphReadingPage(item, index, context) {
     const legend = segmentLegend(item.figure, t);
     if (legend) card.append(legend);
   }
-  card.append(stepsBlock(item, t), answerBlock(item, t));
+  if (!bare) card.append(stepsBlock(item, t), answerBlock(item, t));
   return card;
 }
 

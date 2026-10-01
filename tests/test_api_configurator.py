@@ -47,15 +47,32 @@ def test_the_catalogue_describes_the_configurator_for_the_page_that_has_one():
     assert plain["config"] == []
 
 
-def test_the_graph_reading_page_asks_for_one_graph_and_prints_no_statement():
-    """The teacher clicks, gets a graph to question a student on, and states nothing."""
+def test_the_graph_reading_page_asks_for_one_graph_and_nothing_else():
+    """The teacher clicks, gets a graph to question a student on, and nothing to read."""
     body = client.get("/api/pages").json()
     page = next(p for p in body["pages"] if p["id"] == "cinematica-grafici-lettura")
     assert page["count"] == 1
-    assert page["show_statement"] is False
+    assert page["bare_graph"] is True
     # a page the student reads still gets the ordinary treatment
     other = next(p for p in body["pages"] if p["id"] == "cinematica-problemi")
-    assert other["count"] is None and other["show_statement"] is True
+    assert other["count"] is None and other["bare_graph"] is False
+
+
+def test_the_bare_figure_carries_the_drawing_and_none_of_the_reading():
+    """What a mill page may show: the motion. Not what would answer a question about it —
+    no marker naming the asked instant or stretch, no phase naming the kind of motion, and
+    no per-kind code for a renderer to colour by."""
+    body = client.get(f"{BASE}&figure=bare").json()
+    figure = body["items"][0]["figure"]
+    full = client.get(f"{BASE}&figure=full").json()["items"][0]["figure"]
+    assert "markers" not in figure and "phases" not in figure
+    assert all("kind" not in trace for trace in figure["traces"])
+    assert all("kind" not in vertex for vertex in figure["vertices"])
+    # the drawing itself is untouched: the same samples the full payload carries
+    assert [trace["samples"] for trace in figure["traces"]] == [
+        trace["samples"] for trace in full["traces"]]
+    assert figure["y_unit"] == full["y_unit"] and figure["y_label"] == full["y_label"]
+    assert full["markers"] and full["phases"], "the full payload is what the bare one strips"
 
 
 def test_the_options_are_echoed_back_resolved():

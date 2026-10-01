@@ -209,7 +209,11 @@ function renderPage(macro, sub, page) {
     status.classList.remove("bad");
     results.replaceChildren();
     try {
-      const mode = page.kind === "graph_filling" ? "hidden" : "full";
+      // graph_filling needs an empty grid (the model comes in a second request); a mill
+      // page needs the drawing alone — the server is what strips the marker naming the
+      // asked instant and the labels naming the kind of motion
+      const mode = page.kind === "graph_filling" ? "hidden"
+        : page.bare_graph ? "bare" : "full";
       const items = await fetchItems(page.topic, difficulty, seed, count, mode, options);
       if (page.kind === "graph_filling" && items.length) {
         // the model for the same item: same topic/difficulty/seed/index, full figure

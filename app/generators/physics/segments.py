@@ -15,10 +15,16 @@ answer. The statement stays out of the page for the same reason (the teacher ask
 is still generated and still verified — the item is a normal exercise for every other
 consumer (PDF export, tests).
 
-Motion model: v(t) is piecewise linear in time, hence s(t) is piecewise quadratic. Each
-segment is `uniform` (v constant), `accelerate` (v rises) or `decelerate` (v falls, never
-below zero). Continuity is by construction: a segment's end velocity is the next segment's
-start velocity. All arithmetic is exact (Fraction); nothing is re-solved in the browser.
+Motion model: v(t) is piecewise linear in time, hence s(t) is piecewise quadratic. A
+segment's kind names what the *speed* does: `uniform` (|v| constant), `accelerate` (|v|
+grows) or `decelerate` (|v| shrinks, possibly to a full stop). The direction is drawn once
+for the whole motion and multiplies every velocity, so the graph is the drawn profile or
+its mirror about the time axis: a uniform stretch reads v = −4 m/s exactly as it reads
+v = 4 m/s, and a uniform stretch at v = 0 is the body standing still. A body never
+reverses mid-graph, which is what keeps every stretch monotone — the area under a stretch
+and its slope describe that stretch and nothing else. Continuity is by construction: a
+segment's end velocity is the next segment's start velocity. All arithmetic is exact
+(Fraction); nothing is re-solved in the browser.
 
 Unit policy — one rule, stated once: **time is always in seconds**; a unit system is a
 pair of exact scales (velocity, position) plus the labels the axes and the answer carry.
@@ -49,6 +55,10 @@ QUANTITIES = (VELOCITY, POSITION)
 RANDOM = "random"
 
 KMH_PER_MS = Fraction(18, 5)      # 1 m/s = 3.6 km/h, exactly
+
+#: One decelerating stretch in three that could come to a full stop does. A body standing
+#: still for a stretch is what puts a flat line *on* the time axis, not only at the start.
+_STOP_CHANCE = Fraction(1, 3)
 
 
 @dataclass(frozen=True)
@@ -240,14 +250,32 @@ class SegmentMotion:
         ]
 
     # -------------------------------------------------------------- motion ---
+    @staticmethod
+    def _lift(drawn: list[tuple], amount: Fraction) -> list[tuple]:
+        """Every speed drawn so far, raised by one constant.
+
+        A constant shift changes no Δv, so each stretch keeps its kind, its shape and its
+        acceleration, and the boundary sample two neighbours share stays shared:
+        continuity survives by construction, which is what makes this the only repair
+        that changes nothing the graph says.
+        """
+        return [(kind, duration, u_start + amount, u_end + amount)
+                for kind, duration, u_start, u_end in drawn]
+
     def _build_segments(self, rng: random.Random, kinds: list[str], difficulty: str,
                         pinned: int | None = None, pinned_a: int | None = None,
                         pinned_duration: Fraction | None = None) -> list[Segment]:
-        """Draw durations and velocities; continuity holds by construction.
+        """Draw durations and speeds, then one direction for the whole motion.
+
+        Speeds are magnitudes — a non-negative |v|, so `accelerate` is a rise and
+        `decelerate` a fall of the speed — and the direction drawn last multiplies every
+        velocity. A stretch is therefore the drawn profile or its mirror about the time
+        axis, which is what lets a uniform stretch read v = −4 m/s with nothing about it
+        changing but the side of the axis it sits on.
 
         `pinned` names the segment the question points at. That segment gets an exact
         integer acceleration (Δv = a·Δt), because a student reading a graph should not be
-        asked for 3/7 m/s²; the segments before it are bounded so the pinned one fits.
+        asked for 3/7 m/s²; the stretches before it are bounded so the pinned one fits.
         """
         if difficulty == "easy":
             v_top, d_lo, d_hi = 12, 4, 8
@@ -269,56 +297,65 @@ class SegmentMotion:
                 floor = span                    # leave room to fall
         floor = max(floor, 0)
 
-        segments: list[Segment] = []
-        # a motion may start from rest — or from a speed the pinned segment needs
-        v = Fraction(rng.randint(floor, max(floor, min(4, ceiling))))
+        # (kind, duration, speed in, speed out) — the direction is applied once, at the end
+        drawn: list[tuple[str, Fraction, Fraction, Fraction]] = []
+        # a motion may start from rest — or from a speed the pinned stretch needs
+        speed = Fraction(rng.randint(floor, max(floor, min(4, ceiling))))
         for index, kind in enumerate(kinds):
             duration = (pinned_duration if index == pinned and pinned_duration else
                         Fraction(rng.randint(d_lo, d_hi)))
             if index == pinned and pinned_a is not None and kind != UNIFORM:
                 span = Fraction(pinned_a) * duration
-                if kind == DECELERATE and v - span <= 0:
+                if kind == DECELERATE and speed - span <= 0:
                     # The pinned deceleration would take the motion to a stop or below.
-                    # Lifting the segments drawn so far by one constant is the only repair
-                    # that changes no Δv: their kinds, accelerations and the shared boundary
-                    # sample all survive, and the drawing continues above the answer's own
-                    # segment, which is the one the question points at.
-                    lift = span + 1 - v
-                    segments = [Segment(seg.kind, seg.duration, seg.v_start + lift,
-                                        seg.v_end + lift) for seg in segments]
-                    v = v + lift
-                v_end = v + span if kind == ACCELERATE else v - span
+                    # Lifting the stretches drawn so far is the only repair that changes no
+                    # Δv: their kinds, accelerations and the shared boundary sample all
+                    # survive, and the drawing continues above the answer's own stretch,
+                    # which is the one the question points at.
+                    lift = span + 1 - speed
+                    drawn, speed = self._lift(drawn, lift), speed + lift
+                speed_end = speed + span if kind == ACCELERATE else speed - span
             elif kind == UNIFORM:
-                v_end = v if v > 0 else Fraction(rng.randint(max(2, floor), max(ceiling, 2)))
+                # |v| constant: the stretch keeps the speed it is entered with, and a body
+                # at rest stays at rest for it. The line then lies on the time axis, which
+                # is a reading a student makes — not a graph with nothing on it, which is
+                # what the whole-motion guard further down refuses.
+                speed_end = speed
             elif kind == ACCELERATE:
                 # Δv is a whole multiple of the duration, so the acceleration is an integer
                 # m/s² and every drawn coordinate is a terminating decimal: a school graph
                 # shows v = 1, 2, 3 m/s, not v = 5/3 m/s
-                headroom = min(6, ceiling - int(v))
+                headroom = min(6, ceiling - int(speed))
                 step = max(1, rng.randint(1, headroom)) if headroom >= 1 else 1
-                v_end = v + Fraction(step) * duration
+                speed_end = speed + Fraction(step) * duration
             else:                                           # decelerate
-                # The speed it gives up is at most 3 m/s and at most half of what it has:
-                # the segment always really decelerates and never reaches a speed the next
-                # one cannot continue from, so consecutive decelerating segments — which a
-                # random draw produces — stay continuous instead of restarting at a lift.
-                v_end = v - min(Fraction(3), v / 2)
-                if v_end == v:
-                    # nothing to give up (the motion is at rest): lift the start instead,
-                    # which touches nothing drawn before it because it is the first segment
-                    v = Fraction(rng.randint(floor + 1, max(floor + 1, min(4, ceiling))))
-                    v_end = v - min(Fraction(3), v / 2)
-            segments.append(Segment(kind, duration, v, v_end))
-            v = v_end
+                if speed == 0:
+                    # Nothing to give up: a body at rest cannot decelerate, and a stretch
+                    # drawn flat under a decelerating label is a graph lying about itself.
+                    drawn, speed = self._lift(drawn, Fraction(1)), Fraction(1)
+                    speed_end = speed - min(Fraction(3), speed / 2)
+                elif speed <= 3 and rng.random() < _STOP_CHANCE:
+                    speed_end = Fraction(0)     # a full stop, exactly on the axis
+                else:
+                    # The speed it gives up is at most 3 m/s and at most half of what it
+                    # has: the stretch always really decelerates and never reaches a speed
+                    # the next one cannot continue from, so consecutive decelerating
+                    # stretches — which a random draw produces — stay continuous instead
+                    # of restarting at a lift.
+                    speed_end = speed - min(Fraction(3), speed / 2)
+            drawn.append((kind, duration, speed, speed_end))
+            speed = speed_end
 
-        if all(seg.v_start == seg.v_end == 0 for seg in segments):
+        if all(u_start == u_end == 0 for _, _, u_start, u_end in drawn):
             # A motion that never leaves rest is a flat line on the axis: there is nothing
             # to read off it. The whole motion is lifted by one constant rather than one
-            # segment being moved, because neighbouring segments share their boundary
+            # stretch being moved, because neighbouring stretches share their boundary
             # sample and that shared sample *is* the continuity the verifier checks.
-            segments = [Segment(seg.kind, seg.duration, seg.v_start + 2, seg.v_end + 2)
-                        for seg in segments]
-        return segments
+            drawn = self._lift(drawn, Fraction(2))
+
+        direction = rng.choice((1, -1))
+        return [Segment(kind, duration, direction * u_start, direction * u_end)
+                for kind, duration, u_start, u_end in drawn]
 
     @staticmethod
     def _position_at(segments: list[Segment], t: Fraction) -> Fraction:
@@ -386,7 +423,12 @@ class SegmentMotion:
             value_si = segments[seg_index].acceleration
         else:
             t_ask = total_time
-            value_si = self._position_at(segments, total_time)
+            # "spazio totale percorso" is a length, never a signed displacement: a motion
+            # that runs the other way covers ground just the same, so every stretch
+            # contributes its own travelled amount. |Δs| per stretch is exact (a stretch
+            # never reverses) and equals the area under it on a v(t) graph.
+            value_si = sum((abs(seg.position_after(seg.duration)) for seg in segments),
+                           Fraction(0))
 
         # the answer, in the unit the student will write — the graph's own unit (time stays
         # in seconds, and an acceleration is always SI, so it is the one reading that has
@@ -426,6 +468,10 @@ class SegmentMotion:
         """The derivation, in the units of the graph, with the conversion written out."""
         unit_v, unit_s = system.velocity_unit, system.position_unit
         converted = not system.is_si
+        # A motion drawn the other way has every stretch below the axis. "Space covered" is
+        # a length in both cases, so the derivation has to say which of the two it is
+        # reading — otherwise it prints a value with the wrong sign next to the answer.
+        backwards = min(min(seg.v_start, seg.v_end) for seg in segments) < 0
         rows: list[Step] = [Step("step.read_segments", f"n = {len(segments)}")]
         if ask == ACCELERATION and seg_index is not None:
             seg = segments[seg_index]
@@ -486,14 +532,26 @@ class SegmentMotion:
                                  f"v = {fmt_reading(velocity_si * system.velocity_scale)}"
                                  f"\\,\\text{{{unit_v}}}"))
         elif quantity == POSITION:
-            # a position graph answers "how far" by itself: read where the curve is at the end
-            total_time = sum(seg.duration for seg in segments)
-            travelled = self._position_at(segments, total_time)
-            rows.append(Step("step.read_displacement",
-                             f"\\Delta s = {fmt_reading(travelled * system.position_scale)}"
-                             f"\\,\\text{{{unit_s}}}"))
+            # a position graph answers "how far" by itself: read where the curve ends. A
+            # motion that runs the other way ends lower than it started, and what it
+            # covered is that difference in magnitude, not the signed displacement.
+            path = sum((abs(seg.position_after(seg.duration)) for seg in segments),
+                       Fraction(0))
+            if backwards:
+                rows.append(Step("step.read_path",
+                                 f"s = \\lvert \\Delta s \\rvert = "
+                                 f"{fmt_reading(path * system.position_scale)}"
+                                 f"\\,\\text{{{unit_s}}}"))
+            else:
+                rows.append(Step("step.read_displacement",
+                                 f"\\Delta s = {fmt_reading(path * system.position_scale)}"
+                                 f"\\,\\text{{{unit_s}}}"))
         else:
-            rows.append(Step("step.area", "s = \\text{somma delle aree sotto il grafico } v(t)"))
+            if backwards:
+                rows.append(Step("step.area_signed", "s = \\sum \\lvert A_i \\rvert"))
+            else:
+                rows.append(Step("step.area",
+                                 "s = \\text{somma delle aree sotto il grafico } v(t)"))
             if converted:
                 # the factor that turns an area in (velocity unit x s) into the answer's unit
                 factor = system.position_scale / system.velocity_scale
@@ -560,7 +618,7 @@ class SegmentMotion:
 
         return {
             "kind": "kinematics",
-            "origin": "corner",                 # axes in the bottom-left corner, x >= 0
+            "origin": "corner",                 # time never goes negative, so x starts at 0
             "x_unit": "s",
             "y_unit": y_unit,
             "y_label": "trace.position" if quantity == POSITION else "trace.velocity",
@@ -593,17 +651,26 @@ class SegmentMotion:
             samples = trace["samples"]
             if len(samples) < 2:
                 return VerificationResult(False, "trace_too_short")
+            stretch = [Fraction(y) for _, y in samples]
+            rises = all(later >= earlier for earlier, later in zip(stretch, stretch[1:]))
+            falls = all(later <= earlier for earlier, later in zip(stretch, stretch[1:]))
+            if not (rises or falls):
+                # A stretch that turns back on itself has no single direction: the area
+                # under it stops being the space it covers and its slope stops being one
+                # velocity, so the reading off this graph would describe another motion.
+                return VerificationResult(False, "stretch_reverses")
             # a segment starts where the previous one ends: that shared sample is the
             # continuity of the motion, not a step backwards in time
             first = 1 if index else 0
             times.extend(Fraction(x) for x, _ in samples[first:])
-            values.extend(Fraction(y) for _, y in samples[first:])
+            values.extend(stretch[first:])
         if times[0] != 0:
             return VerificationResult(False, "figure_does_not_start_at_zero")   # x >= 0 always
         if any(later <= earlier for earlier, later in zip(times, times[1:])):
             return VerificationResult(False, "figure_not_monotone_in_time")
-        if any(value < 0 for value in values):
-            return VerificationResult(False, "negative_quantity")
+        # the drawn quantity carries a sign: a motion running the other way sits below the
+        # axis, and a body at rest sits on it. What must hold is that one motion keeps one
+        # direction, which is the monotonicity checked per stretch above.
         for previous, following in zip(traces, traces[1:]):
             if Fraction(previous["samples"][-1][1]) != Fraction(following["samples"][0][1]):
                 return VerificationResult(False, "discontinuity_between_segments")
@@ -615,10 +682,11 @@ class SegmentMotion:
         for vertex in figure.get("vertices", []):
             if tuple(vertex["at"]) not in drawn:
                 return VerificationResult(False, "vertex_not_on_the_line")
-        # markers must sit inside the plotted box
+        # markers must sit inside the plotted box, on whichever side of the axis the
+        # motion runs
         for marker in figure.get("markers", []):
             x, y = (Fraction(value) for value in marker["at"])
-            if not 0 <= x <= times[-1] or y < 0:
+            if not 0 <= x <= times[-1] or not min(values) <= y <= max(values):
                 return VerificationResult(False, "marker_outside_domain")
 
         claimed = item.answer.payload.get("value", [None])[0]
@@ -648,16 +716,21 @@ class SegmentMotion:
 
         if ask == "distance":
             if positions:
-                # the drawn axis already carries the system's own unit, so the answer is the
-                # distance between the two drawn points: there is no scale to undo
-                return (Fraction(traces[-1]["samples"][-1][1])
-                        - Fraction(traces[0]["samples"][0][1]))
-            # trapezoid rule over the drawn samples, across every segment
+                # The drawn axis already carries the system's own unit, so the answer is how
+                # far the curve travelled, stretch by stretch: the rise or the fall of each
+                # one, in magnitude. There is no scale to undo, and a motion that runs the
+                # other way has covered exactly as much ground as one that does not.
+                return sum((abs(Fraction(trace["samples"][-1][1])
+                                - Fraction(trace["samples"][0][1])) for trace in traces),
+                           Fraction(0))
+            # trapezoid rule over the drawn samples, across every segment, in magnitude: a
+            # stretch never changes sign inside itself, so a stretch's areas share its sign
+            # and the absolute value of each trapezoid is the space that stretch covers
             area = Fraction(0)
             for trace in traces:
                 samples = [(Fraction(x), Fraction(y)) for x, y in trace["samples"]]
                 for (x1, y1), (x2, y2) in zip(samples, samples[1:]):
-                    area += (x2 - x1) * (y1 + y2) / 2
+                    area += abs((x2 - x1) * (y1 + y2) / 2)
             return area * system.position_scale / system.velocity_scale   # (u_v · s) -> u_s
 
         if ask == "velocity_at":

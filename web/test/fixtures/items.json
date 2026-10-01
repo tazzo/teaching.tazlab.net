@@ -13,10 +13,10 @@
             "params": {
               "n": "3",
               "seg": "3",
-              "t_ask": "18",
-              "t_total": "22",
-              "value": "1350",
-              "value_si": "27/2"
+              "t_ask": "16",
+              "t_total": "20",
+              "value": "1650",
+              "value_si": "33/2"
             }
           },
           "steps": [
@@ -27,21 +27,21 @@
             },
             {
               "label_key": "step.read_points",
-              "latex": "t = 18\\,\\text{s}",
+              "latex": "t = 16\\,\\text{s}",
               "note_key": null
             },
             {
               "label_key": "step.read_value",
-              "latex": "v = 1350\\,\\text{cm/s}",
+              "latex": "v = 1650\\,\\text{cm/s}",
               "note_key": null
             }
           ],
           "answer": {
-            "latex": "1350\\,\\text{cm/s}",
+            "latex": "1650\\,\\text{cm/s}",
             "kind": "scalar_with_unit",
             "payload": {
               "value": [
-                "1350"
+                "1650"
               ],
               "unit": [
                 "cm/s"
@@ -56,35 +56,35 @@
             "y_label": "phase.decelerated",
             "domain": {
               "t_min": "0",
-              "t_max": "22"
+              "t_max": "20"
             },
             "traces": [],
             "vertices": [
               {
                 "at": [
                   "0",
-                  "300"
+                  "100"
                 ],
                 "kind": "decelerate"
               },
               {
                 "at": [
                   "6",
-                  "150"
+                  "50"
                 ],
                 "kind": "decelerate"
               },
               {
                 "at": [
-                  "14",
-                  "950"
+                  "12",
+                  "1250"
                 ],
                 "kind": "accelerate"
               },
               {
                 "at": [
-                  "22",
-                  "1750"
+                  "20",
+                  "2050"
                 ],
                 "kind": "accelerate"
               }
@@ -96,7 +96,7 @@
                 "label_key": "guide.segment"
               },
               {
-                "at": "14",
+                "at": "12",
                 "label_key": "guide.segment"
               }
             ],
@@ -111,19 +111,206 @@
                 "label_key": "phase.accelerated",
                 "kind": "accelerate",
                 "t_from": "6",
-                "t_to": "14"
+                "t_to": "12"
               },
               {
                 "label_key": "phase.accelerated",
                 "kind": "accelerate",
-                "t_from": "14",
-                "t_to": "22"
+                "t_from": "12",
+                "t_to": "20"
               }
             ],
             "vectors": [],
             "y_range": [
-              "150",
-              "1750"
+              "50",
+              "2050"
+            ]
+          }
+        }
+      ],
+      "options": {
+        "count": 3,
+        "kinds": [
+          "random",
+          "random",
+          "random"
+        ],
+        "quantity": "random",
+        "units": "random"
+      }
+    }
+  },
+  "bare": {
+    "url": "/api/generate?topic=physics.kinematics.segments&difficulty=easy&seed=4242&count=1&figure=bare&options={\"count\":\"3\",\"kinds\":[\"random\",\"random\",\"random\"],\"quantity\":\"random\",\"units\":\"random\"}",
+    "body": {
+      "topic": "physics.kinematics.segments",
+      "difficulty": "easy",
+      "seed": 4242,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "stmt.segments_velocity_at_velocity",
+            "params": {
+              "n": "3",
+              "seg": "3",
+              "t_ask": "16",
+              "t_total": "20",
+              "value": "1650",
+              "value_si": "33/2"
+            }
+          },
+          "steps": [
+            {
+              "label_key": "step.read_segments",
+              "latex": "n = 3",
+              "note_key": null
+            },
+            {
+              "label_key": "step.read_points",
+              "latex": "t = 16\\,\\text{s}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.read_value",
+              "latex": "v = 1650\\,\\text{cm/s}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "1650\\,\\text{cm/s}",
+            "kind": "scalar_with_unit",
+            "payload": {
+              "value": [
+                "1650"
+              ],
+              "unit": [
+                "cm/s"
+              ]
+            }
+          },
+          "figure": {
+            "kind": "kinematics",
+            "origin": "corner",
+            "x_unit": "s",
+            "y_unit": "cm/s",
+            "y_label": "trace.velocity",
+            "domain": {
+              "t_min": "0",
+              "t_max": "20"
+            },
+            "traces": [
+              {
+                "label_key": "phase.decelerated",
+                "samples": [
+                  [
+                    "0",
+                    "100"
+                  ],
+                  [
+                    "3/2",
+                    "175/2"
+                  ],
+                  [
+                    "3",
+                    "75"
+                  ],
+                  [
+                    "9/2",
+                    "125/2"
+                  ],
+                  [
+                    "6",
+                    "50"
+                  ]
+                ]
+              },
+              {
+                "label_key": "phase.accelerated",
+                "samples": [
+                  [
+                    "6",
+                    "50"
+                  ],
+                  [
+                    "15/2",
+                    "350"
+                  ],
+                  [
+                    "9",
+                    "650"
+                  ],
+                  [
+                    "21/2",
+                    "950"
+                  ],
+                  [
+                    "12",
+                    "1250"
+                  ]
+                ]
+              },
+              {
+                "label_key": "phase.accelerated",
+                "samples": [
+                  [
+                    "12",
+                    "1250"
+                  ],
+                  [
+                    "14",
+                    "1450"
+                  ],
+                  [
+                    "16",
+                    "1650"
+                  ],
+                  [
+                    "18",
+                    "1850"
+                  ],
+                  [
+                    "20",
+                    "2050"
+                  ]
+                ]
+              }
+            ],
+            "vertices": [
+              {
+                "at": [
+                  "0",
+                  "100"
+                ]
+              },
+              {
+                "at": [
+                  "6",
+                  "50"
+                ]
+              },
+              {
+                "at": [
+                  "12",
+                  "1250"
+                ]
+              },
+              {
+                "at": [
+                  "20",
+                  "2050"
+                ]
+              }
+            ],
+            "guides": [
+              {
+                "at": "6",
+                "label_key": "guide.segment"
+              },
+              {
+                "at": "12",
+                "label_key": "guide.segment"
+              }
             ]
           }
         }
@@ -154,10 +341,10 @@
             "params": {
               "n": "3",
               "seg": "3",
-              "t_ask": "18",
-              "t_total": "22",
-              "value": "1350",
-              "value_si": "27/2"
+              "t_ask": "16",
+              "t_total": "20",
+              "value": "1650",
+              "value_si": "33/2"
             }
           },
           "steps": [
@@ -168,21 +355,21 @@
             },
             {
               "label_key": "step.read_points",
-              "latex": "t = 18\\,\\text{s}",
+              "latex": "t = 16\\,\\text{s}",
               "note_key": null
             },
             {
               "label_key": "step.read_value",
-              "latex": "v = 1350\\,\\text{cm/s}",
+              "latex": "v = 1650\\,\\text{cm/s}",
               "note_key": null
             }
           ],
           "answer": {
-            "latex": "1350\\,\\text{cm/s}",
+            "latex": "1650\\,\\text{cm/s}",
             "kind": "scalar_with_unit",
             "payload": {
               "value": [
-                "1350"
+                "1650"
               ],
               "unit": [
                 "cm/s"
@@ -197,7 +384,7 @@
             "y_label": "trace.velocity",
             "domain": {
               "t_min": "0",
-              "t_max": "22"
+              "t_max": "20"
             },
             "traces": [
               {
@@ -206,23 +393,23 @@
                 "samples": [
                   [
                     "0",
-                    "300"
+                    "100"
                   ],
                   [
                     "3/2",
-                    "525/2"
+                    "175/2"
                   ],
                   [
                     "3",
-                    "225"
+                    "75"
                   ],
                   [
                     "9/2",
-                    "375/2"
+                    "125/2"
                   ],
                   [
                     "6",
-                    "150"
+                    "50"
                   ]
                 ]
               },
@@ -232,23 +419,23 @@
                 "samples": [
                   [
                     "6",
-                    "150"
+                    "50"
                   ],
                   [
-                    "8",
+                    "15/2",
                     "350"
                   ],
                   [
-                    "10",
-                    "550"
+                    "9",
+                    "650"
+                  ],
+                  [
+                    "21/2",
+                    "950"
                   ],
                   [
                     "12",
-                    "750"
-                  ],
-                  [
-                    "14",
-                    "950"
+                    "1250"
                   ]
                 ]
               },
@@ -257,24 +444,24 @@
                 "kind": "accelerate",
                 "samples": [
                   [
+                    "12",
+                    "1250"
+                  ],
+                  [
                     "14",
-                    "950"
+                    "1450"
                   ],
                   [
                     "16",
-                    "1150"
+                    "1650"
                   ],
                   [
                     "18",
-                    "1350"
+                    "1850"
                   ],
                   [
                     "20",
-                    "1550"
-                  ],
-                  [
-                    "22",
-                    "1750"
+                    "2050"
                   ]
                 ]
               }
@@ -283,28 +470,28 @@
               {
                 "at": [
                   "0",
-                  "300"
+                  "100"
                 ],
                 "kind": "decelerate"
               },
               {
                 "at": [
                   "6",
-                  "150"
+                  "50"
                 ],
                 "kind": "decelerate"
               },
               {
                 "at": [
-                  "14",
-                  "950"
+                  "12",
+                  "1250"
                 ],
                 "kind": "accelerate"
               },
               {
                 "at": [
-                  "22",
-                  "1750"
+                  "20",
+                  "2050"
                 ],
                 "kind": "accelerate"
               }
@@ -313,8 +500,8 @@
               {
                 "label_key": "marker.asked_instant",
                 "at": [
-                  "18",
-                  "1350"
+                  "16",
+                  "1650"
                 ]
               }
             ],
@@ -324,7 +511,7 @@
                 "label_key": "guide.segment"
               },
               {
-                "at": "14",
+                "at": "12",
                 "label_key": "guide.segment"
               }
             ],
@@ -339,13 +526,13 @@
                 "label_key": "phase.accelerated",
                 "kind": "accelerate",
                 "t_from": "6",
-                "t_to": "14"
+                "t_to": "12"
               },
               {
                 "label_key": "phase.accelerated",
                 "kind": "accelerate",
-                "t_from": "14",
-                "t_to": "22"
+                "t_from": "12",
+                "t_to": "20"
               }
             ]
           }

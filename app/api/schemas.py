@@ -82,8 +82,8 @@ class PageInfo(BaseModel):
     label_key: str
     # how many exercises one click produces; null leaves the choice to the client
     count: int | None = None
-    # false on a page read by the teacher: there is no student to state the problem to
-    show_statement: bool = True
+    # true on a page read by the teacher: the card is the graph and nothing else
+    bare_graph: bool = False
     config: list[ConfigControl] = []
     defaults: dict = {}
 

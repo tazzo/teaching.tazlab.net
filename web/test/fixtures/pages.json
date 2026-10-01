@@ -28,7 +28,7 @@
       ],
       "label_key": "page.cinematica.graph_reading",
       "count": 1,
-      "show_statement": false,
+      "bare_graph": true,
       "config": [
         {
           "id": "count",
@@ -148,7 +148,7 @@
       ],
       "label_key": "page.cinematica.graph_filling",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -166,7 +166,7 @@
       ],
       "label_key": "page.cinematica.problems",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -184,7 +184,7 @@
       ],
       "label_key": "page.cinematica.accelerated_problems",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -202,7 +202,7 @@
       ],
       "label_key": "page.cinematica.accelerated_graphs",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -220,7 +220,7 @@
       ],
       "label_key": "page.cinematica.multiphase_problems",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -238,7 +238,7 @@
       ],
       "label_key": "page.cinematica.multiphase_graphs",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -256,7 +256,7 @@
       ],
       "label_key": "page.cinematica.relative_problems",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -274,7 +274,7 @@
       ],
       "label_key": "page.cinematica.relative_graphs",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -292,7 +292,7 @@
       ],
       "label_key": "page.cinematica.circular_problems",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -310,7 +310,7 @@
       ],
       "label_key": "page.equazioni.first_degree",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -328,7 +328,7 @@
       ],
       "label_key": "page.equazioni.second_degree",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -346,7 +346,7 @@
       ],
       "label_key": "page.equazioni.fractional",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -364,7 +364,7 @@
       ],
       "label_key": "page.disequazioni.first_degree",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -382,7 +382,7 @@
       ],
       "label_key": "page.disequazioni.second_degree",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -400,7 +400,7 @@
       ],
       "label_key": "page.disequazioni.rational",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -418,7 +418,7 @@
       ],
       "label_key": "page.sistemi.linear",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -435,7 +435,7 @@
       ],
       "label_key": "page.sistemi.linear_quadratic",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     },
@@ -453,7 +453,7 @@
       ],
       "label_key": "page.sistemi.inequalities",
       "count": null,
-      "show_statement": true,
+      "bare_graph": false,
       "config": [],
       "defaults": {}
     }

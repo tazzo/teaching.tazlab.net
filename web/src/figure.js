@@ -151,13 +151,15 @@ export function renderFigure(container, figure, strings) {
   let [xMin, xMax] = extent(xs.length ? xs : [domain.t_min ?? "0", domain.t_max ?? "1"]);
   // A hidden figure carries the intended y scale so the student's grid is meaningful.
   let [yMin, yMax] = extent(ys.length ? ys : figure.y_range ?? ["0", "1"]);
-  // "corner" figures start at zero: no negative time, so the axes meet in the bottom-left.
-  // The padding stays on EVERY side, because JSXGraph draws tick numbers *outside* the
-  // axes: with the viewport ending exactly at zero they are clipped away and the graph
-  // loses its scale (observed live: an empty-looking plot with a correct legend).
+  // "corner" says the *time* never goes negative, so the x axis starts at zero and the
+  // two axes meet at the left. The value on the y axis is signed — a motion running the
+  // other way is drawn below the axis, a body at rest on it — so the zero line is always
+  // inside the plot box: the sign of the quantity is part of what the student reads, and
+  // a curve clipped at the edge (or an axis drawn where there is no data) says nothing.
   const corner = figure.origin === "corner";
   xMin = corner ? 0 : Math.min(0, xMin);
-  yMin = corner ? 0 : Math.min(0, yMin);
+  yMin = Math.min(0, yMin);
+  yMax = Math.max(0, yMax);
   const padX = (xMax - xMin || 1) * PAD;
   const padY = (yMax - yMin || 1) * PAD;
 
@@ -181,7 +183,10 @@ export function renderFigure(container, figure, strings) {
       y: {
         name: `${quantity ? `${quantity} ` : ""}[${figure.y_unit}]`,
         withLabel: true,
-        label: { position: "rt", offset: [14, -12], fontSize: AXIS_FONT },
+        // The name sits *above* the top of the axis, never inside the plot: a motion
+        // running the other way starts at the top-left corner, and a label printed over
+        // the curve there is a graph a student has to read twice.
+        label: { position: "rt", offset: [14, 12], fontSize: AXIS_FONT },
         ticks: { label: { fontSize: GRAPH_FONT }, strokeColor: "#57606a" },
       },
     },

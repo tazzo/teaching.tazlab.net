@@ -19,7 +19,7 @@ from fractions import Fraction
 import pytest
 
 from app.core.rng import make_rng
-from app.core.units import fmt_reading
+from app.core.units import fmt, fmt_reading
 from app.generators.physics.segments import (
     ACCELERATION,
     ACCELERATE,
@@ -125,7 +125,11 @@ def test_a_velocity_reading_lied_about_on_the_graph_is_rejected():
 
 
 def test_the_figure_starts_at_the_origin_with_no_negative_time():
-    """The operator's rule: graphs run from zero, so the axes meet in the bottom-left corner."""
+    """The operator's rule: time never runs backwards, so the graph starts at zero.
+
+    The *value* on the y axis is a different matter: a motion running the other way is
+    drawn below the axis and a body at rest on it, so only the time axis is pinned.
+    """
     for kinds, quantity, system, ask in combinations():
         item = make(kinds, quantity, system.id, ask, seed=13)
         assert item.figure["origin"] == "corner"
@@ -133,8 +137,8 @@ def test_the_figure_starts_at_the_origin_with_no_negative_time():
         first_times = [trace["samples"][0][0] for trace in item.figure["traces"]]
         assert first_times[0] == "0"
         for trace in item.figure["traces"]:
-            values = [Fraction(value) for _, value in trace["samples"]]
-            assert all(value >= 0 for value in values), "no negative speed or position is drawn"
+            times = [Fraction(time) for time, _ in trace["samples"]]
+            assert min(times) >= 0, "no stretch is drawn before the origin"
 
 
 def test_the_segments_are_drawn_as_separate_traces_with_a_guide_between_them():
@@ -160,10 +164,13 @@ def test_the_segments_are_continuous_where_they_meet():
 
 
 def test_a_decelerating_segment_always_slows_down():
-    """A segment labelled "moto decelerato" that draws flat is a graph that lies about itself.
+    """A stretch labelled "moto decelerato" that draws flat is a graph that lies about itself.
 
-    On a velocity graph that means the curve falls; on a position graph the speed is the
-    *slope*, so the second half of the segment has to climb less steeply than the first.
+    The kind names what the *speed* does, so the test reads the speed and not the sign of
+    the line: a motion running the other way approaches the time axis from below while it
+    slows down. On a velocity graph that is the magnitude of the drawn value; on a position
+    graph the speed is the *slope*, so the second half has to climb less steeply than the
+    first.
     """
     for kinds, quantity, system, ask in combinations():
         item = make(kinds, quantity, system.id, ask, seed=23)
@@ -174,11 +181,30 @@ def test_a_decelerating_segment_always_slows_down():
             samples = [(Fraction(x), Fraction(y)) for x, y in trace["samples"]]
             first, middle, last = samples[0], samples[len(samples) // 2], samples[-1]
             if positions:
-                early = (middle[1] - first[1]) / (middle[0] - first[0])
-                late = (last[1] - middle[1]) / (last[0] - middle[0])
+                early = abs((middle[1] - first[1]) / (middle[0] - first[0]))
+                late = abs((last[1] - middle[1]) / (last[0] - middle[0]))
                 assert late < early, f"the speed did not fall: {trace['samples']}"
             else:
-                assert last[1] < first[1], f"a decelerating segment did not slow down: {samples}"
+                assert abs(last[1]) < abs(first[1]), (
+                    f"a decelerating stretch did not slow down: {samples}")
+
+
+def test_a_stretch_that_turns_back_is_rejected():
+    """The invariant the area and the slope readings rest on: one motion, one direction.
+
+    Without it a stretch that reverses would be drawn as two motions and every reading off
+    it — the space it covers, the velocity at an instant — would describe another one.
+    """
+    item = make([ACCELERATE, UNIFORM, UNIFORM], VELOCITY, SI_SYSTEM.id, VELOCITY_AT, seed=6)
+    trace = item.figure["traces"][0]
+    samples = [list(sample) for sample in trace["samples"]]
+    entry, exit_ = Fraction(samples[0][1]), Fraction(samples[-1][1])
+    # one sample on the far side of the entry value, in a stretch that only moves one way
+    samples[2][1] = fmt(entry - 4 if exit_ > entry else entry + 4)
+    traces = [dict(trace, samples=samples), *item.figure["traces"][1:]]
+    result = TOPIC.verify(type(item)(**{**item.__dict__, "figure": {**item.figure, "traces": traces}}))
+    assert not result.ok
+    assert "stretch_reverses" in (result.reason or "")
 
 
 def test_an_acceleration_question_on_a_uniform_motion_is_refused_with_a_reason():
@@ -273,3 +299,85 @@ def test_a_velocity_read_off_a_converted_position_graph_is_labelled_with_its_own
 def test_no_float_reaches_the_item():
     item = make([ACCELERATE, DECELERATE, UNIFORM], POSITION, RANDOM, ACCELERATION, seed=4)
     assert all(isinstance(value, Fraction) for value in item.params.values())
+
+
+def uniform_stretches(items):
+    """Every (item, stretch) whose velocity is drawn constant, with its drawn values."""
+    for item in items:
+        for trace in item.figure["traces"]:
+            if trace["kind"] == UNIFORM:
+                yield item, [Fraction(value) for _, value in trace["samples"]]
+
+
+def random_motion(seed, quantity=VELOCITY, ask=DISTANCE, count=4, kinds=None):
+    return TOPIC.generate(make_rng(seed, TOPIC.id, "easy", 0), "easy", seed, 0,
+                          {"count": count, "kinds": kinds or [RANDOM] * count,
+                           "quantity": quantity, "units": SI_SYSTEM.id, "ask": ask})
+
+
+def space_shown_by(item) -> Fraction:
+    """The space the drawn graph covers, read off it a second way than the generator did.
+
+    On a position graph the curve's rise or fall per stretch; on a velocity graph the area
+    under each stretch, in magnitude. Both are exact because a stretch never reverses.
+    """
+    total = Fraction(0)
+    for trace in item.figure["traces"]:
+        samples = [(Fraction(x), Fraction(y)) for x, y in trace["samples"]]
+        if item.figure["y_label"] == "trace.position":
+            total += abs(samples[-1][1] - samples[0][1])
+        else:
+            for (x1, y1), (x2, y2) in zip(samples, samples[1:]):
+                total += abs((x2 - x1) * (y1 + y2) / 2)
+    return total
+
+
+def test_a_uniform_stretch_is_drawn_below_the_time_axis_sometimes():
+    """The operator's ask: a uniform stretch reads a negative velocity as readily as a
+    positive one, so the student has to look at which side of the axis it sits on."""
+    items = [random_motion(seed) for seed in range(1, 30)]
+    below = [values for _, values in uniform_stretches(items) if all(v < 0 for v in values)]
+    assert below, "no uniform stretch was ever drawn with a negative velocity"
+    for item in items:
+        signs = {Fraction(value) > 0 for trace in item.figure["traces"]
+                 for _, value in trace["samples"] if Fraction(value) != 0}
+        assert len(signs) <= 1, f"one motion keeps one direction: {item.figure['traces']}"
+
+
+def test_a_uniform_stretch_stands_still_sometimes():
+    """The other half of the ask: a body at rest for a stretch is a flat line *on* the axis,
+    which is a reading a student makes and not a graph with nothing on it."""
+    items = [random_motion(seed) for seed in range(1, 200)]
+    at_rest = [values for _, values in uniform_stretches(items) if all(v == 0 for v in values)]
+    assert at_rest, "no uniform stretch was ever drawn at v = 0"
+    for item, _ in uniform_stretches(items):
+        assert TOPIC.verify(item).ok
+
+
+@pytest.mark.parametrize("quantity", [VELOCITY, POSITION])
+def test_the_space_covered_is_a_length_whatever_the_direction(quantity):
+    """"Spazio totale percorso" is ground covered, not a signed displacement: a motion that
+    runs the other way has covered just as much, and an answer with a minus on it would be
+    a length nobody walked."""
+    for seed in range(1, 60):
+        item = random_motion(seed, quantity=quantity)
+        covered = Fraction(item.answer.payload["value"][0])
+        assert covered >= 0, f"seed {seed}: a distance cannot be negative ({covered})"
+        assert covered == space_shown_by(item), (
+            f"seed {seed}: the answer is not the space the graph shows")
+
+
+def test_a_backwards_motion_reads_its_distance_off_the_position_graph_too():
+    """The same exercise on the other axis: a falling curve covers the same ground, and the
+    derivation has to say it is reading a magnitude rather than a signed displacement."""
+    for seed in range(1, 200):
+        item = random_motion(seed, quantity=POSITION)
+        values = [Fraction(value) for trace in item.figure["traces"]
+                  for _, value in trace["samples"]]
+        if min(values) >= 0:
+            continue
+        covered = Fraction(item.answer.payload["value"][0])
+        assert covered == space_shown_by(item) > 0
+        assert any(step.label_key == "step.read_path" for step in item.steps)
+        return
+    raise AssertionError("no motion was ever drawn running the other way")

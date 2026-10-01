@@ -344,7 +344,11 @@ def _figure_html(figure: Mapping[str, Any], strings: Mapping[str, str]) -> str:
     ts = [t for _, points in traces for t, _ in points] + [t for _, t, _ in markers]
     ss = [s for _, points in traces for _, s in points] + [s for _, _, s in markers]
     x_low, x_high, x_ticks = _axis(min(t_min, *ts), max(t_max, *ts))
-    y_low, y_high, y_ticks = _axis(min(Fraction(0), *ss), max(ss))
+    # The measured quantity is signed — a motion running the other way is drawn below the
+    # axis — so the plot always contains the zero line, and the time axis is drawn *there*
+    # rather than at the foot of the box: an axis line under a curve that never reaches it
+    # would put the whole graph on one side of a line that means nothing.
+    y_low, y_high, y_ticks = _axis(min(Fraction(0), *ss), max(Fraction(0), *ss))
 
     left, right, top = _PLOT_LEFT, _SVG_W - _PLOT_RIGHT, _PLOT_TOP
     bottom = _SVG_H - _PLOT_BOTTOM
@@ -376,7 +380,8 @@ def _figure_html(figure: Mapping[str, Any], strings: Mapping[str, str]) -> str:
             f'{_tick_label(tick)}</text>'
         )
     parts.append(f'<line x1="{left}" y1="{top}" x2="{left}" y2="{bottom}" stroke="#333" stroke-width="2"/>')
-    parts.append(f'<line x1="{left}" y1="{bottom}" x2="{right}" y2="{bottom}" stroke="#333" stroke-width="2"/>')
+    parts.append(f'<line x1="{left}" y1="{_q(to_y(Fraction(0)))}" x2="{right}" '
+                 f'y2="{_q(to_y(Fraction(0)))}" stroke="#333" stroke-width="2"/>')
     # Axis names sit on the axes themselves, as in web/src/figure.js (`defaultAxes`):
     # the x axis gets "t [s]" on its own line under the tick numbers, the y axis its
     # unit from the payload above the top tick.
