@@ -356,7 +356,7 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
 class PresentPerfectTopic:
     id = "english.grammar.present_perfect"
     family = "english"
-    difficulties = ("easy", "medium")
+    difficulties = ("easy", "medium", "hard")
     label_key = "topic.english_present_perfect"
     scenarios: tuple[str, ...] = ()
 

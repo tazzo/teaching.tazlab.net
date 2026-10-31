@@ -358,7 +358,7 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
 class RelativeClausesTopic:
     id = "english.grammar.relative_clauses"
     family = "english"
-    difficulties = ("easy", "medium")
+    difficulties = ("easy", "medium", "hard")
     label_key = "topic.english_relative_clauses"
     scenarios: tuple[str, ...] = ()
 

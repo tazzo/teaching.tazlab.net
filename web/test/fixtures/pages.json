@@ -470,7 +470,8 @@
       "difficulty": null,
       "difficulties": [
         "easy",
-        "medium"
+        "medium",
+        "hard"
       ],
       "label_key": "page.english.present_perfect",
       "count": null,
@@ -487,7 +488,8 @@
       "difficulty": null,
       "difficulties": [
         "easy",
-        "medium"
+        "medium",
+        "hard"
       ],
       "label_key": "page.english.relative_clauses",
       "count": null,

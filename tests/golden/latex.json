@@ -5,6 +5,12 @@
     "\\textbf{has just arrived}",
     "\\textbf{has just arrived}"
   ],
+  "english.grammar.present_perfect|hard": [
+    "\\text{Unfinished work in progress ('almost ready') since last year.}",
+    "\\text{Continuous development of an ongoing project takes Present Perfect Continuous.}",
+    "\\textbf{has been developing}",
+    "\\textbf{has been developing}"
+  ],
   "english.grammar.present_perfect|medium": [
     "\\text{Question with 'How long' about an ongoing process.}",
     "\\text{Ask 'How long' with Present Perfect Continuous to inquire about the duration of an ongoing action.}",
@@ -16,6 +22,12 @@
     "\\text{Use 'which' for non-defining clauses about things; 'that' is never used between commas.}",
     "\\textbf{which}",
     "\\textbf{which}"
+  ],
+  "english.grammar.relative_clauses|hard": [
+    "\\text{Subject of the verb 'stays' following indefinite pronoun 'any supermarket'.}",
+    "\\text{Places acting as the subject of an action take 'that' or 'which', not 'where'.}",
+    "\\textbf{that}",
+    "\\textbf{that}"
   ],
   "english.grammar.relative_clauses|medium": [
     "\\text{Non-defining clause between commas with a person as grammatical subject.}",
