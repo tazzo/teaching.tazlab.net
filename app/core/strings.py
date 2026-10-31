@@ -48,7 +48,9 @@ def render_template(template: str, params: dict[str, str]) -> str:
 
     def _signed(value: str) -> str:
         negative = value.startswith("-")
-        return f"{'\u2212' if negative else '+'} {value[1:] if negative else value}"
+        sign = "\u2212" if negative else "+"
+        val = value[1:] if negative else value
+        return f"{sign} {val}"
 
     out = re.sub(r"\{\+(\w+)\}", lambda m: _signed(str(params.get(m.group(1), "?"))), template)
     out = re.sub(r"\{\*(\w+)\}", lambda m: _coefficient(str(params.get(m.group(1), "?"))), out)

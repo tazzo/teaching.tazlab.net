@@ -448,9 +448,12 @@ def _build(items: Sequence[Any], answers: bool, strings: Mapping[str, str]) -> t
 
     built = []
     for number, item in enumerate(items, start=1):
+        payload = getattr(item.answer, "payload", {}) or {}
+        options = payload.get("options") if getattr(item.answer, "kind", "") == "multiple_choice" else None
         built.append({
             "number": number,
             "statement": _statement(item, strings),
+            "options": options,
             "figure": _figure_html(item.figure, strings) if item.figure else "",
             "steps": [
                 {

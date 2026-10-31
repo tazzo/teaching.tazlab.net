@@ -168,3 +168,17 @@ body {
 .key .katex-display > .katex {
   text-align: left;
 }
+
+.options {
+  margin: 2mm 0 2mm 8mm;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 1.5mm;
+  column-gap: 4mm;
+  font-size: 10pt;
+}
+
+.options li {
+  margin-left: 4mm;
+}

@@ -63,12 +63,18 @@ def _from_wire(topic_id: str, difficulty: str, seed: int, wire: WireItem) -> Ite
     Posted items are untrusted input on a public, ungated endpoint: they are never
     rendered straight to PDF (STRUCTURE §4.4).
     """
+    def _parse_param(val: str):
+        try:
+            return Fraction(val)
+        except (ValueError, ZeroDivisionError):
+            return val
+
     return Item(
         topic=topic_id,
         difficulty=difficulty,
         seed=seed,
         index=wire.index,
-        params={key: Fraction(value) for key, value in wire.statement.params.items()},
+        params={key: _parse_param(value) for key, value in wire.statement.params.items()},
         statement_key=wire.statement.key,
         steps=tuple(Step(s.label_key, s.latex, s.note_key) for s in wire.steps),
         answer=Answer(
@@ -138,30 +144,27 @@ def _bare_figure(figure: dict) -> dict:
     }
 
 
-def _configurer(topic) -> list[dict]:
-    """The topic's own description of its configurator; topics without one return []."""
-    configurer = getattr(topic, "configurer", None)
-    return configurer() if configurer is not None else []
-
-
 @router.get("/pages", response_model=PagesResponse)
 async def pages() -> PagesResponse:
-    """The information architecture: macros -> sub-topics -> pages."""
-    known = set(TOPICS)
-    available = [p for p in PAGES if p.topic in known]
+    """The information architecture: macros -> sub-topics -> pages.
+
+    Pages whose topic is not in the registry are dropped silently: a page declaration
+    can ship before its topic implementation lands, and an unfinished page does not
+    reach the menu.
+    """
+    available = [p for p in PAGES if p.topic in TOPICS]
     return PagesResponse(
         macros=[m for m in MACROS if any(p.macro == m for p in available)],
         subs={m: [s for s in subs(m) if pages_for(m, s)] for m in MACROS},
         pages=[
-            PageInfo(id=p.id, macro=p.macro, sub=p.sub, kind=p.kind, topic=p.topic,
-                     difficulty=p.difficulty,
-                     difficulties=list(TOPICS[p.topic].difficulties) if p.topic in known else [],
-                     label_key=p.label_key, count=p.count, bare_graph=p.bare_graph,
-                     # the configurator a page exposes, described by its own topic
-                     config=(_configurer(TOPICS[p.topic]) if p.configurable and p.topic in known
-                             else []),
-                     defaults=(TOPICS[p.topic].default_options()
-                               if p.configurable and p.topic in known
+            PageInfo(
+                id=p.id, macro=p.macro, sub=p.sub, kind=p.kind, topic=p.topic,
+                difficulty=p.difficulty,
+                difficulties=list(TOPICS[p.topic].difficulties) if p.topic in TOPICS else [],
+                label_key=p.label_key, count=p.count, bare_graph=p.bare_graph,
+                config=TOPICS[p.topic].configurer() if p.configurable
+                       and hasattr(TOPICS[p.topic], "configurer") else [],
+                defaults=(TOPICS[p.topic].default_options() if p.configurable
                                and hasattr(TOPICS[p.topic], "default_options") else {}))
             for p in available
         ],
@@ -179,7 +182,7 @@ async def catalog() -> Catalog:
             scenarios=list(getattr(topic, "scenarios", ())),
             # a topic with a figure belongs to the graph area too; the figure is a
             # property of the generated item, so only the family can decide it here
-            modes=["problemi", "grafici"] if topic.family == "physics" else ["problemi"],
+            modes=["problemi", "grafici"] if topic.family == "physics" else ["esercizi"] if topic.family == "english" else ["problemi"],
         )
         for topic in sorted(TOPICS.values(), key=lambda item: item.id)
     ]

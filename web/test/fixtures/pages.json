@@ -1,7 +1,8 @@
 {
   "macros": [
     "matematica",
-    "fisica"
+    "fisica",
+    "english"
   ],
   "subs": {
     "matematica": [
@@ -11,6 +12,9 @@
     ],
     "fisica": [
       "cinematica"
+    ],
+    "english": [
+      "grammatica"
     ]
   },
   "pages": [
@@ -452,6 +456,40 @@
         "hard"
       ],
       "label_key": "page.sistemi.inequalities",
+      "count": null,
+      "bare_graph": false,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "english-present-perfect",
+      "macro": "english",
+      "sub": "grammatica",
+      "kind": "multiple_choice",
+      "topic": "english.grammar.present_perfect",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium"
+      ],
+      "label_key": "page.english.present_perfect",
+      "count": null,
+      "bare_graph": false,
+      "config": [],
+      "defaults": {}
+    },
+    {
+      "id": "english-relative-clauses",
+      "macro": "english",
+      "sub": "grammatica",
+      "kind": "multiple_choice",
+      "topic": "english.grammar.relative_clauses",
+      "difficulty": null,
+      "difficulties": [
+        "easy",
+        "medium"
+      ],
+      "label_key": "page.english.relative_clauses",
       "count": null,
       "bare_graph": false,
       "config": [],

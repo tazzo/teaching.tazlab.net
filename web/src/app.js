@@ -239,8 +239,22 @@ function renderPage(macro, sub, page) {
 }
 
 // ---------------------------------------------------------------------- shell
+function renderTopnav(currentMacro) {
+  const nav = document.getElementById("topnav");
+  if (!nav) return;
+  nav.replaceChildren(
+    ...(state.nav?.macros ?? []).map((macro) => {
+      const a = el("a", null, t(`macro.${macro}`, macro));
+      a.href = href(macro);
+      if (macro === currentMacro) a.classList.add("active");
+      return a;
+    })
+  );
+}
+
 function render() {
   const route = parseRoute();
+  renderTopnav(route.macro);
   const host = document.getElementById("view");
   let content;
   if (!route.macro) content = renderHome();

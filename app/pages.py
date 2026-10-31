@@ -1,11 +1,12 @@
 """The page catalogue: the site's information architecture (three levels).
 
-    macro (Matematica | Fisica)
-      └─ sub (Equazioni, Disequazioni, Cinematica, ...)
+    macro (Matematica | Fisica | English)
+      └─ sub (Equazioni, Disequazioni, Cinematica, Grammatica, ...)
            └─ page — a *kind of exercise* with its own layout:
                 problem        statement + steps + answer
                 graph_reading  a graph is shown and the answer is read off it
                 graph_filling  the data are given and the student fills an EMPTY graph
+                multiple_choice fill-in-the-blank with multiple choice options
 
 A page binds a kind to a topic (and optionally a difficulty), because the same
 generator can be presented in different ways: reading a graph and completing one use
@@ -23,13 +24,14 @@ from dataclasses import dataclass
 PROBLEM = "problem"
 GRAPH_READING = "graph_reading"
 GRAPH_FILLING = "graph_filling"
-KINDS = (PROBLEM, GRAPH_READING, GRAPH_FILLING)
+MULTIPLE_CHOICE = "multiple_choice"
+KINDS = (PROBLEM, GRAPH_READING, GRAPH_FILLING, MULTIPLE_CHOICE)
 
 
 @dataclass(frozen=True)
 class Page:
     id: str
-    macro: str            # "matematica" | "fisica"
+    macro: str            # "matematica" | "fisica" | "english"
     sub: str              # sub-topic slug
     kind: str             # one of KINDS
     topic: str            # the generator that backs it
@@ -96,9 +98,14 @@ PAGES: tuple[Page, ...] = (
          "math.systems.linear_quadratic", None, "page.sistemi.linear_quadratic", 20),
     Page("sistemi-disequazioni", "matematica", "sistemi", PROBLEM,
          "math.systems.inequalities_2x2", None, "page.sistemi.inequalities", 30),
+    # --- English / Grammatica ------------------------------------------------
+    Page("english-present-perfect", "english", "grammatica", MULTIPLE_CHOICE,
+         "english.grammar.present_perfect", None, "page.english.present_perfect", 10),
+    Page("english-relative-clauses", "english", "grammatica", MULTIPLE_CHOICE,
+         "english.grammar.relative_clauses", None, "page.english.relative_clauses", 20),
 )
 
-MACROS: tuple[str, ...] = ("matematica", "fisica")
+MACROS: tuple[str, ...] = ("matematica", "fisica", "english")
 
 
 def subs(macro: str) -> list[str]:

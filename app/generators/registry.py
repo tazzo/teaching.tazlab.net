@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from app.generators.english.present_perfect import TOPIC as PRESENT_PERFECT
+from app.generators.english.relative_clauses import TOPIC as RELATIVE_CLAUSES
 from app.generators.math.first_degree import TOPIC as FIRST_DEGREE
 from app.generators.math.fractional import TOPIC as FRACTIONAL
 from app.generators.math.inequalities import TOPICS as INEQUALITY_TOPICS
@@ -20,13 +22,16 @@ from app.generators.physics.uniform import TOPIC as UNIFORM
 
 class Topic(Protocol):
     id: str
-    family: str          # "math" | "physics"
+    family: str          # "math" | "physics" | "english"
     difficulties: tuple[str, ...]
     label_key: str
     scenarios: tuple[str, ...]
 
 
 TOPICS: dict[str, Topic] = {
+    # english — grammar
+    PRESENT_PERFECT.id: PRESENT_PERFECT,
+    RELATIVE_CLAUSES.id: RELATIVE_CLAUSES,
     # mathematics — equations
     FIRST_DEGREE.id: FIRST_DEGREE,
     SECOND_DEGREE.id: SECOND_DEGREE,

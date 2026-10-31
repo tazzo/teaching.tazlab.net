@@ -35,6 +35,13 @@
 <article class="exercise">
   <header class="exercise-header"><span class="badge">{{ item.number }}</span></header>
   <p class="statement">{{ item.statement }}</p>
+  {% if item.options %}
+  <ol class="options" type="A">
+    {% for option in item.options %}
+    <li>{{ option }}</li>
+    {% endfor %}
+  </ol>
+  {% endif %}
   {% if item.figure %}<div class="figure">{{ item.figure | safe }}</div>{% endif %}
 </article>
 {% endfor %}

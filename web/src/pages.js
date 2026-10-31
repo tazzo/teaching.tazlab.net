@@ -192,11 +192,137 @@ export function renderGraphFillingPage(item, index, context) {
   return card;
 }
 
+/**
+ * kind: multiple_choice — multiple choice fill-in-the-blank question with instant feedback.
+ */
+export function renderMultipleChoicePage(item, index, context) {
+  const { strings } = context;
+  const t = translate(strings);
+  const card = el("article", "card multiple-choice-card");
+  const { header, statement } = cardHeader(item, index);
+  statement.append(renderText(t(item.statement.key, item.statement.key), item.statement.params));
+  header.append(statement);
+  card.append(header);
+
+  const payload = item.answer?.payload ?? {};
+  const options = payload.options ?? [];
+  const correctAnswer = payload.correct?.[0] ?? "";
+  const explanation = payload.explanation?.[0] ?? "";
+
+  const choiceList = el("div", "choice-list");
+  choiceList.setAttribute("role", "radiogroup");
+
+  const letters = ["A", "B", "C", "D", "E", "F"];
+  let selectedOption = null;
+  const optionButtons = [];
+
+  const status = el("div", "choice-status");
+
+  options.forEach((optText, optIndex) => {
+    const btn = el("button", "choice-option");
+    btn.type = "button";
+    btn.setAttribute("role", "radio");
+    btn.setAttribute("aria-checked", "false");
+
+    const letterSpan = el("span", "choice-letter", letters[optIndex] ?? String(optIndex + 1));
+    const textSpan = el("span", "choice-text", optText);
+    btn.append(letterSpan, textSpan);
+
+    btn.addEventListener("click", () => {
+      if (card.dataset.checked === "true") return;
+      optionButtons.forEach((b) => {
+        b.classList.remove("selected");
+        b.setAttribute("aria-checked", "false");
+      });
+      btn.classList.add("selected");
+      btn.setAttribute("aria-checked", "true");
+      selectedOption = optText;
+      status.replaceChildren();
+      status.className = "choice-status";
+    });
+
+    optionButtons.push(btn);
+    choiceList.append(btn);
+  });
+
+  card.append(choiceList);
+
+  const actions = el("div", "page-actions");
+  const checkBtn = el("button", "btn btn-quiet", t("ui.check_answer", "Verifica"));
+  checkBtn.type = "button";
+  const retryBtn = el("button", "btn btn-quiet", t("ui.try_again", "Riprova"));
+  retryBtn.type = "button";
+  retryBtn.style.display = "none";
+  actions.append(checkBtn, retryBtn);
+  card.append(actions, status);
+
+  checkBtn.addEventListener("click", () => {
+    if (!selectedOption) {
+      status.textContent = t("ui.select_an_option", "Seleziona un'opzione prima di verificare.");
+      status.className = "choice-status bad";
+      return;
+    }
+
+    card.dataset.checked = "true";
+    checkBtn.style.display = "none";
+    retryBtn.style.display = "";
+
+    const isCorrect = selectedOption.trim() === correctAnswer.trim();
+    optionButtons.forEach((btn) => {
+      const btnText = btn.querySelector(".choice-text")?.textContent?.trim();
+      btn.disabled = true;
+      if (btnText === correctAnswer.trim()) {
+        btn.classList.add("choice-correct");
+      } else if (btn.classList.contains("selected")) {
+        btn.classList.add("choice-incorrect");
+      }
+    });
+
+    status.replaceChildren();
+    if (isCorrect) {
+      status.className = "choice-status good";
+      const badge = el("strong", "status-badge", `✓ ${t("ui.correct", "Corretto!")}`);
+      status.append(badge);
+    } else {
+      status.className = "choice-status bad";
+      const badge = el("strong", "status-badge", `✗ ${t("ui.incorrect", "Non corretto")}`);
+      status.append(badge);
+    }
+
+    if (explanation) {
+      const explP = el("p", "choice-explanation", explanation);
+      status.append(explP);
+    }
+  });
+
+  retryBtn.addEventListener("click", () => {
+    card.dataset.checked = "false";
+    selectedOption = null;
+    optionButtons.forEach((btn) => {
+      btn.disabled = false;
+      btn.classList.remove("selected", "choice-correct", "choice-incorrect");
+      btn.setAttribute("aria-checked", "false");
+    });
+    checkBtn.style.display = "";
+    retryBtn.style.display = "none";
+    status.replaceChildren();
+    status.className = "choice-status";
+  });
+
+  if (item.steps && item.steps.length) {
+    card.append(stepsBlock(item, t));
+  }
+
+  return card;
+}
+
 const RENDERERS = {
   problem: renderProblemPage,
   graph_reading: renderGraphReadingPage,
   graph_filling: renderGraphFillingPage,
+  multiple_choice: renderMultipleChoicePage,
 };
+
 
 export function renderItemForKind(kind, item, index, context) {
   const renderer = RENDERERS[kind] ?? renderProblemPage;

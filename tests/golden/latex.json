@@ -1,4 +1,28 @@
 {
+  "english.grammar.present_perfect|easy": [
+    "\\text{'Just' signaling very recent completion.}",
+    "\\text{Use Present Perfect Simple with 'just' for an action completed moments before speaking.}",
+    "\\textbf{has just arrived}",
+    "\\textbf{has just arrived}"
+  ],
+  "english.grammar.present_perfect|medium": [
+    "\\text{Question with 'How long' about an ongoing process.}",
+    "\\text{Ask 'How long' with Present Perfect Continuous to inquire about the duration of an ongoing action.}",
+    "\\textbf{have you been learning}",
+    "\\textbf{have you been learning}"
+  ],
+  "english.grammar.relative_clauses|easy": [
+    "\\text{Non-defining clause with commas with the hotel as subject of 'had'.}",
+    "\\text{Use 'which' for non-defining clauses about things; 'that' is never used between commas.}",
+    "\\textbf{which}",
+    "\\textbf{which}"
+  ],
+  "english.grammar.relative_clauses|medium": [
+    "\\text{Non-defining clause between commas with a person as grammatical subject.}",
+    "\\text{Always choose 'who' over 'that' when commas set off extra information about a person.}",
+    "\\textbf{who}",
+    "\\textbf{who}"
+  ],
   "math.equations.first_degree|easy": [
     "4 x = 20",
     "x = \\frac{20}{4}",
