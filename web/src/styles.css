@@ -349,8 +349,10 @@ a { color: var(--accent); text-underline-offset: 2px; }
   border-radius: var(--radius-md);
   padding: var(--space-5);
   box-shadow: var(--shadow-sm);
+  min-width: 0;
+  overflow-wrap: break-word;
 }
-.card-header { display: flex; gap: var(--space-3); align-items: baseline; }
+.card-header { display: flex; gap: var(--space-3); align-items: baseline; min-width: 0; }
 .badge {
   flex: 0 0 auto;
   padding: 0.05rem var(--space-2);
@@ -361,9 +363,9 @@ a { color: var(--accent); text-underline-offset: 2px; }
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.statement { margin: 0; font-size: var(--size-md); }
+.statement { margin: 0; font-size: var(--size-md); overflow-wrap: break-word; }
 
-.steps { margin: var(--space-4) 0 0; border-top: 1px solid var(--line); }
+.steps { margin: var(--space-4) 0 0; border-top: 1px solid var(--line); min-width: 0; }
 .steps > summary {
   display: flex;
   align-items: center;
@@ -391,9 +393,29 @@ a { color: var(--accent); text-underline-offset: 2px; }
   gap: var(--space-1) var(--space-3);
   align-items: baseline;
   padding: var(--space-2) 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .step + .step { border-top: 1px dashed var(--line); }
 .step-label { color: var(--muted); font-size: var(--size-sm); }
+.step-text {
+  display: inline-block;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.5;
+}
+.step-text.step-bold {
+  font-weight: 600;
+}
+.step .katex {
+  white-space: normal;
+}
+.step .katex-html {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
 
 .answer {
   display: flex;
@@ -446,6 +468,8 @@ a { color: var(--accent); text-underline-offset: 2px; }
   text-align: left;
   cursor: pointer;
   transition: all 0.15s ease;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .choice-option:hover:not(:disabled) {
   border-color: var(--line-strong);
@@ -504,6 +528,9 @@ a { color: var(--accent); text-underline-offset: 2px; }
 .choice-status {
   margin-top: var(--space-3);
   font-size: var(--size-sm);
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .choice-status.good {
   padding: var(--space-2) var(--space-3);
@@ -527,7 +554,10 @@ a { color: var(--accent); text-underline-offset: 2px; }
 .choice-explanation {
   margin: var(--space-1) 0 0;
   color: var(--ink);
-  line-height: 1.45;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* --- 7. graphs ------------------------------------------------------------ */

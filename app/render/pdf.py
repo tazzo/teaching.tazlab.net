@@ -72,12 +72,13 @@ const input = JSON.parse(readFileSync(0, "utf8"));
 const katex = (await import(pathToFileURL(input.katex).href)).default;
 const rendered = {};
 for (const [key, latex, display] of input.formulas) {
-  rendered[key] = katex.renderToString(latex, {
+  const html = katex.renderToString(latex, {
     displayMode: display,
     throwOnError: false,
     strict: false,
     output: "html",
   });
+  rendered[key] = html.replace(/ /g, " ");
 }
 process.stdout.write(JSON.stringify(rendered));
 """

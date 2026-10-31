@@ -204,6 +204,32 @@ function renderPage(macro, sub, page) {
   const status = el("p", "status");
   const results = el("main", "results");
 
+  // For multiple_choice grammar worksheets, show all questions immediately without
+  // needing random seed, count picker or clicking "Genera".
+  if (page.kind === "multiple_choice") {
+    const loadExercises = async () => {
+      status.textContent = t("ui.loading", "Caricamento...");
+      status.classList.remove("bad");
+      results.replaceChildren();
+      try {
+        const count = page.count ?? 20;
+        const difficulty = page.difficulty ?? "easy";
+        const items = await fetchItems(page.topic, difficulty, 1, count, "full", null);
+        status.textContent = "";
+        items.forEach((item, index) => {
+          results.append(renderItemForKind(page.kind, item, index, { strings, page }));
+        });
+      } catch (error) {
+        console.error("fetch failed", error);
+        status.textContent = `${t("ui.error")}: ${error?.message ?? error}`;
+        status.classList.add("bad");
+      }
+    };
+    loadExercises();
+    view.append(status, results);
+    return view;
+  }
+
   const { form, read } = controls(page, async ({ difficulty, seed, count, options }) => {
     status.textContent = t("ui.loading");
     status.classList.remove("bad");

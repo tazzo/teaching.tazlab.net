@@ -467,14 +467,14 @@
       "sub": "grammatica",
       "kind": "multiple_choice",
       "topic": "english.grammar.present_perfect",
-      "difficulty": null,
+      "difficulty": "easy",
       "difficulties": [
         "easy",
         "medium",
         "hard"
       ],
       "label_key": "page.english.present_perfect",
-      "count": null,
+      "count": 20,
       "bare_graph": false,
       "config": [],
       "defaults": {}
@@ -485,14 +485,14 @@
       "sub": "grammatica",
       "kind": "multiple_choice",
       "topic": "english.grammar.relative_clauses",
-      "difficulty": null,
+      "difficulty": "easy",
       "difficulties": [
         "easy",
         "medium",
         "hard"
       ],
       "label_key": "page.english.relative_clauses",
-      "count": null,
+      "count": 20,
       "bare_graph": false,
       "config": [],
       "defaults": {}

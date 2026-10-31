@@ -3,6 +3,22 @@ import katex from "katex";
 import "katex/dist/katex.min.css";
 
 export function renderFormula(latex, displayMode = false) {
+  if (typeof latex === "string") {
+    const textMatch = latex.match(/^\\text\{([\s\S]*)\}$/);
+    if (textMatch) {
+      const span = document.createElement("span");
+      span.className = "step-text";
+      span.textContent = textMatch[1];
+      return span;
+    }
+    const boldMatch = latex.match(/^\\textbf\{([\s\S]*)\}$/);
+    if (boldMatch) {
+      const strong = document.createElement("strong");
+      strong.className = "step-text step-bold";
+      strong.textContent = boldMatch[1];
+      return strong;
+    }
+  }
   const span = document.createElement("span");
   try {
     katex.render(latex, span, { displayMode, throwOnError: false, strict: false });

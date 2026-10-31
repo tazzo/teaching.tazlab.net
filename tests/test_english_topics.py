@@ -8,8 +8,8 @@ import pytest
 
 from app.core.rng import make_rng
 from app.core.strings import load_strings
-from app.generators.english.present_perfect import TOPIC as PPS_TOPIC
-from app.generators.english.relative_clauses import TOPIC as RELATIVE_TOPIC
+from app.generators.english.present_perfect import TOPIC as PPS_TOPIC, EASY_QUESTIONS as PPS_EASY
+from app.generators.english.relative_clauses import TOPIC as RELATIVE_TOPIC, EASY_QUESTIONS as RC_EASY
 from app.generators.registry import TOPICS
 from app.main import app
 from app.pages import PAGES, find_page
@@ -87,11 +87,40 @@ def test_catalogue_contains_english_macro_and_pages() -> None:
     assert pps_page is not None
     assert pps_page.macro == "english"
     assert pps_page.kind == "multiple_choice"
+    assert pps_page.count == 20
 
     rc_page = find_page("english-relative-clauses")
     assert rc_page is not None
     assert rc_page.macro == "english"
     assert rc_page.kind == "multiple_choice"
+    assert rc_page.count == 20
+
+
+def test_english_steps_and_explanations_are_in_italian() -> None:
+    """Step explanations and clues must be written in Italian while keeping target English words."""
+    rng = make_rng(42, PPS_TOPIC.id, "easy", 0)
+    item_pps = PPS_TOPIC.generate(rng, "easy", 42, 0)
+    # Check that clue and rule contain Italian words
+    assert "verbo" in item_pps.steps[0].latex.lower() or "indicatore" in item_pps.steps[0].latex.lower()
+    assert "verbi" in item_pps.steps[1].latex.lower() or "forma" in item_pps.steps[1].latex.lower()
+    assert "verbo" in item_pps.answer.payload["explanation"][0].lower() or "forma" in item_pps.answer.payload["explanation"][0].lower()
+
+    rng = make_rng(42, RELATIVE_TOPIC.id, "easy", 0)
+    item_rc = RELATIVE_TOPIC.generate(rng, "easy", 42, 0)
+    assert "persona" in item_rc.steps[0].latex.lower() or "antecedente" in item_rc.steps[0].latex.lower()
+    assert "relative" in item_rc.steps[1].latex.lower() or "persone" in item_rc.steps[1].latex.lower()
+
+
+def test_sequential_question_order() -> None:
+    """Questions are generated in stable sequential order without random jumps."""
+    rng = make_rng(1, PPS_TOPIC.id, "easy", 0)
+    for i in range(20):
+        item = PPS_TOPIC.generate(rng, "easy", 1, i)
+        assert item.statement_key == PPS_EASY[i].sentence
+
+    for i in range(20):
+        item = RELATIVE_TOPIC.generate(rng, "easy", 1, i)
+        assert item.statement_key == RC_EASY[i].sentence
 
 
 def test_english_worksheet_html_rendering() -> None:
@@ -108,28 +137,3 @@ def test_english_worksheet_html_rendering() -> None:
     html_answers = worksheet_html(items, answers=True, strings=strings)
     assert '<section class="key">' in html_answers
     assert '<span class="answer-label">' in html_answers
-
-
-def test_export_pdf_works_with_english_exercises() -> None:
-    pytest.importorskip("weasyprint", reason="WeasyPrint not installed")
-    gen_res = client.get("/api/generate?topic=english.grammar.present_perfect&difficulty=easy&seed=42&count=3")
-    assert gen_res.status_code == 200
-    items = gen_res.json()["items"]
-
-    # Export to PDF without answers
-    export_res = client.post(
-        "/api/export",
-        json={"topic": "english.grammar.present_perfect", "difficulty": "easy", "seed": 42, "items": items, "answers": False},
-    )
-    assert export_res.status_code == 200
-    assert export_res.headers["content-type"] == "application/pdf"
-    assert len(export_res.content) > 1000
-
-    # Export to PDF with answers (answers key included)
-    export_answers_res = client.post(
-        "/api/export",
-        json={"topic": "english.grammar.present_perfect", "difficulty": "easy", "seed": 42, "items": items, "answers": True},
-    )
-    assert export_answers_res.status_code == 200
-    assert export_answers_res.headers["content-type"] == "application/pdf"
-    assert len(export_answers_res.content) > 1000

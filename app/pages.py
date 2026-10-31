@@ -1,8 +1,8 @@
 """The page catalogue: the site's information architecture (three levels).
 
     macro (Matematica | Fisica | English)
-      └─ sub (Equazioni, Disequazioni, Cinematica, Grammatica, ...)
-           └─ page — a *kind of exercise* with its own layout:
+      └── sub (Equazioni, Disequazioni, Cinematica, Grammatica, ...)
+           └── page — a *kind of exercise* with its own layout:
                 problem        statement + steps + answer
                 graph_reading  a graph is shown and the answer is read off it
                 graph_filling  the data are given and the student fills an EMPTY graph
@@ -100,9 +100,9 @@ PAGES: tuple[Page, ...] = (
          "math.systems.inequalities_2x2", None, "page.sistemi.inequalities", 30),
     # --- English / Grammatica ------------------------------------------------
     Page("english-present-perfect", "english", "grammatica", MULTIPLE_CHOICE,
-         "english.grammar.present_perfect", None, "page.english.present_perfect", 10),
+         "english.grammar.present_perfect", "easy", "page.english.present_perfect", 10, count=20),
     Page("english-relative-clauses", "english", "grammatica", MULTIPLE_CHOICE,
-         "english.grammar.relative_clauses", None, "page.english.relative_clauses", 20),
+         "english.grammar.relative_clauses", "easy", "page.english.relative_clauses", 20, count=20),
 )
 
 MACROS: tuple[str, ...] = ("matematica", "fisica", "english")
