@@ -18,10 +18,10 @@ The grammar the exercise enforces (and that ``verify`` re-checks on every genera
   available and ``that`` is *forbidden*. ``that (non-defining)`` is therefore a plausible
   distractor that is always wrong.
 
-Every wrong option is wrong for one precise reason: either the pronoun does not fit the
-antecedent, or the classification contradicts the commas (or both). Several questions
-turn on the comma alone — the same pronoun is offered twice, once per classification,
-and only the punctuation decides.
+Every explanation says *why* the classification is what it is before it says which pronoun
+goes in the blank, and names why the tempting option fails — in particular the twin that
+has the right pronoun and the wrong classification. The clue carries the diagnostic signal
+and never the answer: it names no pronoun. Several questions turn on the comma alone.
 """
 
 from __future__ import annotations
@@ -47,6 +47,8 @@ class QuestionSpec(NamedTuple):
 OPTION_SHAPE = re.compile(r"^(who|which|that|whose|where) \((non-defining|defining)\)$")
 #: The blank the student fills; the exercise text uses six underscores.
 BLANK = re.compile(r"_{3,}")
+#: The relative pronouns the exercise can offer.
+PRONOUNS = ("who", "which", "that", "whose", "where")
 
 
 EASY_QUESTIONS: tuple[QuestionSpec, ...] = (
@@ -55,78 +57,88 @@ EASY_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("who (defining)", "who (non-defining)", "which (defining)", "that (non-defining)"),
         correct="who (defining)",
         explanation=(
-            "La frase non ha virgole: la relativa serve a identificare 'the girl' e per questo è "
-            "defining. L'antecedente è una persona e il pronome è il soggetto di 'won', quindi si "
-            "usa 'who'. 'who (non-defining)' sbaglia la classificazione, 'which (defining)' sbaglia "
-            "il pronome, 'that (non-defining)' è doppiamente sbagliato perché 'that' non si usa mai "
-            "in una relativa tra virgole."
+            "Defining: non ci sono virgole e la relativa serve a dire di quale ragazza si parla — "
+            "senza di essa la frase non identifica nessuno. Il pronome è 'who' perché l'antecedente "
+            "è una persona e il pronome è il soggetto di 'won'. 'who (non-defining)' ha il pronome "
+            "giusto e la classificazione sbagliata: senza virgole l'informazione non può essere "
+            "accessoria. 'which (defining)' sbaglia il pronome, perché 'the girl' non è una cosa, e "
+            "'that (non-defining)' sbaglia entrambe le cose, perché 'that' non può introdurre una "
+            "relativa tra virgole."
         ),
-        clue="Nessuna virgola e antecedente personale: la relativa identifica la ragazza e il pronome è il soggetto di 'won'.",
-        rule="Defining clause, senza virgole: per le persone soggetto si usa 'who' oppure 'that'.",
+        clue="Nessuna virgola; l'antecedente è una persona e il verbo della relativa ('won') non ha ancora il suo soggetto.",
+        rule="Defining clause, senza virgole: la relativa identifica il referente. Per le persone soggetto si usa 'who' (oppure 'that', ammesso solo qui).",
     ),
     QuestionSpec(
         sentence="This is the book ______ inspired me to become an engineer.",
         options=("which (defining)", "which (non-defining)", "that (non-defining)", "who (defining)"),
         correct="which (defining)",
         explanation=(
-            "'The book' è una cosa e il pronome è il soggetto di 'inspired'. Senza virgole la "
-            "relativa è defining e il pronome per le cose è 'which'. 'which (non-defining)' sbaglia "
-            "la classificazione, 'who (defining)' sbaglia l'antecedente, 'that (non-defining)' è "
-            "impossibile perché 'that' non regge una relativa tra virgole."
+            "Defining: nessuna virgola e la relativa restringe il riferimento a un libro preciso. "
+            "'which' perché 'the book' è una cosa e il pronome è il soggetto di 'inspired'. "
+            "'which (non-defining)' ha il pronome giusto e la classificazione sbagliata: "
+            "un'informazione accessoria starebbe fra virgole. 'who (defining)' sbaglia l'antecedente, "
+            "perché un libro non è una persona, e 'that (non-defining)' è impossibile perché 'that' "
+            "non regge una relativa tra virgole."
         ),
-        clue="Antecedente inanimato e nessuna virgola: la relativa restringe il riferimento a quel libro.",
-        rule="Defining clause: per le cose si usa 'which' oppure 'that'.",
+        clue="Nessuna virgola; antecedente inanimato e il verbo 'inspired' è ancora senza soggetto.",
+        rule="Defining clause: per le cose, come soggetto o oggetto, si usa 'which' oppure 'that'.",
     ),
     QuestionSpec(
         sentence="My uncle, ______ is a pilot, flies planes all over the world.",
         options=("who (non-defining)", "who (defining)", "that (non-defining)", "which (non-defining)"),
         correct="who (non-defining)",
         explanation=(
-            "Le due virgole racchiudono un'informazione aggiuntiva su uno zio già identificato: è "
-            "una non-defining. Per una persona soggetto si usa 'who'. 'who (defining)' sbaglia la "
-            "classificazione, 'that (non-defining)' sbaglia il pronome perché 'that' è vietato tra "
-            "virgole, 'which (non-defining)' sbaglia l'antecedente personale."
+            "Non-defining: la relativa è chiusa fra due virgole e aggiunge un dettaglio su uno zio "
+            "già identificato — togliendola la frase resta completa. Il pronome è 'who' perché "
+            "l'antecedente è una persona e il pronome è il soggetto di 'is'. 'who (defining)' ha il "
+            "pronome giusto e la classificazione sbagliata: le virgole dicono che l'informazione è "
+            "accessoria. 'that (non-defining)' è sempre scorretto, perché 'that' non può stare in una "
+            "non-defining, e 'which (non-defining)' sbaglia l'antecedente personale."
         ),
-        clue="Le virgole isolano la relativa: l'informazione è accessoria e il pronome è il soggetto di 'is'.",
-        rule="Non-defining clause, tra virgole: 'who' per le persone e mai 'that'.",
+        clue="Due virgole attorno alla relativa; l'antecedente è una persona e il verbo 'is' non ha ancora il soggetto.",
+        rule="Non-defining clause, tra virgole: informazione accessoria. Per le persone si usa 'who'; 'that' è vietato.",
     ),
     QuestionSpec(
         sentence="The restaurant ______ we had dinner last night was excellent.",
         options=("where (defining)", "which (defining)", "where (non-defining)", "that (defining)"),
         correct="where (defining)",
         explanation=(
-            "Nessuna virgola: la relativa identifica il ristorante. La subordinata 'we had dinner "
-            "last night' è già completa, quindi non manca un oggetto ma il complemento di luogo: "
-            "serve 'where'. 'which (defining)' e 'that (defining)' sono errati perché il verbo "
-            "'had' ha già il suo oggetto, 'where (non-defining)' sbaglia la classificazione."
+            "Defining: nessuna virgola e la relativa identifica il ristorante. Qui il pronome non è "
+            "un oggetto ma un avverbio di luogo: 'we had dinner last night' ha già soggetto e "
+            "oggetto, quindi manca il complemento di luogo e serve 'where'. 'which (defining)' e "
+            "'that (defining)' sarebbero corretti solo se il verbo della relativa cercasse un "
+            "oggetto, ma 'had' ne ha già uno ('dinner'); 'where (non-defining)' ha il pronome giusto "
+            "e la classificazione sbagliata, perché senza virgole l'informazione è essenziale."
         ),
-        clue="'we had dinner last night' è una frase completa: manca il luogo, non l'oggetto.",
-        rule="Nelle defining clauses, se la subordinata è completa si usa 'where' e non 'which' o 'that'.",
+        clue="'we had dinner last night' è una frase già completa: il verbo 'had' ha il suo oggetto, quindi manca il luogo.",
+        rule="Nelle defining clauses, se la subordinata è completa si usa 'where' (in cui / nel quale); 'which' e 'that' servono solo come soggetto o oggetto.",
     ),
     QuestionSpec(
         sentence="A mechanic is someone ______ repairs broken cars.",
         options=("who (defining)", "which (defining)", "who (non-defining)", "whose (defining)"),
         correct="who (defining)",
         explanation=(
-            "'Someone' indica una persona e il pronome è il soggetto di 'repairs', quindi 'who'. "
-            "Nessuna virgola: la relativa è defining. 'which (defining)' sbaglia l'antecedente, "
-            "'who (non-defining)' sbaglia la classificazione, 'whose (defining)' indica possesso e "
-            "qui non c'è nulla da possedere."
+            "Defining: nessuna virgola e la relativa definisce che cosa è un meccanico. 'who' perché "
+            "'someone' è una persona e il pronome è il soggetto di 'repairs'. 'which (defining)' "
+            "sbaglia l'antecedente, perché 'someone' non è una cosa. 'who (non-defining)' ha il "
+            "pronome giusto e la classificazione sbagliata: senza virgole l'informazione è necessaria "
+            "a definire il mestiere. 'whose (defining)' introduce un possesso che qui non c'è."
         ),
-        clue="Persona indeterminata come soggetto del verbo della relativa, senza virgole.",
-        rule="Con i pronomi indefiniti che indicano persone si usa 'who' nelle relative defining.",
+        clue="Nessuna virgola; 'someone' è una persona e il verbo 'repairs' non ha ancora il soggetto.",
+        rule="Defining clause: con i pronomi indefiniti che indicano persone si usa 'who' (o 'that') come soggetto.",
     ),
     QuestionSpec(
         sentence="The computer ______ I bought last week has already crashed twice.",
         options=("which (defining)", "who (defining)", "which (non-defining)", "that (non-defining)"),
         correct="which (defining)",
         explanation=(
-            "'The computer' è una cosa e il pronome è l'oggetto di 'bought': si usa 'which'. La "
-            "relativa è defining perché non ci sono virgole. 'who (defining)' sbaglia l'antecedente, "
-            "'which (non-defining)' sbaglia la classificazione, 'that (non-defining)' è impossibile "
+            "Defining: nessuna virgola e la relativa dice di quale computer si tratta. 'which' perché "
+            "'the computer' è una cosa e il pronome è l'oggetto di 'bought'. 'who (defining)' sbaglia "
+            "l'antecedente; 'which (non-defining)' ha il pronome giusto e la classificazione "
+            "sbagliata; 'that (non-defining)' è impossibile perché 'that' non entra in una relativa "
             "tra virgole."
         ),
-        clue="Cosa inanimata con il pronome oggetto di 'bought'; nessuna virgola.",
+        clue="Nessuna virgola; cosa inanimata e il verbo 'bought' cerca il suo oggetto.",
         rule="Defining clause: per le cose oggetto si usa 'which' oppure 'that'.",
     ),
     QuestionSpec(
@@ -134,88 +146,94 @@ EASY_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("who (non-defining)", "that (non-defining)", "who (defining)", "whose (non-defining)"),
         correct="who (non-defining)",
         explanation=(
-            "Le virgole rendono l'informazione accessoria, quindi la relativa è non-defining, e "
-            "l'antecedente è una persona soggetto: 'who'. 'that (non-defining)' è sempre scorretto, "
-            "'who (defining)' sbaglia la classificazione, 'whose (non-defining)' esprime possesso e "
-            "qui non serve."
+            "Non-defining: le virgole racchiudono un commento su una nonna già identificata, e la "
+            "frase regge anche senza. 'who' perché è una persona e il pronome è il soggetto di 'is'. "
+            "'who (defining)' ha il pronome giusto e la classificazione sbagliata; 'that "
+            "(non-defining)' è sempre vietato; 'whose (non-defining)' esprimerebbe un possesso che "
+            "qui non c'è."
         ),
-        clue="Due virgole e una persona come soggetto di 'is': informazione aggiuntiva, non necessaria.",
-        rule="Non-defining clause: 'who' per le persone e mai 'that'.",
+        clue="Due virgole; antecedente personale e il verbo 'is' senza soggetto.",
+        rule="Non-defining clause: 'who' per le persone, mai 'that'.",
     ),
     QuestionSpec(
         sentence="A widow is a woman ______ husband has died.",
         options=("whose (defining)", "who (defining)", "whose (non-defining)", "which (defining)"),
         correct="whose (defining)",
         explanation=(
-            "'Husband' appartiene alla donna, quindi serve il possessivo 'whose'. Nessuna virgola: "
-            "la relativa è defining. 'who (defining)' non può reggere un sostantivo, "
-            "'whose (non-defining)' sbaglia la classificazione, 'which (defining)' sbaglia "
-            "l'antecedente personale."
+            "Defining: nessuna virgola e la relativa serve a spiegare che cosa è una vedova. 'whose' "
+            "perché 'husband' appartiene alla donna: è l'unico pronome che regge direttamente un "
+            "sostantivo. 'who (defining)' non può introdurre 'husband'; 'whose (non-defining)' ha il "
+            "pronome giusto e la classificazione sbagliata; 'which (defining)' sbaglia l'antecedente "
+            "personale."
         ),
-        clue="Rapporto di possesso tra 'woman' e 'husband', senza virgole.",
-        rule="Si usa 'whose' quando il pronome esprime possesso, sia in defining sia in non-defining.",
+        clue="Nessuna virgola; rapporto di possesso tra 'woman' e 'husband'.",
+        rule="Si usa 'whose' quando il pronome esprime possesso e regge un sostantivo: vale sia in defining sia in non-defining.",
     ),
     QuestionSpec(
         sentence="The town ______ I grew up has changed completely.",
         options=("where (defining)", "which (defining)", "where (non-defining)", "that (defining)"),
         correct="where (defining)",
         explanation=(
-            "'I grew up' è una frase completa: manca il luogo, quindi 'where'. Nessuna virgola, "
-            "quindi la relativa è defining. 'which (defining)' e 'that (defining)' sarebbero "
-            "possibili solo se il verbo della relativa avesse bisogno di un oggetto, "
-            "'where (non-defining)' sbaglia la classificazione."
+            "Defining: nessuna virgola e la relativa identifica la città. 'I grew up' è completa e "
+            "non ha oggetto, quindi manca il complemento di luogo: 'where'. 'which (defining)' e "
+            "'that (defining)' funzionerebbero solo come soggetto o oggetto di un verbo che ne ha "
+            "bisogno; 'where (non-defining)' ha il pronome giusto e la classificazione sbagliata."
         ),
-        clue="Verbo intransitivo e antecedente di luogo: nessun oggetto da sostituire.",
-        rule="Con i luoghi, se la relativa è completa si usa 'where'; 'which' e 'that' servono solo come soggetto o oggetto.",
+        clue="Nessuna virgola; 'grew up' è intransitivo, quindi la relativa non cerca un oggetto.",
+        rule="Con i luoghi si usa 'where' quando la relativa è completa; 'which' e 'that' solo se servono da soggetto o oggetto.",
     ),
     QuestionSpec(
         sentence="The students ______ failed the test must take it again next Friday.",
         options=("who (defining)", "who (non-defining)", "which (defining)", "whose (defining)"),
         correct="who (defining)",
         explanation=(
-            "La relativa identifica quali studenti e non ci sono virgole: è defining, e il pronome "
-            "è il soggetto di 'failed', quindi 'who'. 'who (non-defining)' è la trappola della "
-            "virgola: lo stesso pronome, ma senza virgole la classificazione è sbagliata. "
-            "'which (defining)' sbaglia l'antecedente, 'whose (defining)' il possesso."
+            "Defining: non ci sono virgole e la relativa identifica quali studenti devono rifare il "
+            "test — è informazione essenziale, non un commento. Il pronome è 'who' perché sono "
+            "persone e il pronome è il soggetto di 'failed'. 'who (non-defining)' è la trappola: "
+            "stesso pronome, classificazione sbagliata, perché la frase non ha le virgole che una "
+            "non-defining richiede. 'which (defining)' sbaglia l'antecedente e 'whose (defining)' un "
+            "possesso che non c'è."
         ),
-        clue="Nessuna virgola e antecedente personale: la relativa restringe il gruppo degli studenti.",
-        rule="La classificazione non dipende dal pronome ma dalle virgole: senza virgole la relativa è defining.",
+        clue="Nessuna virgola e antecedente personale; la relativa restringe il gruppo a chi ha fallito.",
+        rule="La classificazione la decidono le virgole, non il pronome: senza virgole la relativa è defining.",
     ),
     QuestionSpec(
         sentence="Paris, ______ is known as the City of Light, attracts millions of visitors.",
         options=("which (non-defining)", "that (non-defining)", "which (defining)", "where (non-defining)"),
         correct="which (non-defining)",
         explanation=(
-            "Le virgole indicano una non-defining e la città è il soggetto del passivo 'is known', "
-            "quindi serve 'which' e non 'where'. 'that (non-defining)' è vietato, 'which (defining)' "
-            "sbaglia la classificazione, 'where (non-defining)' sbaglia il pronome perché non c'è "
-            "un'azione che avviene nella città."
+            "Non-defining: le virgole aggiungono un soprannome a una città già identificata. 'which' "
+            "perché Parigi è il soggetto del passivo 'is known' — non è il luogo in cui avviene "
+            "un'azione, quindi 'where' sarebbe sbagliato. 'that (non-defining)' è vietato; 'which "
+            "(defining)' ha il pronome giusto e la classificazione sbagliata."
         ),
-        clue="La città è il soggetto grammaticale del verbo passivo, non il luogo di un'azione altrui.",
-        rule="Nelle non-defining, per una cosa o una città soggetto si usa 'which', mai 'that'.",
+        clue="Due virgole; la città è il soggetto del verbo passivo 'is known'.",
+        rule="Nelle non-defining, per una cosa o una città soggetto si usa 'which'; 'where' solo se la relativa descrive un'azione che avviene nel luogo.",
     ),
     QuestionSpec(
         sentence="The boy ______ dog ran away was crying in the park.",
         options=("whose (defining)", "whose (non-defining)", "who (defining)", "which (defining)"),
         correct="whose (defining)",
         explanation=(
-            "'Dog' appartiene al ragazzo, quindi 'whose'. Nessuna virgola: la relativa è defining. "
-            "'whose (non-defining)' sbaglia la classificazione, 'who (defining)' non può introdurre "
-            "un sostantivo, 'which (defining)' sbaglia l'antecedente personale."
+            "Defining: nessuna virgola e la relativa identifica il ragazzo. 'whose' perché 'dog' "
+            "appartiene a lui. 'whose (non-defining)' ha il pronome giusto e la classificazione "
+            "sbagliata; 'who (defining)' non può reggere il sostantivo 'dog'; 'which (defining)' "
+            "sbaglia l'antecedente personale."
         ),
-        clue="Possesso tra il ragazzo e il cane, senza virgole.",
-        rule="'Whose' sostituisce 'his', 'her' o 'their' e si usa in entrambe le classificazioni.",
+        clue="Nessuna virgola; il cane è del ragazzo.",
+        rule="'Whose' sostituisce 'his', 'her', 'their' e regge il sostantivo che segue, in entrambe le classificazioni.",
     ),
     QuestionSpec(
         sentence="The phone ______ was on the kitchen table started ringing.",
         options=("which (defining)", "who (defining)", "which (non-defining)", "that (non-defining)"),
         correct="which (defining)",
         explanation=(
-            "Cosa inanimata e pronome soggetto di 'was': 'which'. Nessuna virgola, quindi defining. "
-            "'who (defining)' sbaglia l'antecedente, 'which (non-defining)' sbaglia la "
-            "classificazione, 'that (non-defining)' è impossibile tra virgole."
+            "Defining: nessuna virgola e la relativa dice di quale telefono si parla. 'which' perché "
+            "è una cosa e il pronome è il soggetto di 'was'. 'who (defining)' sbaglia l'antecedente; "
+            "'which (non-defining)' ha il pronome giusto e la classificazione sbagliata; 'that "
+            "(non-defining)' è impossibile tra virgole."
         ),
-        clue="Oggetto inanimato come soggetto della relativa, senza virgole.",
+        clue="Nessuna virgola; oggetto inanimato e il verbo 'was' senza soggetto.",
         rule="Defining clause con una cosa soggetto: 'which' oppure 'that'.",
     ),
     QuestionSpec(
@@ -223,25 +241,26 @@ EASY_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("who (non-defining)", "that (non-defining)", "which (non-defining)", "who (defining)"),
         correct="who (non-defining)",
         explanation=(
-            "Il nome e cognome identificano già la persona: la relativa tra virgole aggiunge un "
-            "dettaglio, quindi è non-defining. Persona soggetto: 'who'. 'that (non-defining)' è "
-            "sempre vietato, 'which (non-defining)' sbaglia l'antecedente, 'who (defining)' sbaglia "
-            "la classificazione."
+            "Non-defining: nome e cognome identificano già la persona, quindi la relativa fra "
+            "virgole aggiunge un dettaglio. 'who' perché è una persona e il pronome è il soggetto di "
+            "'examined'. 'who (defining)' ha il pronome giusto e la classificazione sbagliata; 'that "
+            "(non-defining)' è sempre vietato; 'which (non-defining)' sbaglia l'antecedente."
         ),
-        clue="Nome e cognome già identificano la persona: le virgole aggiungono un dettaglio.",
-        rule="Dopo un nome proprio l'informazione della relativa è accessoria: virgole e 'who', mai 'that'.",
+        clue="Due virgole; il referente è già identificato dal nome proprio.",
+        rule="Dopo un nome proprio la relativa è di norma accessoria: virgole e 'who', mai 'that'.",
     ),
     QuestionSpec(
         sentence="This is the café ______ we usually have coffee.",
         options=("where (defining)", "which (defining)", "where (non-defining)", "whose (defining)"),
         correct="where (defining)",
         explanation=(
-            "La subordinata 'we usually have coffee' è completa: serve l'avverbio di luogo 'where'. "
-            "Nessuna virgola, quindi defining. 'which (defining)' non può essere l'oggetto di 'have', "
-            "che ne ha già uno, 'where (non-defining)' sbaglia la classificazione, "
-            "'whose (defining)' sbaglia il pronome."
+            "Defining: nessuna virgola e la relativa identifica il bar. 'we usually have coffee' è "
+            "completa: 'have' ha già il suo oggetto, quindi manca il luogo e serve 'where'. 'which "
+            "(defining)' non può essere l'oggetto di 'have', che ne ha già uno; 'where "
+            "(non-defining)' ha il pronome giusto e la classificazione sbagliata; 'whose "
+            "(defining)' esprime possesso e qui non c'è."
         ),
-        clue="Azione abituale dentro un luogo: la frase non manca dell'oggetto.",
+        clue="Nessuna virgola; 'have coffee' ha già l'oggetto, quindi la relativa non cerca un oggetto.",
         rule="Con i luoghi si usa 'where' quando la relativa non ha bisogno di soggetto o oggetto.",
     ),
     QuestionSpec(
@@ -249,36 +268,38 @@ EASY_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("whose (defining)", "who (defining)", "whose (non-defining)", "which (defining)"),
         correct="whose (defining)",
         explanation=(
-            "'Father' appartiene all'amica, quindi 'whose'. Nessuna virgola: defining. "
-            "'who (defining)' non regge il sostantivo, 'whose (non-defining)' sbaglia la "
-            "classificazione, 'which (defining)' sbaglia l'antecedente personale."
+            "Defining: nessuna virgola e la relativa identifica di quale amica si parla. 'whose' "
+            "perché 'father' appartiene a lei. 'who (defining)' non regge il sostantivo 'father'; "
+            "'whose (non-defining)' ha il pronome giusto e la classificazione sbagliata; 'which "
+            "(defining)' sbaglia l'antecedente."
         ),
-        clue="Il padre dell'amica: un rapporto di possesso, senza virgole.",
-        rule="'Whose' introduce il nome di ciò che appartiene all'antecedente.",
+        clue="Nessuna virgola; il padre è dell'amica.",
+        rule="'Whose' introduce ciò che appartiene all'antecedente, in defining e in non-defining.",
     ),
     QuestionSpec(
         sentence="The umbrella ______ you lent me kept me completely dry.",
         options=("which (defining)", "who (defining)", "which (non-defining)", "whose (defining)"),
         correct="which (defining)",
         explanation=(
-            "'The umbrella' è una cosa e il pronome è l'oggetto di 'lent': 'which'. Nessuna virgola, "
-            "quindi defining. 'who (defining)' sbaglia l'antecedente, 'which (non-defining)' sbaglia "
-            "la classificazione, 'whose (defining)' esprime possesso e qui non serve."
+            "Defining: nessuna virgola e la relativa identifica l'ombrello. 'which' perché è una "
+            "cosa e il pronome è l'oggetto di 'lent'. 'who (defining)' sbaglia l'antecedente; 'which "
+            "(non-defining)' ha il pronome giusto e la classificazione sbagliata; 'whose "
+            "(defining)' esprime possesso e non può essere l'oggetto di 'lent'."
         ),
-        clue="Cosa con il pronome oggetto di 'lent', senza virgole.",
-        rule="Per le cose oggetto nelle defining clauses si usa 'which' oppure 'that'.",
+        clue="Nessuna virgola; cosa inanimata e 'lent' cerca il suo oggetto.",
+        rule="Defining clause: per le cose oggetto si usa 'which' oppure 'that'.",
     ),
     QuestionSpec(
         sentence="The hotel, ______ had a rooftop swimming pool, was right by the sea.",
         options=("which (non-defining)", "that (non-defining)", "where (non-defining)", "which (defining)"),
         correct="which (non-defining)",
         explanation=(
-            "Le virgole aggiungono un dettaglio a un albergo già identificato e il pronome è il "
-            "soggetto di 'had': 'which'. 'that (non-defining)' è vietato, 'where (non-defining)' "
-            "sbaglia il pronome perché non c'è un'azione che avviene nell'albergo, "
-            "'which (defining)' sbaglia la classificazione."
+            "Non-defining: le virgole aggiungono un dettaglio a un albergo già identificato. 'which' "
+            "perché l'albergo è il soggetto di 'had' — non è il luogo di un'azione altrui, quindi "
+            "'where' non va. 'that (non-defining)' è vietato; 'which (defining)' ha il pronome "
+            "giusto e la classificazione sbagliata."
         ),
-        clue="L'albergo è il soggetto di 'had': non è il luogo di un'azione altrui.",
+        clue="Due virgole; l'albergo è il soggetto del verbo 'had'.",
         rule="Nelle non-defining un edificio soggetto richiede 'which'; 'that' è sempre escluso.",
     ),
     QuestionSpec(
@@ -286,25 +307,27 @@ EASY_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("who (defining)", "who (non-defining)", "which (defining)", "where (defining)"),
         correct="who (defining)",
         explanation=(
-            "La relativa identifica la donna e non ci sono virgole: defining. Il pronome è il "
-            "soggetto di 'lives', quindi 'who'. 'who (non-defining)' è la trappola della virgola, "
-            "'which (defining)' sbaglia l'antecedente, 'where (defining)' non può essere il soggetto "
-            "di un verbo."
+            "Defining: nessuna virgola e la relativa identifica la donna. 'who' perché è una persona "
+            "e il pronome è il soggetto di 'lives'. 'who (non-defining)' è la trappola della "
+            "virgola: stesso pronome, classificazione sbagliata, perché senza virgole l'informazione "
+            "è essenziale. 'which (defining)' sbaglia l'antecedente e 'where (defining)' non può "
+            "fare da soggetto a un verbo."
         ),
-        clue="Nessuna virgola e una persona soggetto del verbo 'lives'.",
-        rule="Senza virgole la relativa è defining: 'who' oppure 'that' per le persone soggetto.",
+        clue="Nessuna virgola; una persona e il verbo 'lives' senza soggetto.",
+        rule="Senza virgole la relativa è defining: 'who' (o 'that') per le persone soggetto.",
     ),
     QuestionSpec(
         sentence="Rome, ______ was founded in 753 BC, is the capital of Italy.",
         options=("which (non-defining)", "where (non-defining)", "that (non-defining)", "which (defining)"),
         correct="which (non-defining)",
         explanation=(
-            "Le virgole rendono la relativa non-defining e Roma è il soggetto del passivo 'was "
-            "founded': 'which'. 'where (non-defining)' sbaglia il pronome, 'that (non-defining)' è "
-            "vietato, 'which (defining)' sbaglia la classificazione."
+            "Non-defining: le virgole aggiungono una data a una città già identificata. 'which' "
+            "perché Roma è il soggetto del passivo 'was founded'; 'where' vorrebbe dire che l'azione "
+            "avviene a Roma, ma chi fonda non è la città. 'that (non-defining)' è vietato; 'which "
+            "(defining)' ha il pronome giusto e la classificazione sbagliata."
         ),
-        clue="La città è il soggetto del verbo passivo, non il luogo in cui avviene l'azione.",
-        rule="Una città soggetto richiede 'which'; 'where' si usa solo se la relativa descrive un'azione che avviene nel luogo.",
+        clue="Due virgole; la città è il soggetto del verbo passivo.",
+        rule="Una città soggetto richiede 'which'; 'where' si usa solo per un'azione che avviene nel luogo.",
     ),
 )
 
@@ -315,12 +338,13 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("which (non-defining)", "that (non-defining)", "which (defining)", "who (non-defining)"),
         correct="which (non-defining)",
         explanation=(
-            "La relativa non si riferisce a un sostantivo ma all'intera frase precedente: è "
-            "non-defining, segnalata dalla virgola, e il pronome è 'which'. 'that (non-defining)' è "
-            "vietato, 'which (defining)' sbaglia la classificazione, 'who (non-defining)' non può "
-            "commentare una frase."
+            "Non-defining: la virgola segnala un commento che riguarda tutta la frase precedente, non "
+            "un sostantivo. 'which' è l'unico pronome che può riferirsi a un'intera proposizione. "
+            "'that (non-defining)' è vietato; 'which (defining)' ha il pronome giusto ma non può "
+            "introdurre un commento separato da virgola; 'who (non-defining)' si riferisce a persone, "
+            "non a una frase."
         ),
-        clue="Il pronome non sostituisce un nome ma tutto ciò che è appena stato detto.",
+        clue="Una sola virgola, e il pronome non ha un sostantivo a cui appoggiarsi: guarda che cosa c'è prima.",
         rule="Per commentare un'intera frase si usa ', which': non-defining e mai 'that'.",
     ),
     QuestionSpec(
@@ -328,11 +352,13 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("whose (non-defining)", "which (non-defining)", "whose (defining)", "that (non-defining)"),
         correct="whose (non-defining)",
         explanation=(
-            "La sede appartiene all'azienda, quindi serve 'whose'; le virgole rendono la relativa "
-            "non-defining. 'which (non-defining)' non può reggere il sostantivo 'headquarters', "
-            "'whose (defining)' sbaglia la classificazione, 'that (non-defining)' è vietato."
+            "Non-defining: le virgole presentano la sede come dettaglio di un'azienda già "
+            "identificata. 'whose' perché 'headquarters' appartiene alla compagnia, e regge "
+            "direttamente il sostantivo. 'which (non-defining)' non può reggere 'headquarters'; "
+            "'whose (defining)' ha il pronome giusto e la classificazione sbagliata; 'that "
+            "(non-defining)' è vietato."
         ),
-        clue="Rapporto di appartenenza tra l'azienda e la sua sede centrale, con le virgole.",
+        clue="Due virgole; la sede è dell'azienda, e 'headquarters' non ha articolo: dipende dal pronome.",
         rule="'Whose' esprime possesso anche con aziende e istituzioni, in entrambe le classificazioni.",
     ),
     QuestionSpec(
@@ -340,11 +366,12 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("whose (non-defining)", "which (non-defining)", "that (non-defining)", "whose (defining)"),
         correct="whose (non-defining)",
         explanation=(
-            "La vetta appartiene alla montagna: 'whose'. Le virgole indicano una non-defining. "
-            "'which (non-defining)' non può reggere 'peak', 'that (non-defining)' è vietato, "
-            "'whose (defining)' sbaglia la classificazione."
+            "Non-defining: le virgole aggiungono un primato a una montagna già identificata. 'whose' "
+            "perché 'peak' appartiene alla montagna. 'which (non-defining)' non regge 'peak'; 'that "
+            "(non-defining)' è vietato; 'whose (defining)' ha il pronome giusto e la classificazione "
+            "sbagliata."
         ),
-        clue="La vetta della montagna: possesso tra l'antecedente e il sostantivo che segue.",
+        clue="Due virgole; la vetta è della montagna, e 'peak' dipende dal pronome.",
         rule="'Whose' si usa anche per elementi geografici e cose inanimate, al posto di 'of which'.",
     ),
     QuestionSpec(
@@ -352,50 +379,51 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("whose (defining)", "who (defining)", "whose (non-defining)", "which (defining)"),
         correct="whose (defining)",
         explanation=(
-            "I genitori appartengono ai bambini: 'whose'. Nessuna virgola, quindi la relativa è "
-            "defining e restringe il gruppo. 'who (defining)' non può reggere 'parents', "
-            "'whose (non-defining)' sbaglia la classificazione, 'which (defining)' sbaglia "
-            "l'antecedente personale."
+            "Defining: nessuna virgola e la relativa restringe il gruppo ai bambini con genitori "
+            "lavoratori. 'whose' perché 'parents' appartiene ai bambini. 'who (defining)' non può "
+            "reggere 'parents'; 'whose (non-defining)' ha il pronome giusto e la classificazione "
+            "sbagliata; 'which (defining)' sbaglia l'antecedente personale."
         ),
-        clue="Legame di parentela tra i bambini e i loro genitori, senza virgole.",
-        rule="Nelle relative defining 'whose' indica legami familiari o di possesso.",
+        clue="Nessuna virgola; i genitori sono dei bambini, e 'parents' non ha articolo.",
+        rule="Nelle defining 'whose' indica legami familiari o di possesso.",
     ),
     QuestionSpec(
         sentence="The politician, ______ was accused of corruption, resigned from parliament.",
         options=("who (non-defining)", "that (non-defining)", "which (non-defining)", "who (defining)"),
         correct="who (non-defining)",
         explanation=(
-            "La relativa tra virgole aggiunge un dettaglio su un politico già identificato: "
-            "non-defining. Il pronome è il soggetto di 'was accused', quindi 'who'. "
-            "'that (non-defining)' è vietato, 'which (non-defining)' sbaglia l'antecedente, "
-            "'who (defining)' sbaglia la classificazione."
+            "Non-defining: le virgole aggiungono un'accusa su un politico già identificato. 'who' "
+            "perché è una persona e il pronome è il soggetto di 'was accused'. 'that "
+            "(non-defining)' è vietato; 'which (non-defining)' sbaglia l'antecedente; 'who "
+            "(defining)' ha il pronome giusto e la classificazione sbagliata."
         ),
-        clue="Le virgole isolano un commento su una persona che è soggetto del passivo.",
-        rule="Nelle non-defining con una persona soggetto si usa sempre 'who', mai 'that'.",
+        clue="Due virgole; una persona e il passivo 'was accused' senza soggetto.",
+        rule="Nelle non-defining con una persona soggetto si usa 'who', mai 'that'.",
     ),
     QuestionSpec(
         sentence="Venice, ______ canals are famous across the world, is threatened by rising sea levels.",
         options=("whose (non-defining)", "whose (defining)", "which (non-defining)", "where (non-defining)"),
         correct="whose (non-defining)",
         explanation=(
-            "I canali appartengono a Venezia: 'whose'. Le virgole rendono la relativa non-defining. "
-            "'whose (defining)' sbaglia la classificazione, 'which (non-defining)' non può reggere "
-            "'canals', 'where (non-defining)' non esprime possesso."
+            "Non-defining: le virgole aggiungono un dettaglio su una città già identificata. 'whose' "
+            "perché i canali appartengono a Venezia. 'whose (defining)' ha il pronome giusto e la "
+            "classificazione sbagliata; 'which (non-defining)' non regge 'canals'; 'where "
+            "(non-defining)' indica un luogo, non un possesso."
         ),
-        clue="Possesso tra la città e i suoi canali, con le virgole.",
-        rule="'Whose' esprime gli attributi di appartenenza anche di entità geografiche.",
+        clue="Due virgole; i canali sono di Venezia.",
+        rule="'Whose' esprime appartenenza anche per entità geografiche.",
     ),
     QuestionSpec(
         sentence="The historic castle, ______ was constructed in the twelfth century, was damaged by fire.",
         options=("which (non-defining)", "that (non-defining)", "where (non-defining)", "which (defining)"),
         correct="which (non-defining)",
         explanation=(
-            "Il castello è il soggetto del passivo 'was constructed', quindi 'which', e le virgole "
-            "rendono la relativa non-defining. 'that (non-defining)' è vietato, "
-            "'where (non-defining)' sbaglia il pronome, 'which (defining)' sbaglia la "
-            "classificazione."
+            "Non-defining: le virgole aggiungono una data a un castello già identificato. 'which' "
+            "perché il castello è il soggetto del passivo 'was constructed'; 'where' indicherebbe un "
+            "luogo in cui avviene un'azione, non il soggetto che la subisce. 'that (non-defining)' è "
+            "vietato; 'which (defining)' ha il pronome giusto e la classificazione sbagliata."
         ),
-        clue="Il castello compie l'azione espressa dal verbo passivo: non è il luogo di un'azione.",
+        clue="Due virgole; il castello è il soggetto del passivo.",
         rule="Nelle non-defining un edificio soggetto richiede 'which'; 'that' non è mai ammesso.",
     ),
     QuestionSpec(
@@ -403,23 +431,25 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("who (defining)", "which (defining)", "who (non-defining)", "whose (defining)"),
         correct="who (defining)",
         explanation=(
-            "Il candidato è una persona e il pronome è l'oggetto di 'interviewed': 'who'. Nessuna "
-            "virgola, quindi defining. 'which (defining)' sbaglia l'antecedente, "
-            "'who (non-defining)' sbaglia la classificazione, 'whose (defining)' il possesso."
+            "Defining: nessuna virgola e la relativa identifica il candidato. 'who' perché è una "
+            "persona e il pronome è l'oggetto di 'interviewed'. 'which (defining)' sbaglia "
+            "l'antecedente; 'who (non-defining)' ha il pronome giusto e la classificazione "
+            "sbagliata; 'whose (defining)' esprimerebbe un possesso che non c'è."
         ),
-        clue="Persona come oggetto del verbo della relativa, senza virgole.",
-        rule="Per le persone oggetto nelle defining clauses si usa 'who' oppure 'that'.",
+        clue="Nessuna virgola; una persona e 'interviewed' cerca il suo oggetto.",
+        rule="Per le persone oggetto nelle defining si usa 'who' (oppure 'that').",
     ),
     QuestionSpec(
         sentence="The car ______ engine broke down on the motorway was towed away.",
         options=("whose (defining)", "which (defining)", "whose (non-defining)", "who (defining)"),
         correct="whose (defining)",
         explanation=(
-            "Il motore appartiene all'auto: 'whose'. Nessuna virgola, quindi defining. "
-            "'which (defining)' non può reggere 'engine', 'whose (non-defining)' sbaglia la "
-            "classificazione, 'who (defining)' è riservato alle persone."
+            "Defining: nessuna virgola e la relativa identifica l'auto. 'whose' perché 'engine' è "
+            "parte dell'auto. 'which (defining)' non può reggere 'engine'; 'whose (non-defining)' "
+            "ha il pronome giusto e la classificazione sbagliata; 'who (defining)' è riservato alle "
+            "persone."
         ),
-        clue="Il motore dell'auto: possesso tra una cosa e una sua parte.",
+        clue="Nessuna virgola; il motore è parte dell'auto.",
         rule="'Whose' si usa anche per le parti di un oggetto, in entrambe le classificazioni.",
     ),
     QuestionSpec(
@@ -427,24 +457,25 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("who (non-defining)", "who (defining)", "that (non-defining)", "whose (non-defining)"),
         correct="who (non-defining)",
         explanation=(
-            "La relativa tra virgole aggiunge un dettaglio su una sorella già identificata: "
-            "non-defining. Persona soggetto di 'works', quindi 'who'. 'who (defining)' sbaglia la "
-            "classificazione, 'that (non-defining)' è vietato, 'whose (non-defining)' esprime "
-            "possesso e qui non serve."
+            "Non-defining: il possessivo 'my' identifica già la persona, quindi le virgole "
+            "aggiungono solo un dettaglio. 'who' perché è una persona e il pronome è il soggetto di "
+            "'works'. 'who (defining)' ha il pronome giusto e la classificazione sbagliata; 'that "
+            "(non-defining)' è vietato; 'whose (non-defining)' esprime possesso e qui non serve."
         ),
-        clue="Il possessivo 'my' identifica già la persona: le virgole aggiungono un dettaglio.",
-        rule="Con un antecedente già identificato la relativa va tra virgole e richiede 'who'.",
+        clue="Due virgole; 'my' identifica già la persona e 'works' aspetta il soggetto.",
+        rule="Con un antecedente già identificato la relativa è accessoria: virgole e 'who'.",
     ),
     QuestionSpec(
         sentence="The film ______ we watched last night was absolutely terrifying.",
         options=("which (defining)", "whose (defining)", "which (non-defining)", "where (defining)"),
         correct="which (defining)",
         explanation=(
-            "Il film è una cosa e il pronome è l'oggetto di 'watched': 'which'. Nessuna virgola, "
-            "quindi defining. 'whose (defining)' non può reggere 'watched', 'which (non-defining)' "
-            "sbaglia la classificazione, 'where (defining)' non può essere l'oggetto di un verbo."
+            "Defining: nessuna virgola e la relativa identifica il film. 'which' perché è una cosa e "
+            "il pronome è l'oggetto di 'watched'. 'whose (defining)' non può reggere 'watched'; "
+            "'which (non-defining)' ha il pronome giusto e la classificazione sbagliata; 'where "
+            "(defining)' non può essere oggetto di un verbo."
         ),
-        clue="Cosa inanimata oggetto di 'watched', senza virgole.",
+        clue="Nessuna virgola; cosa inanimata e 'watched' cerca il suo oggetto.",
         rule="Defining clause: per le cose oggetto si usa 'which' oppure 'that'.",
     ),
     QuestionSpec(
@@ -452,12 +483,13 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("which (defining)", "where (defining)", "which (non-defining)", "that (non-defining)"),
         correct="which (defining)",
         explanation=(
-            "Il verbo 'rented' ha bisogno di un oggetto, e quell'oggetto è la casa: serve 'which'. "
-            "'where (defining)' è la trappola più insidiosa, ma 'where' sostituisce un complemento "
-            "di luogo e qui il luogo è già espresso da 'in Cornwall'. Nessuna virgola: defining. "
-            "'which (non-defining)' sbaglia la classificazione, 'that (non-defining)' è vietato."
+            "Defining: nessuna virgola e la relativa identifica la casa. 'rented' è transitivo e il "
+            "suo oggetto è la casa, quindi serve 'which'. 'where (defining)' è la trappola più "
+            "insidiosa: sostituirebbe un complemento di luogo, ma il luogo è già detto ('in "
+            "Cornwall'). 'which (non-defining)' ha il pronome giusto e la classificazione "
+            "sbagliata; 'that (non-defining)' è vietato."
         ),
-        clue="'we rented' non è completa: manca l'oggetto, non il luogo, che è già 'in Cornwall'.",
+        clue="Nessuna virgola; 'we rented' è transitivo e il luogo è già 'in Cornwall'.",
         rule="Se il verbo della relativa è transitivo serve 'which' o 'that'; 'where' sostituisce solo un complemento di luogo mancante.",
     ),
     QuestionSpec(
@@ -465,11 +497,12 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("whose (non-defining)", "who (non-defining)", "which (non-defining)", "whose (defining)"),
         correct="whose (non-defining)",
         explanation=(
-            "La pazienza appartiene all'insegnante: 'whose'. Le virgole rendono la relativa "
-            "non-defining. 'who (non-defining)' non può reggere 'patience', 'which (non-defining)' "
-            "sbaglia l'antecedente, 'whose (defining)' sbaglia la classificazione."
+            "Non-defining: le virgole aggiungono un dettaglio su un'insegnante già identificata. "
+            "'whose' perché la pazienza è sua e regge direttamente il sostantivo. 'who "
+            "(non-defining)' non può reggere 'patience'; 'which (non-defining)' sbaglia "
+            "l'antecedente; 'whose (defining)' ha il pronome giusto e la classificazione sbagliata."
         ),
-        clue="La pazienza dell'insegnante: possesso, con le virgole.",
+        clue="Due virgole; la pazienza è dell'insegnante.",
         rule="'Whose' è l'unico pronome relativo che regge direttamente un sostantivo, in entrambe le classificazioni.",
     ),
     QuestionSpec(
@@ -477,12 +510,12 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("that (defining)", "that (non-defining)", "which (non-defining)", "who (defining)"),
         correct="that (defining)",
         explanation=(
-            "Dopo un superlativo la scelta naturale in inglese è 'that'. La relativa è defining "
-            "perché non ci sono virgole e perché restringe il riferimento alla pizza migliore. "
-            "'that (non-defining)' è impossibile, 'which (non-defining)' sbaglia la "
-            "classificazione, 'who (defining)' sbaglia l'antecedente."
+            "Defining: nessuna virgola, e il superlativo restringe già il riferimento alla pizza "
+            "migliore, quindi la relativa è essenziale. Qui 'that' è la scelta naturale dopo un "
+            "superlativo. 'that (non-defining)' è impossibile; 'which (non-defining)' ha il pronome "
+            "giusto e la classificazione sbagliata; 'who (defining)' sbaglia l'antecedente."
         ),
-        clue="Un superlativo restringe già il riferimento: nessuna virgola e 'that' come pronome naturale.",
+        clue="Nessuna virgola e un superlativo ('the best'): il riferimento è già ristretto.",
         rule="Dopo un superlativo si preferisce 'that' nelle relative defining riferite a cose.",
     ),
     QuestionSpec(
@@ -490,12 +523,13 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("that (defining)", "that (non-defining)", "which (non-defining)", "whose (defining)"),
         correct="that (defining)",
         explanation=(
-            "Con antecedenti come 'everything', 'all' e 'nothing' si usa 'that'. La relativa è "
-            "defining perché non ci sono virgole. 'that (non-defining)' è impossibile, "
-            "'which (non-defining)' sbaglia la classificazione, 'whose (defining)' esprime possesso "
-            "e non può reggere 'told'."
+            "Defining: nessuna virgola e la relativa restringe 'everything' a ciò che lui ha "
+            "raccontato. Con antecedenti come 'everything', 'all' o 'nothing' la forma naturale è "
+            "'that'. 'that (non-defining)' è impossibile; 'which (non-defining)' ha il pronome "
+            "giusto e la classificazione sbagliata; 'whose (defining)' esprime possesso e non può "
+            "reggere 'told'."
         ),
-        clue="Antecedente indefinito ('everything'): è la forma che in inglese richiede 'that'.",
+        clue="Nessuna virgola; antecedente indefinito ('everything').",
         rule="Dopo 'everything', 'all', 'nothing' e simili si usa 'that' nella relativa defining.",
     ),
     QuestionSpec(
@@ -503,12 +537,13 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("who (defining)", "who (non-defining)", "which (defining)", "that (non-defining)"),
         correct="who (defining)",
         explanation=(
-            "La relativa identifica l'unica persona che sa la verità: è defining, senza virgole, e "
-            "il pronome è il soggetto di 'knows', quindi 'who'. 'who (non-defining)' è la trappola "
-            "della virgola: con 'the only' l'informazione è essenziale e non può essere tra virgole. "
-            "'which (defining)' sbaglia l'antecedente, 'that (non-defining)' è vietato."
+            "Defining: con 'the only' l'informazione è essenziale — non ci sono altre persone — e "
+            "non ci sono virgole. 'who' perché è una persona e il pronome è il soggetto di 'knows'. "
+            "'who (non-defining)' è la trappola della virgola: stesso pronome, classificazione "
+            "sbagliata, perché un'informazione essenziale non può stare fra virgole. 'which "
+            "(defining)' sbaglia l'antecedente e 'that (non-defining)' è vietato."
         ),
-        clue="'the only' rende l'informazione essenziale: nessuna virgola e pronome soggetto.",
+        clue="Nessuna virgola; 'the only' rende l'informazione necessaria, e 'knows' aspetta il soggetto.",
         rule="Con 'the only' la relativa è sempre defining: niente virgole, e 'who' per le persone soggetto.",
     ),
     QuestionSpec(
@@ -516,12 +551,13 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("where (defining)", "which (defining)", "where (non-defining)", "that (defining)"),
         correct="where (defining)",
         explanation=(
-            "'they carried out the experiment' è completa: manca il luogo, quindi 'where'. Nessuna "
-            "virgola, quindi defining. 'which (defining)' e 'that (defining)' non possono essere "
-            "l'oggetto di 'carried out', che ne ha già uno, 'where (non-defining)' sbaglia la "
-            "classificazione."
+            "Defining: nessuna virgola e la relativa identifica il laboratorio. 'they carried out "
+            "the experiment' è completa e ha già l'oggetto, quindi manca il luogo: 'where'. 'which "
+            "(defining)' e 'that (defining)' non possono essere l'oggetto di 'carried out', che ne "
+            "ha già uno; 'where (non-defining)' ha il pronome giusto e la classificazione "
+            "sbagliata."
         ),
-        clue="La subordinata ha già soggetto e oggetto: manca solo il luogo.",
+        clue="Nessuna virgola; soggetto e oggetto ci sono già, manca il luogo.",
         rule="Se la relativa è completa si usa 'where'; 'which' e 'that' servono come soggetto o oggetto.",
     ),
     QuestionSpec(
@@ -529,11 +565,12 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("which (non-defining)", "that (non-defining)", "which (defining)", "where (non-defining)"),
         correct="which (non-defining)",
         explanation=(
-            "Il romanzo è il soggetto di 'has sold', quindi 'which', e le virgole rendono la "
-            "relativa non-defining. 'that (non-defining)' è vietato, 'which (defining)' sbaglia la "
-            "classificazione, 'where (non-defining)' sbaglia il pronome."
+            "Non-defining: le virgole aggiungono un dato su un romanzo già identificato ('her new "
+            "novel'). 'which' perché il romanzo è il soggetto di 'has sold'; 'where' non può essere "
+            "soggetto. 'that (non-defining)' è vietato; 'which (defining)' ha il pronome giusto e "
+            "la classificazione sbagliata."
         ),
-        clue="Il romanzo compie l'azione: è soggetto, non luogo.",
+        clue="Due virgole; il romanzo è il soggetto del verbo 'has sold'.",
         rule="Nelle non-defining, una cosa soggetto richiede 'which' e mai 'that'.",
     ),
     QuestionSpec(
@@ -541,12 +578,12 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("who (non-defining)", "who (defining)", "that (non-defining)", "which (non-defining)"),
         correct="who (non-defining)",
         explanation=(
-            "Le virgole presentano l'informazione come aggiuntiva su studenti già individuati: "
-            "non-defining. Il pronome è il soggetto di 'had finished', quindi 'who'. "
-            "'who (defining)' sbaglia la classificazione, 'that (non-defining)' è vietato, "
-            "'which (non-defining)' sbaglia l'antecedente."
+            "Non-defining: le virgole presentano l'informazione come aggiuntiva su studenti già "
+            "individuati. 'who' perché sono persone e il pronome è il soggetto di 'had finished'. "
+            "'who (defining)' ha il pronome giusto e la classificazione sbagliata; 'that "
+            "(non-defining)' è vietato; 'which (non-defining)' sbaglia l'antecedente."
         ),
-        clue="Due virgole e una persona soggetto del verbo della relativa.",
+        clue="Due virgole; persone e il verbo 'had finished' senza soggetto.",
         rule="La virgola cambia la classificazione, non il pronome: per le persone soggetto resta 'who'.",
     ),
     QuestionSpec(
@@ -554,12 +591,13 @@ MEDIUM_QUESTIONS: tuple[QuestionSpec, ...] = (
         options=("where (non-defining)", "which (non-defining)", "where (defining)", "that (non-defining)"),
         correct="where (non-defining)",
         explanation=(
-            "'we spent the summer' è completa e indica un soggiorno dentro la villa: serve 'where', "
-            "e le virgole rendono la relativa non-defining. 'which (non-defining)' non può essere "
-            "l'oggetto di 'spent', 'where (defining)' sbaglia la classificazione, "
+            "Non-defining: le virgole rendono accessorio il soggiorno in villa. 'we spent the "
+            "summer' è completa ('the summer' è già l'oggetto) e descrive un'azione dentro la villa, "
+            "quindi serve 'where'. 'which (non-defining)' non può essere l'oggetto di 'spent', che "
+            "ne ha già uno; 'where (defining)' ha il pronome giusto e la classificazione sbagliata; "
             "'that (non-defining)' è vietato."
         ),
-        clue="La relativa è completa: manca il luogo dell'azione, e le virgole la rendono accessoria.",
+        clue="Due virgole; 'spent' ha già il suo oggetto ('the summer'), manca il luogo.",
         rule="'Where' si usa anche nelle non-defining quando la relativa descrive ciò che avviene nel luogo.",
     ),
 )

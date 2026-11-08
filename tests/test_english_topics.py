@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+import re
 from fastapi.testclient import TestClient
 import pytest
 
@@ -16,6 +17,7 @@ from app.generators.english.relative_defining_non_defining import (
     MEDIUM_QUESTIONS as RDN_MEDIUM,
     option_classification,
     sentence_classification,
+    PRONOUNS as RDN_PRONOUNS,
 )
 from app.generators.registry import TOPICS
 from app.main import app
@@ -170,6 +172,17 @@ def test_relative_defining_non_defining_offers_pronoun_and_classification() -> N
                 assert text.strip(), spec.sentence
                 # the text is wrapped in \text{...}: a LaTeX special would break the render
                 assert not set(text) & set("%&$#_\\{}"), (spec.sentence, text)
+
+            # The depth bar, taken from the present-perfect topic: the explanation says WHY
+            # the clause is defining or non-defining before it says which pronoun fits.
+            explanation = spec.explanation.lower()
+            assert explanation.startswith(("defining:", "non-defining:")), spec.sentence
+            assert "virgol" in explanation, spec.sentence
+            assert option_classification(spec.correct) in explanation, spec.sentence
+            # ... and the clue carries the diagnostic signal without naming a pronoun, so it
+            # puts the student on the road without handing over the answer.
+            for pronoun in RDN_PRONOUNS:
+                assert not re.search(rf"\b{pronoun}\b", spec.clue, re.I), (spec.sentence, pronoun)
 
 
 def test_the_comma_is_the_only_thing_that_changes_the_answer() -> None:
