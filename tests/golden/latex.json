@@ -35,6 +35,24 @@
     "\\textbf{which}",
     "\\textbf{which}"
   ],
+  "english.grammar.relative_defining_non_defining|easy": [
+    "\\text{Nessuna virgola e antecedente personale: la relativa identifica la ragazza e il pronome è il soggetto di 'won'.}",
+    "\\text{Defining clause, senza virgole: per le persone soggetto si usa 'who' oppure 'that'.}",
+    "\\textbf{who (defining)}",
+    "\\textbf{who (defining)}"
+  ],
+  "english.grammar.relative_defining_non_defining|hard": [
+    "\\text{Il pronome non sostituisce un nome ma tutto ciò che è appena stato detto.}",
+    "\\text{Per commentare un'intera frase si usa ', which': non-defining e mai 'that'.}",
+    "\\textbf{which (non-defining)}",
+    "\\textbf{which (non-defining)}"
+  ],
+  "english.grammar.relative_defining_non_defining|medium": [
+    "\\text{Il pronome non sostituisce un nome ma tutto ciò che è appena stato detto.}",
+    "\\text{Per commentare un'intera frase si usa ', which': non-defining e mai 'that'.}",
+    "\\textbf{which (non-defining)}",
+    "\\textbf{which (non-defining)}"
+  ],
   "math.equations.first_degree|easy": [
     "4 x = 20",
     "x = \\frac{20}{4}",

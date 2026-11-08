@@ -6,6 +6,9 @@ from typing import Protocol
 
 from app.generators.english.present_perfect import TOPIC as PRESENT_PERFECT
 from app.generators.english.relative_clauses import TOPIC as RELATIVE_CLAUSES
+from app.generators.english.relative_defining_non_defining import (
+    TOPIC as RELATIVE_DEFINING_NON_DEFINING,
+)
 from app.generators.math.first_degree import TOPIC as FIRST_DEGREE
 from app.generators.math.fractional import TOPIC as FRACTIONAL
 from app.generators.math.inequalities import TOPICS as INEQUALITY_TOPICS
@@ -32,6 +35,7 @@ TOPICS: dict[str, Topic] = {
     # english — grammar
     PRESENT_PERFECT.id: PRESENT_PERFECT,
     RELATIVE_CLAUSES.id: RELATIVE_CLAUSES,
+    RELATIVE_DEFINING_NON_DEFINING.id: RELATIVE_DEFINING_NON_DEFINING,
     # mathematics — equations
     FIRST_DEGREE.id: FIRST_DEGREE,
     SECOND_DEGREE.id: SECOND_DEGREE,

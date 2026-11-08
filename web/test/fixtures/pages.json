@@ -496,6 +496,24 @@
       "bare_graph": false,
       "config": [],
       "defaults": {}
+    },
+    {
+      "id": "english-relative-defining-non-defining",
+      "macro": "english",
+      "sub": "grammatica",
+      "kind": "multiple_choice",
+      "topic": "english.grammar.relative_defining_non_defining",
+      "difficulty": "easy",
+      "difficulties": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "label_key": "page.english.relative_defining_non_defining",
+      "count": 20,
+      "bare_graph": false,
+      "config": [],
+      "defaults": {}
     }
   ]
 }

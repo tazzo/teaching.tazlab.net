@@ -103,6 +103,11 @@ PAGES: tuple[Page, ...] = (
          "english.grammar.present_perfect", "easy", "page.english.present_perfect", 10, count=20),
     Page("english-relative-clauses", "english", "grammatica", MULTIPLE_CHOICE,
          "english.grammar.relative_clauses", "easy", "page.english.relative_clauses", 20, count=20),
+    # Same grammar area, harder question: the blank asks for the pronoun *and* the
+    # classification at once, so the commas decide as much as the pronoun does.
+    Page("english-relative-defining-non-defining", "english", "grammatica", MULTIPLE_CHOICE,
+         "english.grammar.relative_defining_non_defining", "easy",
+         "page.english.relative_defining_non_defining", 30, count=20),
 )
 
 MACROS: tuple[str, ...] = ("matematica", "fisica", "english")

@@ -10,6 +10,13 @@ from app.core.rng import make_rng
 from app.core.strings import load_strings
 from app.generators.english.present_perfect import TOPIC as PPS_TOPIC, EASY_QUESTIONS as PPS_EASY
 from app.generators.english.relative_clauses import TOPIC as RELATIVE_TOPIC, EASY_QUESTIONS as RC_EASY
+from app.generators.english.relative_defining_non_defining import (
+    TOPIC as RDN_TOPIC,
+    EASY_QUESTIONS as RDN_EASY,
+    MEDIUM_QUESTIONS as RDN_MEDIUM,
+    option_classification,
+    sentence_classification,
+)
 from app.generators.registry import TOPICS
 from app.main import app
 from app.pages import PAGES, find_page
@@ -18,7 +25,7 @@ from app.render.pdf import worksheet_html
 client = TestClient(app)
 
 
-@pytest.mark.parametrize("topic", [PPS_TOPIC, RELATIVE_TOPIC])
+@pytest.mark.parametrize("topic", [PPS_TOPIC, RELATIVE_TOPIC, RDN_TOPIC])
 @pytest.mark.parametrize("difficulty", ["easy", "medium"])
 def test_english_topic_generation_and_verification(topic, difficulty: str) -> None:
     rng = make_rng(42, topic.id, difficulty, 0)
@@ -42,7 +49,7 @@ def test_english_topic_generation_and_verification(topic, difficulty: str) -> No
     assert result.ok, result.reason
 
 
-@pytest.mark.parametrize("topic", [PPS_TOPIC, RELATIVE_TOPIC])
+@pytest.mark.parametrize("topic", [PPS_TOPIC, RELATIVE_TOPIC, RDN_TOPIC])
 def test_corrupted_english_item_is_rejected(topic) -> None:
     rng = make_rng(100, topic.id, "easy", 0)
     item = topic.generate(rng, "easy", 100, 0)
@@ -66,7 +73,11 @@ def test_corrupted_english_item_is_rejected(topic) -> None:
 
 def test_twenty_items_are_all_distinct_in_a_single_run() -> None:
     """A batch of 20 requested exercises must contain 20 distinct questions."""
-    for topic_id in ("english.grammar.present_perfect", "english.grammar.relative_clauses"):
+    for topic_id in (
+        "english.grammar.present_perfect",
+        "english.grammar.relative_clauses",
+        "english.grammar.relative_defining_non_defining",
+    ):
         for diff in ("easy", "medium"):
             response = client.get(f"/api/generate?topic={topic_id}&difficulty={diff}&seed=12345&count=20")
             assert response.status_code == 200, response.text
@@ -95,6 +106,13 @@ def test_catalogue_contains_english_macro_and_pages() -> None:
     assert rc_page.kind == "multiple_choice"
     assert rc_page.count == 20
 
+    rdn_page = find_page("english-relative-defining-non-defining")
+    assert rdn_page is not None
+    assert rdn_page.macro == "english"
+    assert rdn_page.sub == "grammatica"
+    assert rdn_page.kind == "multiple_choice"
+    assert rdn_page.count == 20
+
 
 def test_english_steps_and_explanations_are_in_italian() -> None:
     """Step explanations and clues must be written in Italian while keeping target English words."""
@@ -121,6 +139,94 @@ def test_sequential_question_order() -> None:
     for i in range(20):
         item = RELATIVE_TOPIC.generate(rng, "easy", 1, i)
         assert item.statement_key == RC_EASY[i].sentence
+
+
+def test_relative_defining_non_defining_offers_pronoun_and_classification() -> None:
+    """The new exercise asks two things at once, and the commas decide the second one.
+
+    A defining clause has no commas and admits 'that'; a non-defining clause sits between
+    commas and forbids it. The invariants below are what make the exercise answerable: one
+    correct option, three distractors that fail for a stated reason, and 'that' never
+    correct inside a non-defining clause.
+    """
+    for pool in (RDN_EASY, RDN_MEDIUM):
+        assert len(pool) >= 20, "a batch of 20 needs at least 20 questions"
+        assert len({spec.sentence for spec in pool}) == len(pool), "duplicate sentence in the pool"
+        for spec in pool:
+            assert len(spec.options) == 4
+            assert len(set(spec.options)) == 4, spec.sentence
+            assert spec.correct in spec.options, spec.sentence
+
+            # every option carries both facts, or it cannot be answered
+            assert all(option_classification(option) for option in spec.options), spec.sentence
+
+            # the classification claimed by the answer is the one the punctuation shows
+            assert option_classification(spec.correct) == sentence_classification(spec.sentence), spec.sentence
+
+            # 'that' is forbidden in a non-defining clause, never the right answer there
+            assert spec.correct != "that (non-defining)", spec.sentence
+
+            for text in (spec.explanation, spec.clue, spec.rule):
+                assert text.strip(), spec.sentence
+                # the text is wrapped in \text{...}: a LaTeX special would break the render
+                assert not set(text) & set("%&$#_\\{}"), (spec.sentence, text)
+
+
+def test_the_comma_is_the_only_thing_that_changes_the_answer() -> None:
+    """At least one question offers the right pronoun under both classifications.
+
+    When the same pronoun appears as 'defining' and as 'non-defining', the pronoun cannot be
+    what decides: the commas are. Those are the cards that teach the rule instead of
+    rewarding a guess.
+    """
+    for pool in (RDN_EASY, RDN_MEDIUM):
+        comma_traps = [
+            spec for spec in pool
+            if any(
+                other.split(" (")[0] == spec.correct.split(" (")[0]
+                and other != spec.correct
+                for other in spec.options
+            )
+        ]
+        assert comma_traps, "no question where the comma alone decides the answer"
+
+
+def test_a_that_non_defining_answer_is_refused_by_verify() -> None:
+    """The grammar truth is enforced, not merely respected by the data."""
+    rng = make_rng(7, RDN_TOPIC.id, "easy", 0)
+    # a card whose punctuation really makes the clause non-defining
+    index = next(
+        i for i in range(len(RDN_EASY))
+        if sentence_classification(RDN_EASY[i].sentence) == "non-defining"
+    )
+    item = RDN_TOPIC.generate(rng, "easy", 7, index)
+    forged = type(item.answer)(
+        latex=item.answer.latex,
+        kind=item.answer.kind,
+        payload={**item.answer.payload, "correct": ["that (non-defining)"]},
+    )
+    result = RDN_TOPIC.verify(type(item)(**{**item.__dict__, "answer": forged}))
+    assert not result.ok
+    assert result.reason == "that_in_non_defining"
+
+
+def test_a_classification_that_contradicts_the_commas_is_refused() -> None:
+    """A defining sentence whose answer claims to be non-defining is a broken question."""
+    rng = make_rng(7, RDN_TOPIC.id, "easy", 0)
+    index = next(
+        i for i in range(len(RDN_EASY))
+        if sentence_classification(RDN_EASY[i].sentence) == "defining"
+    )
+    item = RDN_TOPIC.generate(rng, "easy", 7, index)
+    pronoun = item.answer.payload["correct"][0].split(" (")[0]
+    forged = type(item.answer)(
+        latex=item.answer.latex,
+        kind=item.answer.kind,
+        payload={**item.answer.payload, "correct": [f"{pronoun} (non-defining)"]},
+    )
+    result = RDN_TOPIC.verify(type(item)(**{**item.__dict__, "answer": forged}))
+    assert not result.ok
+    assert result.reason == "classification_mismatch"
 
 
 def test_english_worksheet_html_rendering() -> None:
