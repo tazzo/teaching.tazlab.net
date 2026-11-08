@@ -25,6 +25,16 @@ if shutil.which("node") is None:
     pytest.skip("node is required to render formulas", allow_module_level=True)
 
 
+def levels(topic) -> tuple[str, ...]:
+    """The difficulties the topic actually declares.
+
+    Not every topic has every level: a topic that publishes one level only (the medium
+    present-perfect exercise) would be asked for a difficulty it does not have, and
+    ``verify`` rightly refuses it. The sweep covers what the site can serve.
+    """
+    return tuple(topic.difficulties) or DIFFICULTIES
+
+
 def item_options(topic):
     """Every configuration a page can ask for: the topic's own list, or a single default."""
     configurer = getattr(topic, "configurer", None)
@@ -70,7 +80,7 @@ def test_no_generated_formula_fails_to_render():
     formulas = []
     for topic_id, topic in sorted(TOPICS.items()):
         for options in item_options(topic):
-            for difficulty in DIFFICULTIES:
+            for difficulty in levels(topic):
                 for seed in SEEDS:
                     item = topic.generate(make_rng(seed, topic.id, difficulty, 0),
                                           difficulty, seed, 0, options)

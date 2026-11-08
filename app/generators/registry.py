@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from app.generators.english.present_perfect import TOPIC as PRESENT_PERFECT
+from app.generators.english.present_perfect_medium import TOPIC as PRESENT_PERFECT_MEDIUM
 from app.generators.english.relative_clauses import TOPIC as RELATIVE_CLAUSES
 from app.generators.english.relative_defining_non_defining import (
     TOPIC as RELATIVE_DEFINING_NON_DEFINING,
@@ -34,6 +35,7 @@ class Topic(Protocol):
 TOPICS: dict[str, Topic] = {
     # english — grammar
     PRESENT_PERFECT.id: PRESENT_PERFECT,
+    PRESENT_PERFECT_MEDIUM.id: PRESENT_PERFECT_MEDIUM,
     RELATIVE_CLAUSES.id: RELATIVE_CLAUSES,
     RELATIVE_DEFINING_NON_DEFINING.id: RELATIVE_DEFINING_NON_DEFINING,
     # mathematics — equations

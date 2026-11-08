@@ -1,4 +1,10 @@
 {
+  "english.grammar.present_perfect_medium|medium": [
+    "\\text{Il libro non è finito ('I'm on the last chapter'): la lettura è un'attività ancora aperta.}",
+    "\\text{Il Present Perfect Continuous presenta un'attività iniziata nel passato e non ancora conclusa, con l'accento sul suo svolgersi.}",
+    "\\textbf{have been reading}",
+    "\\textbf{have been reading}"
+  ],
   "english.grammar.present_perfect|easy": [
     "\\text{Stative verb 'know' con indicatore di durata ('for more than ten years').}",
     "\\text{I verbi di stato (know, like, believe, understand) prendono il Present Perfect Simple, mai il continuous.}",

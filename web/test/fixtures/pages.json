@@ -480,6 +480,22 @@
       "defaults": {}
     },
     {
+      "id": "english-present-perfect-medium",
+      "macro": "english",
+      "sub": "grammatica",
+      "kind": "multiple_choice",
+      "topic": "english.grammar.present_perfect_medium",
+      "difficulty": "medium",
+      "difficulties": [
+        "medium"
+      ],
+      "label_key": "page.english.present_perfect_medium",
+      "count": 20,
+      "bare_graph": false,
+      "config": [],
+      "defaults": {}
+    },
+    {
       "id": "english-relative-clauses",
       "macro": "english",
       "sub": "grammatica",

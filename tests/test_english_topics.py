@@ -10,6 +10,13 @@ import pytest
 from app.core.rng import make_rng
 from app.core.strings import load_strings
 from app.generators.english.present_perfect import TOPIC as PPS_TOPIC, EASY_QUESTIONS as PPS_EASY
+from app.generators.english.present_perfect_medium import (
+    TOPIC as PPM_TOPIC,
+    MEDIUM_QUESTIONS as PPM_MEDIUM,
+    aspect,
+    asks_for_a_continuous_form,
+    verb_hint,
+)
 from app.generators.english.relative_clauses import TOPIC as RELATIVE_TOPIC, EASY_QUESTIONS as RC_EASY
 from app.generators.english.relative_defining_non_defining import (
     TOPIC as RDN_TOPIC,
@@ -256,3 +263,158 @@ def test_english_worksheet_html_rendering() -> None:
     html_answers = worksheet_html(items, answers=True, strings=strings)
     assert '<section class="key">' in html_answers
     assert '<span class="answer-label">' in html_answers
+
+
+# --- Present Perfect, the medium level -------------------------------------
+# The page `english-present-perfect` publishes the easy level. These tests guard the
+# second exercise: it must be a distinct topic with its own pool, never the easy pool
+# under a medium label, and its questions must carry the sibling's depth.
+
+
+def test_present_perfect_medium_pool_is_rich_and_well_formed() -> None:
+    """Twenty questions, twenty statements, and four options of which one is right."""
+    assert len(PPM_MEDIUM) >= 20, "a batch of 20 needs at least 20 questions"
+    assert len({spec.sentence for spec in PPM_MEDIUM}) == len(PPM_MEDIUM), "duplicate sentence"
+    for spec in PPM_MEDIUM:
+        assert len(spec.options) == 4, spec.sentence
+        assert len(set(spec.options)) == 4, spec.sentence
+        assert spec.correct in spec.options, spec.sentence
+        assert "______" in spec.sentence, spec.sentence
+
+        for text in (spec.explanation, spec.clue, spec.rule):
+            assert text.strip(), spec.sentence
+            # the text is wrapped in \text{...}: a LaTeX special would break the render
+            assert not set(text) & set("%&$#_\\{}"), (spec.sentence, text)
+
+        # the clue carries the diagnostic signal, not the answer
+        assert spec.correct.lower() not in spec.clue.lower(), spec.sentence
+        # the explanation is the WHY: it names the form and at least one tempting twin
+        assert "present perfect" in spec.explanation.lower(), spec.sentence
+        assert any(option != spec.correct and option in spec.explanation for option in spec.options), (
+            "the explanation must say why the tempting option fails", spec.sentence
+        )
+
+
+def test_present_perfect_medium_weighs_the_two_aspects_against_each_other() -> None:
+    """The level exists to make Simple and Continuous argue on the same sentence.
+
+    Most questions offer both aspects of the same verb, and neither aspect may win the
+    whole pool: a level that is all Simple (or all Continuous) would not be a choice.
+    """
+    both = [spec for spec in PPM_MEDIUM if {aspect(o) for o in spec.options} >= {"simple", "continuous"}]
+    assert len(both) >= 15, "the twin form must be on the table, or there is nothing to choose"
+    simple = [spec for spec in PPM_MEDIUM if aspect(spec.correct) == "simple"]
+    continuous = [spec for spec in PPM_MEDIUM if aspect(spec.correct) == "continuous"]
+    assert len(simple) >= 8, "too few Simple answers: the Continuous would win by habit"
+    assert len(continuous) >= 8, "too few Continuous answers: the Simple would win by habit"
+
+
+def test_present_perfect_medium_for_and_since_are_both_on_the_table() -> None:
+    """`for` and `since` are the two signals the level is built on: each must appear."""
+    assert any(" since " in spec.sentence for spec in PPM_MEDIUM), "no question with 'since'"
+    assert any(" for " in spec.sentence for spec in PPM_MEDIUM), "no question with 'for'"
+
+
+def test_verbs_of_state_never_take_the_continuous_form() -> None:
+    """know, own, believe, possessive have: the -ing twin is offered, and it is wrong."""
+    statives = [spec for spec in PPM_MEDIUM if asks_for_a_continuous_form(spec.sentence)]
+    assert len(statives) >= 3, "the level must exercise verbs of state"
+    for spec in statives:
+        assert aspect(spec.correct) == "simple", spec.sentence
+        assert any(aspect(option) == "continuous" for option in spec.options), spec.sentence
+
+
+def test_a_continuous_answer_for_a_verb_of_state_is_refused_by_verify() -> None:
+    """The grammar truth is enforced, not merely respected by the data."""
+    index = next(
+        i for i, spec in enumerate(PPM_MEDIUM) if verb_hint(spec.sentence) == "know"
+    )
+    rng = make_rng(7, PPM_TOPIC.id, "medium", index)
+    item = PPM_TOPIC.generate(rng, "medium", 7, index)
+    forged = type(item.answer)(
+        latex=item.answer.latex,
+        kind=item.answer.kind,
+        payload={**item.answer.payload, "correct": ["has been knowing"]},
+    )
+    result = PPM_TOPIC.verify(type(item)(**{**item.__dict__, "answer": forged}))
+    assert not result.ok
+    assert result.reason == "stative_in_continuous"
+
+
+def test_a_statement_without_a_blank_is_refused_by_verify() -> None:
+    rng = make_rng(7, PPM_TOPIC.id, "medium", 0)
+    item = PPM_TOPIC.generate(rng, "medium", 7, 0)
+    broken = type(item)(**{**item.__dict__, "statement_key": "She has known the answer since Monday."})
+    result = PPM_TOPIC.verify(broken)
+    assert not result.ok
+    assert result.reason == "missing_blank"
+
+
+def test_present_perfect_medium_is_the_second_level_of_the_topic() -> None:
+    """Two pages over the same grammar: one easy, one medium, each backed by its own topic."""
+    easy_page = find_page("english-present-perfect")
+    medium_page = find_page("english-present-perfect-medium")
+    assert easy_page is not None and medium_page is not None
+
+    assert medium_page.macro == "english"
+    assert medium_page.sub == "grammatica"
+    assert medium_page.kind == "multiple_choice"
+    assert medium_page.count == 20
+    assert medium_page.topic == PPM_TOPIC.id
+    assert PPM_TOPIC.id in TOPICS
+
+    # the two pages are different levels of the same grammar, not the same page twice
+    assert (easy_page.difficulty, medium_page.difficulty) == ("easy", "medium")
+    assert easy_page.topic != medium_page.topic
+    assert PPM_TOPIC.difficulties == ("medium",), (
+        "no easy level under a medium label: a level this pool does not have must be refused"
+    )
+
+    strings = load_strings("it")
+    assert strings[medium_page.label_key].strip()
+    assert strings[PPM_TOPIC.label_key].strip()
+    # the two entries must be tellable apart in the menu
+    assert strings[medium_page.label_key] != strings[easy_page.label_key]
+
+
+def test_present_perfect_medium_serves_twenty_distinct_questions_and_one_level() -> None:
+    base = "/api/generate?topic=english.grammar.present_perfect_medium&seed=12345&count=20"
+
+    response = client.get(f"{base}&difficulty=medium")
+    assert response.status_code == 200, response.text
+    statements = [item["statement"]["key"] for item in response.json()["items"]]
+    assert len(statements) == 20
+    assert len(set(statements)) == 20, "a batch of 20 must be 20 distinct questions"
+
+    refused = client.get(f"{base}&difficulty=easy")
+    assert refused.status_code == 400, "a level this topic does not have must be refused"
+    assert refused.json()["error"]["code"] == "invalid_difficulty"
+
+    pages = client.get("/api/pages").json()["pages"]
+    served = next(page for page in pages if page["id"] == "english-present-perfect-medium")
+    assert served["difficulty"] == "medium"
+    assert served["difficulties"] == ["medium"]
+
+
+def test_the_correct_answer_is_not_always_the_first_option() -> None:
+    """A batch of 20 must spread the answer over the four positions.
+
+    The shuffling is deterministic (a reload shows the same card), so a pool whose data
+    happen to land the answer first every time would teach the student to press A. The
+    spread is checked on a full batch, which is what a page asks for.
+    """
+    response = client.get(
+        "/api/generate?topic=english.grammar.present_perfect_medium&difficulty=medium"
+        "&seed=12345&count=20"
+    )
+    assert response.status_code == 200, response.text
+    positions = [
+        item["answer"]["payload"]["options"].index(item["answer"]["payload"]["correct"][0])
+        for item in response.json()["items"]
+    ]
+    assert len(positions) == 20
+    for position in range(4):
+        assert 2 <= positions.count(position) <= 8, (
+            f"the correct answer sits in position {position} {positions.count(position)} "
+            f"times out of 20: the position is a habit, not a coincidence"
+        )

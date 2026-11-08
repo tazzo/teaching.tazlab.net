@@ -101,6 +101,12 @@ PAGES: tuple[Page, ...] = (
     # --- English / Grammatica ------------------------------------------------
     Page("english-present-perfect", "english", "grammatica", MULTIPLE_CHOICE,
          "english.grammar.present_perfect", "easy", "page.english.present_perfect", 10, count=20),
+    # The same grammar one level up: the easy page asks which form, this one asks why —
+    # duration against result on the same verb, verbs of state, and the for/since traps.
+    # Its topic declares one level only and the page pins it, so the selector disappears.
+    Page("english-present-perfect-medium", "english", "grammatica", MULTIPLE_CHOICE,
+         "english.grammar.present_perfect_medium", "medium",
+         "page.english.present_perfect_medium", 15, count=20),
     Page("english-relative-clauses", "english", "grammatica", MULTIPLE_CHOICE,
          "english.grammar.relative_clauses", "easy", "page.english.relative_clauses", 20, count=20),
     # Same grammar area, harder question: the blank asks for the pronoun *and* the
