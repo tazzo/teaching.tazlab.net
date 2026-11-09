@@ -530,6 +530,22 @@
       "bare_graph": false,
       "config": [],
       "defaults": {}
+    },
+    {
+      "id": "english-relative-classification",
+      "macro": "english",
+      "sub": "grammatica",
+      "kind": "classification_choice",
+      "topic": "english.grammar.relative_classification",
+      "difficulty": "easy",
+      "difficulties": [
+        "easy"
+      ],
+      "label_key": "page.english.relative_classification",
+      "count": 20,
+      "bare_graph": false,
+      "config": [],
+      "defaults": {}
     }
   ]
 }

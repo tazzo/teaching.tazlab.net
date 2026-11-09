@@ -271,3 +271,189 @@ describe("a page without a configurator", () => {
     expect(host.querySelector("article.card .statement").textContent).not.toBe("");
   });
 });
+
+// --- the page where the kind of sentence is chosen -------------------------
+// The operator rejected the previous page because the classification written in every
+// option ("who (defining)") repeats the right kind four times: it can be read off the
+// pattern without looking at the commas. This page asks the kind separately, under the
+// sentence, and the check is disabled until one is chosen. What is asserted here is that
+// interaction, on the cards the server really sends (`fixtures/items.json` is pinned
+// against `/api/generate` by `tests/test_web_fixture.py`), card by card: a disabled state
+// before the click, not an error after it.
+
+describe("the page where the sentence's kind is chosen", () => {
+  const classifying = catalogue.pages.find((entry) => entry.kind === "classification_choice");
+  // the batch the page asks for, as the server produced it (one entry per exercise)
+  const batch = items.classification.body.items;
+
+  const open = async () => {
+    await goTo(`#/${classifying.macro}/${classifying.sub}/${classifying.id}`);
+    await vi.waitFor(() => expect(view().querySelectorAll("article.card"))
+      .toHaveLength(batch.length));
+    return [...view().querySelectorAll("article.card")];
+  };
+
+  const kindButtons = (card) => [...card.querySelectorAll("button.classification-option")];
+  const kindButton = (card, value) =>
+    card.querySelector(`button.classification-option[data-classification="${value}"]`);
+  const optionButton = (card, text) =>
+    [...card.querySelectorAll(".choice-option")]
+      .find((button) => button.querySelector(".choice-text").textContent.trim() === text);
+  const otherKind = (value) => (value === "defining" ? "non-defining" : "defining");
+
+  test("loads its own batch, with no form and no generate button", async () => {
+    await open();
+    expect(view().querySelector("form.controls")).toBeNull();
+    const generate = requested.filter((url) => url.startsWith("/api/generate"));
+    // the harness renders the page twice (jsdom fires its own hashchange, then the test
+    // dispatches one); the same batch is asked twice, identically — one URL, not two
+    expect(new Set(generate).size).toBe(1);
+    const url = new URL(generate[0], "https://teaching.tazlab.net");
+    expect(url.searchParams.get("topic")).toBe(classifying.topic);
+    expect(url.searchParams.get("count")).toBe("20");
+    expect(url.searchParams.get("seed")).toBe("1");
+    expect(url.searchParams.get("figure")).toBe("full");
+  });
+
+  test("twenty cards, twenty distinct sentences", async () => {
+    const cards = await open();
+    expect(cards).toHaveLength(20);
+    const statements = cards.map((card) => card.querySelector(".statement").textContent.trim());
+    expect(new Set(statements).size).toBe(20);
+  });
+
+  test("no option and no sentence carries the classification", async () => {
+    const cards = await open();
+    for (const card of cards) {
+      expect(card.querySelector(".statement").textContent).not.toContain("(");
+      expect(card.querySelector(".statement").textContent).not.toMatch(/defining/i);
+      for (const option of card.querySelectorAll(".choice-text")) {
+        expect(option.textContent).not.toContain("(");
+        expect(option.textContent).not.toMatch(/defining/i);
+      }
+      // and the card never prints the answer the selector is asking for
+      expect(card.textContent).not.toMatch(/\(\s*(non-)?defining\s*\)/i);
+    }
+  });
+
+  test("a selector with the two kinds sits under the sentence, above the pronouns", async () => {
+    const [card] = await open();
+    const picker = card.querySelector(".classification-picker");
+    expect(picker).not.toBeNull();
+    expect(picker.querySelector(".classification-prompt").textContent)
+      .toBe(strings["ui.classification_prompt"]);
+    expect(kindButtons(card).map((button) => button.dataset.classification))
+      .toEqual(["defining", "non-defining"]);
+    expect(kindButtons(card).map((button) => button.textContent))
+      .toEqual([strings["ui.classification_defining"], strings["ui.classification_non_defining"]]);
+    expect(card.innerHTML.indexOf("classification-picker"))
+      .toBeLessThan(card.innerHTML.indexOf("choice-list"));
+  });
+
+  test("every card opens with the check disabled, and says why", async () => {
+    const cards = await open();
+    for (const card of cards) {
+      const check = card.querySelector(".page-actions button");
+      expect(check.disabled).toBe(true);
+      expect(check.getAttribute("aria-disabled")).toBe("true");
+      const hint = card.querySelector(".classification-hint");
+      expect(hint.hidden).toBe(false);
+      expect(hint.textContent).toBe(strings["ui.classification_locked"]);
+    }
+  });
+
+  test("choosing the pronoun does not unlock the check; choosing the kind does", async () => {
+    const [card] = await open();
+    const check = card.querySelector(".page-actions button");
+    const expected = batch[0].answer.payload;
+    optionButton(card, expected.correct[0]).click();
+    expect(check.disabled).toBe(true);            // still locked: the kind is the key
+
+    kindButton(card, expected.classification[0]).click();
+    expect(check.disabled).toBe(false);
+    expect(check.getAttribute("aria-disabled")).toBe("false");
+    expect(card.querySelector(".classification-hint").hidden).toBe(true);
+
+    // pointing the selector at the other kind keeps the check available
+    kindButton(card, otherKind(expected.classification[0])).click();
+    expect(kindButton(card, otherKind(expected.classification[0]))
+      .getAttribute("aria-checked")).toBe("true");
+    expect(kindButton(card, expected.classification[0]).getAttribute("aria-checked")).toBe("false");
+    expect(check.disabled).toBe(false);
+  });
+
+  test("the right pronoun with the wrong kind is wrong, and only the kind is reported", async () => {
+    const [card] = await open();
+    const expected = batch[0].answer.payload;
+    optionButton(card, expected.correct[0]).click();
+    kindButton(card, otherKind(expected.classification[0])).click();
+    card.querySelector(".page-actions button").click();
+
+    const status = card.querySelector(".choice-status");
+    expect(status.className).toContain("bad");
+    expect(status.textContent).toContain(strings["ui.incorrect"]);
+    expect(status.textContent).toContain(strings["ui.classification_wrong"]);
+    expect(status.textContent).not.toContain(strings["ui.pronoun_wrong"]);
+    expect(status.textContent).toContain(expected.explanation[0].slice(0, 30));
+    // the selector shows which kind was right, and the card cannot be re-answered
+    expect(kindButton(card, expected.classification[0])
+      .classList.contains("classification-correct")).toBe(true);
+    expect(kindButton(card, otherKind(expected.classification[0]))
+      .classList.contains("classification-incorrect")).toBe(true);
+    expect(kindButtons(card).every((button) => button.disabled)).toBe(true);
+  });
+
+  test("the wrong pronoun with the right kind reports the pronoun", async () => {
+    const [card] = await open();
+    const expected = batch[0].answer.payload;
+    const wrong = expected.options.find((option) => option !== expected.correct[0]);
+    optionButton(card, wrong).click();
+    kindButton(card, expected.classification[0]).click();
+    card.querySelector(".page-actions button").click();
+    const status = card.querySelector(".choice-status");
+    expect(status.className).toContain("bad");
+    expect(status.textContent).toContain(strings["ui.pronoun_wrong"]);
+    expect(status.textContent).not.toContain(strings["ui.classification_wrong"]);
+  });
+
+  test("both answers right is correct, and every card of the batch can be answered", async () => {
+    const cards = await open();
+    cards.forEach((card, index) => {
+      const expected = batch[index].answer.payload;
+      optionButton(card, expected.correct[0]).click();
+      kindButton(card, expected.classification[0]).click();
+      card.querySelector(".page-actions button").click();
+      const status = card.querySelector(".choice-status");
+      expect(status.className).toContain("good");
+      expect(status.textContent).toContain(strings["ui.correct"]);
+    });
+    // the batch exercises both kinds, or the selector would have one answer
+    expect(new Set(batch.map((item) => item.answer.payload.classification[0])))
+      .toEqual(new Set(["defining", "non-defining"]));
+  });
+
+  test("a second attempt starts locked again", async () => {
+    const [card] = await open();
+    const expected = batch[0].answer.payload;
+    optionButton(card, expected.correct[0]).click();
+    kindButton(card, expected.classification[0]).click();
+    const [check, retry] = card.querySelectorAll(".page-actions button");
+    check.click();
+    retry.click();
+    expect(check.disabled).toBe(true);
+    expect(card.querySelector(".classification-hint").hidden).toBe(false);
+    expect(kindButtons(card).map((button) => button.getAttribute("aria-checked")))
+      .toEqual(["false", "false"]);
+  });
+
+  test("the same sentence drawn as a plain multiple choice has no selector: the rest is untouched", async () => {
+    const { renderItemForKind } = await import("../src/pages.js");
+    const plain = renderItemForKind("multiple_choice", batch[0], 0,
+      { strings, page: { kind: "multiple_choice" } });
+    document.body.append(plain);
+    expect(plain.querySelector(".classification-picker")).toBeNull();
+    expect(plain.querySelector(".classification-hint")).toBeNull();
+    expect(plain.querySelector(".page-actions button").disabled).toBe(false);
+    plain.remove();
+  });
+});

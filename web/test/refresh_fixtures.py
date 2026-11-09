@@ -62,6 +62,14 @@ def main() -> None:
     items["uniform"] = {"url": "/api/generate?topic=physics.kinematics.uniform"
                                 f"&difficulty=easy&seed={SEED}&count=1&figure=hidden",
                         "body": None}
+    # the page where the sentence kind is chosen: the whole batch, at the seed and the
+    # count the page itself asks for (web/src/app.js), so the suite renders real cards of
+    # that page and not a hand-written imitation of one
+    items["classification"] = {
+        "url": "/api/generate?topic=english.grammar.relative_classification"
+               "&difficulty=easy&seed=1&count=20&figure=full",
+        "body": None,
+    }
 
     for fixture in items.values():
         response = client.get(fixture["url"])

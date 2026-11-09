@@ -7,6 +7,8 @@
                 graph_reading  a graph is shown and the answer is read off it
                 graph_filling  the data are given and the student fills an EMPTY graph
                 multiple_choice fill-in-the-blank with multiple choice options
+                classification_choice  the kind of sentence is chosen first, and only then
+                                       can the multiple choice answer be checked
 
 A page binds a kind to a topic (and optionally a difficulty), because the same
 generator can be presented in different ways: reading a graph and completing one use
@@ -25,7 +27,12 @@ PROBLEM = "problem"
 GRAPH_READING = "graph_reading"
 GRAPH_FILLING = "graph_filling"
 MULTIPLE_CHOICE = "multiple_choice"
-KINDS = (PROBLEM, GRAPH_READING, GRAPH_FILLING, MULTIPLE_CHOICE)
+# The same multiple choice, asked in two moves: the student first names the kind the
+# sentence asks for, and only then can the answer be checked. The separate kind exists
+# because the interaction is different (a selector, a check that starts disabled), not
+# because the grammar is.
+CLASSIFICATION_CHOICE = "classification_choice"
+KINDS = (PROBLEM, GRAPH_READING, GRAPH_FILLING, MULTIPLE_CHOICE, CLASSIFICATION_CHOICE)
 
 
 @dataclass(frozen=True)
@@ -114,6 +121,14 @@ PAGES: tuple[Page, ...] = (
     Page("english-relative-defining-non-defining", "english", "grammatica", MULTIPLE_CHOICE,
          "english.grammar.relative_defining_non_defining", "easy",
          "page.english.relative_defining_non_defining", 30, count=20),
+    # The same grammar asked the other way round: no option carries its classification any
+    # more (that label was the answer, repeated), the sentence is followed by a selector
+    # with the two kinds, and the check stays disabled until one of them is chosen. Its own
+    # pool, disjoint from the three above — a page that repeated their sentences would be
+    # the third copy of one exercise.
+    Page("english-relative-classification", "english", "grammatica", CLASSIFICATION_CHOICE,
+         "english.grammar.relative_classification", "easy",
+         "page.english.relative_classification", 40, count=20),
 )
 
 MACROS: tuple[str, ...] = ("matematica", "fisica", "english")

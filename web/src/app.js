@@ -192,6 +192,10 @@ async function fetchItems(topic, difficulty, seed, count, figureMode, options) {
   return body.items;
 }
 
+// The exercise kinds that fill themselves on entry: a grammar worksheet shows the whole
+// batch immediately, so there is no seed, no count and no "Genera" for it to wait for.
+const SELF_LOADING_KINDS = new Set(["multiple_choice", "classification_choice"]);
+
 function renderPage(macro, sub, page) {
   const view = el("section", "page");
   view.append(crumb([
@@ -205,8 +209,9 @@ function renderPage(macro, sub, page) {
   const results = el("main", "results");
 
   // For multiple_choice grammar worksheets, show all questions immediately without
-  // needing random seed, count picker or clicking "Genera".
-  if (page.kind === "multiple_choice") {
+  // needing random seed, count picker or clicking "Genera". The kind that asks the student
+  // to name the sentence type first loads the same way: the lock is on each card.
+  if (SELF_LOADING_KINDS.has(page.kind)) {
     const loadExercises = async () => {
       status.textContent = t("ui.loading", "Caricamento...");
       status.classList.remove("bad");

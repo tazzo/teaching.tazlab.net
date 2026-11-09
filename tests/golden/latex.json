@@ -23,6 +23,11 @@
     "\\textbf{have you been doing}",
     "\\textbf{have you been doing}"
   ],
+  "english.grammar.relative_classification|easy": [
+    "\\text{Nessuna virgola; l'antecedente è una persona e il verbo 'looked after' non ha ancora il suo soggetto.}",
+    "\\text{Defining clause, senza virgole: la relativa identifica il referente. Per le persone soggetto si usa 'who' ('that' è ammesso solo qui, mai tra virgole).}",
+    "\\textbf{who}, \\text{defining}"
+  ],
   "english.grammar.relative_clauses|easy": [
     "\\text{L'antecedente è una persona ('The girl') in una defining relative clause.}",
     "\\text{Si usa 'who' per le persone nelle relative restrittive (defining clauses).}",

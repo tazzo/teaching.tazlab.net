@@ -26,9 +26,15 @@ from app.generators.english.relative_defining_non_defining import (
     sentence_classification,
     PRONOUNS as RDN_PRONOUNS,
 )
+from app.generators.english.relative_classification import (
+    TOPIC as RCK_TOPIC,
+    QUESTIONS as RCK_QUESTIONS,
+    PRONOUNS as RCK_PRONOUNS,
+    CLASSIFICATIONS as RCK_CLASSIFICATIONS,
+)
 from app.generators.registry import TOPICS
 from app.main import app
-from app.pages import PAGES, find_page
+from app.pages import KINDS, PAGES, find_page
 from app.render.pdf import worksheet_html
 
 client = TestClient(app)
@@ -418,3 +424,181 @@ def test_the_correct_answer_is_not_always_the_first_option() -> None:
             f"the correct answer sits in position {position} {positions.count(position)} "
             f"times out of 20: the position is a habit, not a coincidence"
         )
+
+
+# --- Relative clauses: the kind is chosen, not labelled ---------------------
+# The operator rejected the previous page for a reason that is a design rule: an option
+# written as "who (defining)" repeats the correct classification across the four options,
+# so the answer is readable off the pattern instead of the commas. The page
+# `english-relative-classification` therefore asks the kind separately, with a selector
+# (frontend: `web/src/pages.js`, kind `classification_choice`) and grades both answers.
+# These tests hold the server side of that contract, and hold the pool to being *new*.
+
+
+def test_relative_classification_pool_is_new_and_well_formed() -> None:
+    assert len(RCK_QUESTIONS) >= 20, "a batch of 20 needs at least 20 questions"
+    sentences = [spec.sentence for spec in RCK_QUESTIONS]
+    assert len(set(sentences)) == len(sentences), "duplicate sentence in the pool"
+
+    # A new page, not the same questions with the label taken off: no sentence of the new
+    # pool appears in the three relative-clause pools (and the present perfect pools, which
+    # share the macro) already on the site.
+    existing = {
+        spec.sentence
+        for pool in (RC_EASY, RDN_EASY, RDN_MEDIUM, PPS_EASY, PPM_MEDIUM)
+        for spec in pool
+    }
+    assert set(sentences) & existing == set(), "a sentence was copied from an existing pool"
+
+    for spec in RCK_QUESTIONS:
+        assert len(spec.options) == 4, spec.sentence
+        assert len(set(spec.options)) == 4, spec.sentence
+        assert spec.correct in spec.options, spec.sentence
+
+        # an option is a pronoun and nothing else: no classification rides along with it
+        assert all(option in RCK_PRONOUNS for option in spec.options), spec.sentence
+        # and no label anywhere in the sentence, in either spelling
+        assert "(" not in spec.sentence and ")" not in spec.sentence, spec.sentence
+        assert "defining" not in spec.sentence.lower(), spec.sentence
+
+        kind = sentence_classification(spec.sentence)
+        assert kind in RCK_CLASSIFICATIONS, spec.sentence
+
+        # 'that' never introduces a clause between commas ...
+        assert not (spec.correct == "that" and kind == "non-defining"), spec.sentence
+        # ... and is never offered in a defining card, where 'who' or 'which' would be
+        # equally right and the card would carry two correct answers
+        assert not (kind == "defining" and "that" in spec.options), spec.sentence
+
+        for text in (spec.explanation, spec.clue, spec.rule):
+            assert text.strip(), spec.sentence
+            # the text is wrapped in \text{...}: a LaTeX special would break the render
+            assert not set(text) & set("%&$#_\\{}"), (spec.sentence, text)
+
+        # the explanation is the WHY: it names the kind first, and one tempting twin after
+        explanation = spec.explanation.lower()
+        assert explanation.startswith(f"{kind}:"), spec.sentence
+        assert "virgol" in explanation, spec.sentence
+        assert any(option != spec.correct and option in spec.explanation
+                   for option in spec.options), (
+            "the explanation must say why a tempting option fails", spec.sentence
+        )
+        # the clue carries the diagnostic signal and never the answer: it names no pronoun
+        for pronoun in RCK_PRONOUNS:
+            assert not re.search(rf"\b{pronoun}\b", spec.clue, re.I), (spec.sentence, pronoun)
+
+
+def test_relative_classification_serves_twenty_distinct_questions_in_pool_order() -> None:
+    rng = make_rng(1, RCK_TOPIC.id, "easy", 0)
+    for i in range(20):
+        item = RCK_TOPIC.generate(rng, "easy", 1, i)
+        assert item.statement_key == RCK_QUESTIONS[i].sentence
+        assert RCK_TOPIC.verify(item).ok
+
+    base = "/api/generate?topic=english.grammar.relative_classification&seed=12345&count=20"
+    response = client.get(f"{base}&difficulty=easy")
+    assert response.status_code == 200, response.text
+    items = response.json()["items"]
+    assert len(items) == 20
+    statements = [item["statement"]["key"] for item in items]
+    assert len(set(statements)) == 20, "a batch of 20 must be 20 distinct questions"
+    assert not any("defining" in statement.lower() for statement in statements), (
+        "the sentence must not carry the label: the kind is a question, not a printed hint"
+    )
+
+    kinds = set()
+    for item in items:
+        payload = item["answer"]["payload"]
+        assert payload["classification"][0] in RCK_CLASSIFICATIONS, item["statement"]["key"]
+        kinds.add(payload["classification"][0])
+        for option in payload["options"]:
+            assert option in RCK_PRONOUNS, item["statement"]["key"]
+            assert "(" not in option, item["statement"]["key"]
+    # both kinds are on the page, with a selector showing two options only
+    assert kinds == set(RCK_CLASSIFICATIONS), "one kind only: the selector would have one answer"
+
+    refused = client.get(f"{base}&difficulty=medium")
+    assert refused.status_code == 400, "a level this topic does not have must be refused"
+    assert refused.json()["error"]["code"] == "invalid_difficulty"
+
+
+def test_the_chosen_kind_must_be_the_one_the_commas_show() -> None:
+    """The grammar truth is enforced by verify, not merely respected by the data."""
+    seed = 7
+    non_defining = next(
+        i for i, spec in enumerate(RCK_QUESTIONS)
+        if sentence_classification(spec.sentence) == "non-defining"
+    )
+    item = RCK_TOPIC.generate(make_rng(seed, RCK_TOPIC.id, "easy", non_defining),
+                              "easy", seed, non_defining)
+    forged = type(item)(
+        **{**item.__dict__, "answer": type(item.answer)(
+            latex=item.answer.latex,
+            kind=item.answer.kind,
+            payload={**item.answer.payload, "classification": ["defining"]},
+        )}
+    )
+    result = RCK_TOPIC.verify(forged)
+    assert not result.ok
+    assert result.reason == "classification_mismatch"
+
+    # a pronoun with the classification written beside it is the label the operator
+    # rejected: a card like that cannot be answered, only decoded
+    branded = type(item)(
+        **{**item.__dict__, "answer": type(item.answer)(
+            latex=item.answer.latex,
+            kind=item.answer.kind,
+            payload={**item.answer.payload,
+                     "options": [f"{item.answer.payload['correct'][0]} (defining)",
+                                 "which", "whose", "where"]},
+        )}
+    )
+    assert RCK_TOPIC.verify(branded).reason == "option_is_not_a_bare_pronoun"
+
+    # and a sentence that prints its own classification is refused the same way
+    labelled = type(item)(**{
+        **item.__dict__,
+        "statement_key": "The nurse ______ looked after my father works here (non-defining).",
+    })
+    assert RCK_TOPIC.verify(labelled).reason == "statement_carries_the_label"
+
+    # a card with no blank is a broken question, not a hard one
+    blankless = type(item)(**{**item.__dict__, "statement_key": "The nurse looked after my father."})
+    assert RCK_TOPIC.verify(blankless).reason == "missing_blank"
+
+
+def test_the_classification_page_is_a_new_catalogue_entry() -> None:
+    page = find_page("english-relative-classification")
+    assert page is not None, "the new page is not in the catalogue"
+    assert page.macro == "english"
+    assert page.sub == "grammatica"
+    assert page.kind == "classification_choice"
+    assert page.kind in KINDS
+    assert page.count == 20
+    assert page.topic == RCK_TOPIC.id
+    assert RCK_TOPIC.id in TOPICS
+    assert RCK_TOPIC.difficulties == ("easy",), (
+        "one level only: a level this pool does not have must be refused, not served under "
+        "another name"
+    )
+
+    # the previous page stays exactly as it was: two exercises, not two copies of one
+    sibling = find_page("english-relative-defining-non-defining")
+    assert sibling is not None and sibling.id != page.id
+    assert sibling.topic != page.topic
+    assert all("(" in option for spec in RDN_EASY for option in spec.options), (
+        "the old page carries the label on purpose; the new one is the page without it"
+    )
+    assert all("(" not in option for spec in RCK_QUESTIONS for option in spec.options)
+
+    strings = load_strings("it")
+    assert strings[page.label_key].strip()
+    assert strings[RCK_TOPIC.label_key].strip()
+    assert strings[page.label_key] != strings[sibling.label_key], (
+        "the two pages must be tellable apart in the menu"
+    )
+
+    served = next(p for p in client.get("/api/pages").json()["pages"] if p["id"] == page.id)
+    assert served["kind"] == "classification_choice"
+    assert served["count"] == 20
+    assert served["difficulties"] == ["easy"]

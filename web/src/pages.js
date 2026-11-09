@@ -316,11 +316,219 @@ export function renderMultipleChoicePage(item, index, context) {
   return card;
 }
 
+/**
+ * kind: classification_choice — the kind of sentence is a question of its own.
+ *
+ * The sibling page writes the classification inside every option ("who (defining)"), which
+ * gives the answer away: the right kind is the one that repeats across the four options, so
+ * it can be read off the pattern without ever looking at the commas. Here the options are
+ * bare pronouns and the kind is asked separately, under the sentence:
+ *
+ *   [ defining ] [ non-defining ]        <- nothing is checkable until one is chosen
+ *
+ * The check button is born `disabled` and, while it is, a line under it says why: the lock
+ * has to be visible before the click, not an error after it. `data-classification` on each
+ * selector button is the value compared with `payload.classification[0]`; the server checks
+ * the same grammar in `verify()`, so the lock is a teaching device, not the only guard.
+ */
+export function renderClassificationChoicePage(item, index, context) {
+  const { strings } = context;
+  const t = translate(strings);
+  const card = el("article", "card multiple-choice-card classification-card");
+  const { header, statement } = cardHeader(item, index);
+  statement.append(renderText(t(item.statement.key, item.statement.key), item.statement.params));
+  header.append(statement);
+  card.append(header);
+
+  const payload = item.answer?.payload ?? {};
+  const options = payload.options ?? [];
+  const correctAnswer = payload.correct?.[0] ?? "";
+  const correctClassification = payload.classification?.[0] ?? "";
+  const explanation = payload.explanation?.[0] ?? "";
+
+  let selectedOption = null;
+  let selectedClassification = null;
+  const optionButtons = [];
+  const classificationButtons = [];
+
+  // --- the kind: the first question, and the lock on the second ------------------
+  const kindHost = el("div", "classification-picker");
+  const kindPrompt = t("ui.classification_prompt", "Che tipo di relativa \u00e8 questa frase?");
+  kindHost.append(el("p", "classification-prompt", kindPrompt));
+  const kindGroup = el("div", "classification-choices");
+  kindGroup.setAttribute("role", "radiogroup");
+  kindGroup.setAttribute("aria-label", kindPrompt);
+
+  [
+    ["defining", t("ui.classification_defining", "Defining")],
+    ["non-defining", t("ui.classification_non_defining", "Non-defining")],
+  ].forEach(([value, label]) => {
+    const btn = el("button", "classification-option");
+    btn.type = "button";
+    btn.dataset.classification = value;
+    btn.setAttribute("role", "radio");
+    btn.setAttribute("aria-checked", "false");
+    btn.append(el("span", "classification-text", label));
+    btn.addEventListener("click", () => {
+      if (card.dataset.checked === "true") return;
+      classificationButtons.forEach((other) => {
+        other.classList.remove("selected");
+        other.setAttribute("aria-checked", "false");
+      });
+      btn.classList.add("selected");
+      btn.setAttribute("aria-checked", "true");
+      selectedClassification = value;
+      status.replaceChildren();
+      status.className = "choice-status";
+      syncLock();
+    });
+    classificationButtons.push(btn);
+    kindGroup.append(btn);
+  });
+  kindHost.append(kindGroup);
+  card.append(kindHost);
+
+  // --- the pronoun: the multiple choice the other grammar pages already draw -----
+  const choiceList = el("div", "choice-list");
+  const letters = ["A", "B", "C", "D", "E", "F"];
+
+  options.forEach((optText, optIndex) => {
+    const btn = el("button", "choice-option");
+    btn.type = "button";
+    btn.setAttribute("role", "radio");
+    btn.setAttribute("aria-checked", "false");
+
+    const letterSpan = el("span", "choice-letter", letters[optIndex] ?? String(optIndex + 1));
+    const textSpan = el("span", "choice-text", optText);
+    btn.append(letterSpan, textSpan);
+
+    btn.addEventListener("click", () => {
+      if (card.dataset.checked === "true") return;
+      optionButtons.forEach((other) => {
+        other.classList.remove("selected");
+        other.setAttribute("aria-checked", "false");
+      });
+      btn.classList.add("selected");
+      btn.setAttribute("aria-checked", "true");
+      selectedOption = optText;
+      status.replaceChildren();
+      status.className = "choice-status";
+    });
+
+    optionButtons.push(btn);
+    choiceList.append(btn);
+  });
+
+  choiceList.setAttribute("role", "radiogroup");
+  card.append(choiceList);
+
+  const status = el("div", "choice-status");
+  const lockedHint = el("p", "classification-hint",
+    t("ui.classification_locked",
+      "Scegli il tipo di relativa: finch\u00e9 non scegli, la verifica resta bloccata."));
+
+  const actions = el("div", "page-actions");
+  const checkBtn = el("button", "btn btn-quiet", t("ui.check_answer", "Verifica"));
+  checkBtn.type = "button";
+  const retryBtn = el("button", "btn btn-quiet", t("ui.try_again", "Riprova"));
+  retryBtn.type = "button";
+  retryBtn.style.display = "none";
+  actions.append(checkBtn, retryBtn);
+  card.append(actions, lockedHint, status);
+
+  /** The lock and its visible reason travel together: one without the other is a puzzle. */
+  function syncLock() {
+    const locked = selectedClassification === null;
+    checkBtn.disabled = locked;
+    checkBtn.setAttribute("aria-disabled", String(locked));
+    lockedHint.hidden = !locked;
+  }
+
+  checkBtn.addEventListener("click", () => {
+    // a disabled button does not fire; the guard is for keyboard and programmatic clicks
+    if (selectedClassification === null || !selectedOption) return;
+
+    card.dataset.checked = "true";
+    checkBtn.style.display = "none";
+    retryBtn.style.display = "";
+    lockedHint.hidden = true;
+
+    const pronounRight = selectedOption.trim() === correctAnswer.trim();
+    const kindRight = selectedClassification === correctClassification;
+
+    optionButtons.forEach((btn) => {
+      const btnText = btn.querySelector(".choice-text")?.textContent?.trim();
+      btn.disabled = true;
+      if (btnText === correctAnswer.trim()) {
+        btn.classList.add("choice-correct");
+      } else if (btn.classList.contains("selected")) {
+        btn.classList.add("choice-incorrect");
+      }
+    });
+    classificationButtons.forEach((btn) => {
+      btn.disabled = true;
+      if (btn.dataset.classification === correctClassification) {
+        btn.classList.add("classification-correct");
+      } else if (btn.dataset.classification === selectedClassification) {
+        btn.classList.add("classification-incorrect");
+      }
+    });
+
+    status.replaceChildren();
+    if (pronounRight && kindRight) {
+      status.className = "choice-status good";
+      status.append(el("strong", "status-badge", `\u2713 ${t("ui.correct", "Corretto!")}`));
+    } else {
+      status.className = "choice-status bad";
+      status.append(el("strong", "status-badge", `\u2717 ${t("ui.incorrect", "Non corretto")}`));
+      // two facts were asked, so the sentence says which one fell
+      if (!kindRight) {
+        status.append(el("p", "choice-hint",
+          t("ui.classification_wrong", "Il tipo di relativa non \u00e8 quello giusto.")));
+      }
+      if (!pronounRight) {
+        status.append(el("p", "choice-hint", t("ui.pronoun_wrong", "Il pronome non \u00e8 quello giusto.")));
+      }
+    }
+    if (explanation) status.append(el("p", "choice-explanation", explanation));
+  });
+
+  retryBtn.addEventListener("click", () => {
+    card.dataset.checked = "false";
+    selectedOption = null;
+    selectedClassification = null;
+    optionButtons.forEach((btn) => {
+      btn.disabled = false;
+      btn.classList.remove("selected", "choice-correct", "choice-incorrect");
+      btn.setAttribute("aria-checked", "false");
+    });
+    classificationButtons.forEach((btn) => {
+      btn.disabled = false;
+      btn.classList.remove("selected", "classification-correct", "classification-incorrect");
+      btn.setAttribute("aria-checked", "false");
+    });
+    checkBtn.style.display = "";
+    retryBtn.style.display = "none";
+    status.replaceChildren();
+    status.className = "choice-status";
+    syncLock();                       // a second attempt starts locked again
+  });
+
+  syncLock();                         // the page opens locked, not after a first mistake
+
+  if (item.steps && item.steps.length) {
+    card.append(stepsBlock(item, t));
+  }
+
+  return card;
+}
+
 const RENDERERS = {
   problem: renderProblemPage,
   graph_reading: renderGraphReadingPage,
   graph_filling: renderGraphFillingPage,
   multiple_choice: renderMultipleChoicePage,
+  classification_choice: renderClassificationChoicePage,
 };
 
 

@@ -715,5 +715,836 @@
       ],
       "options": {}
     }
+  },
+  "classification": {
+    "url": "/api/generate?topic=english.grammar.relative_classification&difficulty=easy&seed=1&count=20&figure=full",
+    "body": {
+      "topic": "english.grammar.relative_classification",
+      "difficulty": "easy",
+      "seed": 1,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "The nurse ______ looked after my father works at the city hospital.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; l'antecedente è una persona e il verbo 'looked after' non ha ancora il suo soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Defining clause, senza virgole: la relativa identifica il referente. Per le persone soggetto si usa 'who' ('that' è ammesso solo qui, mai tra virgole).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{who}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "which",
+                "where",
+                "who",
+                "whose"
+              ],
+              "correct": [
+                "who"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: non ci sono virgole e la relativa dice di quale infermiera si parla — senza di essa la frase non identifica una persona precisa. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'looked after'. 'which' sbaglia l'antecedente, 'whose' esigerebbe un sostantivo posseduto al posto di un verbo, e 'where' non può fare da soggetto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 1,
+          "statement": {
+            "key": "My cousin Anna, ______ studied in Vienna, now works for a bank.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole e un nome proprio che identifica già la persona; il verbo 'studied' aspetta il soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Non-defining clause, tra virgole: informazione accessoria. Per le persone si usa 'who'; 'that' è escluso.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{who}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "where",
+                "which",
+                "that"
+              ],
+              "correct": [
+                "who"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: la relativa è chiusa fra due virgole e aggiunge un dettaglio su una persona già identificata dal nome, quindi la frase regge anche senza. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'studied'. 'that' è sempre vietato tra virgole, 'which' sbaglia l'antecedente personale e 'where' non può fare da soggetto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 2,
+          "statement": {
+            "key": "This is the recipe ______ my grandmother wrote on a postcard.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola, antecedente inanimato, e 'wrote' cerca ancora il suo oggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Defining clause: per le cose oggetto si usa 'which' (oppure 'that').}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{which}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "whose",
+                "where",
+                "which"
+              ],
+              "correct": [
+                "which"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa dice di quale ricetta si tratta. Il pronome è 'which' perché l'antecedente è una cosa e il pronome è l'oggetto di 'wrote'. 'who' sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non può essere l'oggetto di un verbo."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 3,
+          "statement": {
+            "key": "The old bridge, ______ was built by the Romans, is still in use.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole; l'antecedente è una cosa e il verbo passivo 'was built' non ha soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Non-defining clause: per le cose soggetto si usa 'which'; 'that' non entra mai fra virgole.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{which}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "which",
+                "that",
+                "whose"
+              ],
+              "correct": [
+                "which"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: le virgole aggiungono un'informazione su un ponte già identificato. Il pronome è 'which' perché l'antecedente è una cosa e il pronome è il soggetto del passivo 'was built'. 'that' è vietato tra virgole, 'who' sbaglia l'antecedente e 'whose' esigerebbe un sostantivo posseduto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 4,
+          "statement": {
+            "key": "The woman ______ car was stolen called the police immediately.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; rapporto di possesso fra la donna e l'auto, e 'car' non ha articolo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Whose' esprime possesso e regge il sostantivo che segue, sia in defining sia in non-defining.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{whose}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "where",
+                "whose",
+                "which",
+                "who"
+              ],
+              "correct": [
+                "whose"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa identifica la donna. Il pronome è 'whose' perché 'car' appartiene a lei: è l'unico relativo che regge direttamente un sostantivo. 'who' non può introdurre 'car', 'which' sbaglia l'antecedente personale e 'where' indica un luogo."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 5,
+          "statement": {
+            "key": "Our neighbours, ______ son plays in the national team, moved to Spain.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole; il figlio è dei vicini, e 'son' non ha articolo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Whose' vale anche per i legami di famiglia: prende il posto di 'their' e regge il sostantivo.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{whose}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "which",
+                "whose",
+                "that"
+              ],
+              "correct": [
+                "whose"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: le virgole presentano il figlio come dettaglio di vicini già identificati. Il pronome è 'whose' perché 'son' appartiene a loro. 'who' non può reggere 'son', 'that' è vietato tra virgole e 'which' sbaglia l'antecedente personale."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 6,
+          "statement": {
+            "key": "The bicycle ______ belongs to my neighbour has a broken chain.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; antecedente inanimato e il verbo 'belongs to' senza soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Defining clause con una cosa soggetto: 'which' (oppure 'that').}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{which}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "which",
+                "whose",
+                "where",
+                "who"
+              ],
+              "correct": [
+                "which"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa dice di quale bicicletta si parla. Il pronome è 'which' perché l'antecedente è una cosa e il pronome è il soggetto di 'belongs to'. 'who' sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non può fare da soggetto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 7,
+          "statement": {
+            "key": "Alberto, ______ works in my office, speaks four languages fluently.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole; nome proprio e il verbo 'works' che aspetta il soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Dopo un nome proprio la relativa è di norma accessoria: virgole e 'who', mai 'that'.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{who}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "whose",
+                "that",
+                "which"
+              ],
+              "correct": [
+                "who"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: il nome proprio identifica già la persona e le virgole aggiungono un dettaglio. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'works'. 'that' è vietato tra virgole, 'which' sbaglia l'antecedente e 'whose' esigerebbe un sostantivo posseduto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 8,
+          "statement": {
+            "key": "The library ______ I borrowed this atlas is on the second floor.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; 'I borrowed this atlas' ha già soggetto e oggetto, quindi non cerca un oggetto ma un luogo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Se la relativa è completa si usa 'where' (in cui / nel quale); 'which' e 'that' servono solo come soggetto o oggetto.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{where}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "whose",
+                "where",
+                "which"
+              ],
+              "correct": [
+                "where"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa identifica la biblioteca. 'I borrowed this atlas' ha già soggetto e oggetto, quindi manca il complemento di luogo e serve 'where'. 'which' sarebbe corretto solo con una preposizione davanti ('from which'), 'whose' esprime possesso e 'who' è riservato alle persone."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 9,
+          "statement": {
+            "key": "The conference, ______ took place in Lisbon, was attended by two hundred people.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole; il luogo è già nella relativa ('in Lisbon'), quindi manca il soggetto, non il luogo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Nelle non-defining una cosa soggetto richiede 'which'; 'where' sostituisce solo un complemento di luogo mancante.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{which}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "that",
+                "where",
+                "who",
+                "which"
+              ],
+              "correct": [
+                "which"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: le virgole aggiungono il luogo a una conferenza già identificata. Il pronome è 'which' perché la conferenza è il soggetto di 'took place'; 'where' sarebbe sbagliato, perché il luogo è già detto ('in Lisbon') e 'took place' non cerca un complemento. 'that' è vietato tra virgole e 'who' sbaglia l'antecedente."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 10,
+          "statement": {
+            "key": "Children ______ eat too much sugar often have problems at school.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; antecedente personale e il verbo 'eat' senza soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Defining clause: per le persone soggetto si usa 'who' ('that' è ammesso solo qui).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{who}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "whose",
+                "which",
+                "where",
+                "who"
+              ],
+              "correct": [
+                "who"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa restringe il gruppo ai bambini che mangiano troppo zucchero — è informazione essenziale. Il pronome è 'who' perché sono persone e il pronome è il soggetto di 'eat'. 'which' sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non può fare da soggetto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 11,
+          "statement": {
+            "key": "Her grandfather, ______ health is sadly failing, lives with them now.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole; la salute è del nonno, e 'health' non ha articolo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Whose' è l'unico relativo che regge direttamente un sostantivo: vale in entrambe le classificazioni.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{whose}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "that",
+                "whose",
+                "who",
+                "which"
+              ],
+              "correct": [
+                "whose"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: il possessivo 'her' e le virgole rendono accessoria l'informazione. Il pronome è 'whose' perché la salute è del nonno e 'health' è un sostantivo che dipende dal relativo. 'who' non può reggere 'health', 'that' è vietato tra virgole e 'which' sbaglia l'antecedente personale."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 12,
+          "statement": {
+            "key": "The keys ______ I left on the table this morning have disappeared.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; antecedente inanimato e 'left' cerca il suo oggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Defining clause: per le cose oggetto si usa 'which' (oppure 'that').}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{which}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "which",
+                "who",
+                "where",
+                "whose"
+              ],
+              "correct": [
+                "which"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa dice di quali chiavi si parla. Il pronome è 'which' perché l'antecedente è una cosa e il pronome è l'oggetto di 'left'. 'who' sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non può essere l'oggetto di un verbo."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 13,
+          "statement": {
+            "key": "The photograph, ______ was taken in 1963, hangs in the hallway.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole; la fotografia è il soggetto del verbo passivo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Nelle non-defining un oggetto soggetto richiede 'which'; 'that' non è mai ammesso.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{which}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "which",
+                "who",
+                "that",
+                "where"
+              ],
+              "correct": [
+                "which"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: le virgole aggiungono una data a una fotografia già identificata. Il pronome è 'which' perché la fotografia è il soggetto del passivo 'was taken'; 'where' indicherebbe il luogo di un'azione, non il soggetto che la subisce. 'that' è vietato tra virgole e 'who' sbaglia l'antecedente."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 14,
+          "statement": {
+            "key": "A carpenter is a person ______ makes wooden furniture.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; 'a person' è una persona e 'makes' non ha ancora il soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Defining clause: con i nomi di mestiere si usa 'who' (o 'that') come soggetto.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{who}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "whose",
+                "who",
+                "where",
+                "which"
+              ],
+              "correct": [
+                "who"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa definisce che cosa è un falegname. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'makes'. 'which' sbaglia l'antecedente, 'whose' esigerebbe un sostantivo posseduto e 'where' non può fare da soggetto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 15,
+          "statement": {
+            "key": "Our guide, ______ had never been to the castle before, got lost twice.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole; una persona e il verbo 'had been' senza soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{La virgola cambia la classificazione, non il pronome: per le persone soggetto resta 'who'.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{who}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "that",
+                "who",
+                "which",
+                "where"
+              ],
+              "correct": [
+                "who"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: le virgole aggiungono un dettaglio su una guida già identificata. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'had been'. 'that' è vietato tra virgole, 'which' sbaglia l'antecedente e 'where' non può fare da soggetto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 16,
+          "statement": {
+            "key": "The village ______ my parents got married has a famous bridge.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; 'got married' è intransitivo, quindi la relativa non cerca un oggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Con i luoghi si usa 'where' quando la relativa è completa; 'which' e 'that' solo se servono da soggetto o oggetto.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{where}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "which",
+                "who",
+                "where",
+                "whose"
+              ],
+              "correct": [
+                "where"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa identifica il paese. 'my parents got married' è completa e non ha oggetto, quindi manca il complemento di luogo: 'where'. 'which' avrebbe bisogno di una preposizione ('in which'), 'whose' esprime possesso e 'who' è riservato alle persone."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 17,
+          "statement": {
+            "key": "The little restaurant, ______ tables overlook the harbour, serves fresh fish.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole; i tavoli sono del ristorante, e 'tables' non ha articolo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Whose' si usa anche per gli oggetti e i locali, al posto di 'of which'.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{whose}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "that",
+                "which",
+                "whose"
+              ],
+              "correct": [
+                "whose"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: le virgole aggiungono un dettaglio su un ristorante già identificato. Il pronome è 'whose' perché i tavoli sono del ristorante e 'tables' è il sostantivo che dipende dal relativo. 'which' non può reggere 'tables', 'that' è vietato tra virgole e 'who' sbaglia l'antecedente."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 18,
+          "statement": {
+            "key": "The athlete ______ ankle was injured during the race withdrew immediately.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; la caviglia è dell'atleta, e 'ankle' non ha articolo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Whose' si usa anche per le parti del corpo, in entrambe le classificazioni.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{whose}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "where",
+                "whose",
+                "which",
+                "who"
+              ],
+              "correct": [
+                "whose"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa identifica l'atleta. Il pronome è 'whose' perché 'ankle' è parte di lui. 'who' non può reggere 'ankle', 'which' sbaglia l'antecedente personale e 'where' indica un luogo."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 19,
+          "statement": {
+            "key": "The exam, ______ I had prepared for all winter, turned out to be easy.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole; la preposizione 'for' è rimasta in fondo e cerca il suo oggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Nelle non-defining il pronome oggetto resta necessario: la preposizione in fondo regge 'which', mai 'that'.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{which}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "that",
+                "who",
+                "whose",
+                "which"
+              ],
+              "correct": [
+                "which"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "explanation": [
+                "Non-defining: le virgole aggiungono un dettaglio su un esame già identificato. Il pronome è 'which' perché l'esame è ciò per cui ci si è preparati: è l'oggetto della preposizione finale 'for'. 'that' è vietato tra virgole, 'who' sbaglia l'antecedente e 'whose' esigerebbe un sostantivo posseduto."
+              ]
+            }
+          },
+          "figure": null
+        }
+      ],
+      "options": {}
+    }
   }
 }

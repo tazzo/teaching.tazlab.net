@@ -623,3 +623,62 @@ a { color: var(--accent); text-underline-offset: 2px; }
   .answer { background: none; padding: 0; }
   .katex-display { overflow: visible; }
 }
+
+/* --- 6.2 classification choice -------------------------------------------- */
+/* The kind is a question of its own: it sits above the pronoun list, and the two buttons
+   read as a choice of one, not as an action. The correct/incorrect colours are the ones
+   the options already use, so a student reads one vocabulary, not two. */
+.classification-picker { margin: var(--space-3) 0 0; }
+.classification-prompt {
+  margin: 0 0 var(--space-2);
+  font-size: var(--size-sm);
+  color: var(--muted);
+}
+.classification-choices { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.classification-option {
+  padding: 0.5rem 1.125rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--size-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.classification-option:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.classification-option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.classification-option.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-weight: 600;
+  box-shadow: 0 0 0 2px var(--accent-ring);
+}
+.classification-option.classification-correct {
+  border-color: var(--success);
+  background: #f0fdf4;
+  color: var(--success);
+  font-weight: 600;
+}
+.classification-option.classification-incorrect {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.classification-hint {
+  margin: var(--space-2) 0 0;
+  font-size: var(--size-sm);
+  color: var(--muted);
+}
+.choice-hint {
+  margin: var(--space-1) 0 0;
+  color: var(--ink);
+  line-height: 1.5;
+}

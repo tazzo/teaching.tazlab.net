@@ -6,6 +6,7 @@ from typing import Protocol
 
 from app.generators.english.present_perfect import TOPIC as PRESENT_PERFECT
 from app.generators.english.present_perfect_medium import TOPIC as PRESENT_PERFECT_MEDIUM
+from app.generators.english.relative_classification import TOPIC as RELATIVE_CLASSIFICATION
 from app.generators.english.relative_clauses import TOPIC as RELATIVE_CLAUSES
 from app.generators.english.relative_defining_non_defining import (
     TOPIC as RELATIVE_DEFINING_NON_DEFINING,
@@ -38,6 +39,7 @@ TOPICS: dict[str, Topic] = {
     PRESENT_PERFECT_MEDIUM.id: PRESENT_PERFECT_MEDIUM,
     RELATIVE_CLAUSES.id: RELATIVE_CLAUSES,
     RELATIVE_DEFINING_NON_DEFINING.id: RELATIVE_DEFINING_NON_DEFINING,
+    RELATIVE_CLASSIFICATION.id: RELATIVE_CLASSIFICATION,
     # mathematics — equations
     FIRST_DEGREE.id: FIRST_DEGREE,
     SECOND_DEGREE.id: SECOND_DEGREE,
