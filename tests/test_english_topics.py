@@ -17,21 +17,13 @@ from app.generators.english.present_perfect_medium import (
     asks_for_a_continuous_form,
     verb_hint,
 )
-from app.generators.english.relative_clauses import TOPIC as RELATIVE_TOPIC, EASY_QUESTIONS as RC_EASY
-from app.generators.english.relative_defining_non_defining import (
-    TOPIC as RDN_TOPIC,
-    EASY_QUESTIONS as RDN_EASY,
-    MEDIUM_QUESTIONS as RDN_MEDIUM,
-    option_classification,
-    sentence_classification,
-    PRONOUNS as RDN_PRONOUNS,
-)
 from app.generators.english.relative_classification import (
     TOPIC as RCK_TOPIC,
     QUESTIONS as RCK_QUESTIONS,
     PRONOUNS as RCK_PRONOUNS,
     CLASSIFICATIONS as RCK_CLASSIFICATIONS,
 )
+from app.generators.english.relative_grammar import sentence_classification
 from app.generators.english.present_perfect_simple_continuous import (
     TOPIC as PPSC_TOPIC,
     QUESTIONS as PPSC_QUESTIONS,
@@ -47,8 +39,11 @@ from app.render.pdf import worksheet_html
 client = TestClient(app)
 
 
-@pytest.mark.parametrize("topic", [PPS_TOPIC, RELATIVE_TOPIC, RDN_TOPIC])
-@pytest.mark.parametrize("difficulty", ["easy", "medium"])
+@pytest.mark.parametrize(("topic", "difficulty"), [
+    (PPS_TOPIC, "easy"),
+    (PPS_TOPIC, "medium"),
+    (RCK_TOPIC, "easy"),
+])
 def test_english_topic_generation_and_verification(topic, difficulty: str) -> None:
     rng = make_rng(42, topic.id, difficulty, 0)
     item = topic.generate(rng, difficulty, 42, 0)
@@ -71,13 +66,15 @@ def test_english_topic_generation_and_verification(topic, difficulty: str) -> No
     assert result.ok, result.reason
 
 
-@pytest.mark.parametrize("topic", [PPS_TOPIC, RELATIVE_TOPIC, RDN_TOPIC])
-def test_corrupted_english_item_is_rejected(topic) -> None:
+@pytest.mark.parametrize(("topic", "corrupted_options"), [
+    (PPS_TOPIC, ["wrong1", "wrong2", "wrong3", "wrong4"]),
+    # the relative page grades the shape of an option before the answer, so a corrupted
+    # card there is four bare pronouns that do not contain the correct one
+    (RCK_TOPIC, ["who", "which", "whose", "where"]),
+])
+def test_corrupted_english_item_is_rejected(topic, corrupted_options) -> None:
     rng = make_rng(100, topic.id, "easy", 0)
     item = topic.generate(rng, "easy", 100, 0)
-
-    # Corrupt by removing the correct answer from options
-    corrupted_options = ["wrong1", "wrong2", "wrong3", "wrong4"]
     corrupted_answer = type(item.answer)(
         latex=item.answer.latex,
         kind=item.answer.kind,
@@ -95,18 +92,21 @@ def test_corrupted_english_item_is_rejected(topic) -> None:
 
 def test_twenty_items_are_all_distinct_in_a_single_run() -> None:
     """A batch of 20 requested exercises must contain 20 distinct questions."""
-    for topic_id in (
-        "english.grammar.present_perfect",
-        "english.grammar.relative_clauses",
-        "english.grammar.relative_defining_non_defining",
+    for topic_id, difficulty in (
+        ("english.grammar.present_perfect", "easy"),
+        ("english.grammar.present_perfect", "medium"),
+        ("english.grammar.relative_classification", "easy"),
     ):
-        for diff in ("easy", "medium"):
-            response = client.get(f"/api/generate?topic={topic_id}&difficulty={diff}&seed=12345&count=20")
-            assert response.status_code == 200, response.text
-            body = response.json()
-            statements = [item["statement"]["key"] for item in body["items"]]
-            assert len(statements) == 20
-            assert len(set(statements)) == 20, f"Found duplicate questions in {topic_id} {diff}"
+        response = client.get(
+            f"/api/generate?topic={topic_id}&difficulty={difficulty}&seed=12345&count=20"
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        statements = [item["statement"]["key"] for item in body["items"]]
+        assert len(statements) == 20
+        assert len(set(statements)) == 20, (
+            f"Found duplicate questions in {topic_id} {difficulty}"
+        )
 
 
 def test_catalogue_contains_english_macro_and_pages() -> None:
@@ -122,18 +122,24 @@ def test_catalogue_contains_english_macro_and_pages() -> None:
     assert pps_page.kind == "multiple_choice"
     assert pps_page.count == 20
 
-    rc_page = find_page("english-relative-clauses")
-    assert rc_page is not None
-    assert rc_page.macro == "english"
-    assert rc_page.kind == "multiple_choice"
-    assert rc_page.count == 20
+    # The catalogue changed on the operator's request (task-281711): the two
+    # multiple-choice relative pages were fused into the classification page, so their
+    # ids are gone from the catalogue and from the registry, not merely unlisted.
+    for removed in ("english-relative-clauses", "english-relative-defining-non-defining"):
+        assert find_page(removed) is None, f"{removed} is still in the catalogue"
+    for removed_topic in (
+        "english.grammar.relative_clauses",
+        "english.grammar.relative_defining_non_defining",
+    ):
+        assert removed_topic not in TOPICS, f"{removed_topic} is still a served topic"
 
-    rdn_page = find_page("english-relative-defining-non-defining")
-    assert rdn_page is not None
-    assert rdn_page.macro == "english"
-    assert rdn_page.sub == "grammatica"
-    assert rdn_page.kind == "multiple_choice"
-    assert rdn_page.count == 20
+    relative_pages = [
+        page for page in PAGES if page.macro == "english" and "relative" in page.id
+    ]
+    assert [page.id for page in relative_pages] == ["english-relative-classification"], (
+        "one relative page only: two identical pages are a duplicate even when one is "
+        "prettier"
+    )
 
 
 def test_english_steps_and_explanations_are_in_italian() -> None:
@@ -145,8 +151,8 @@ def test_english_steps_and_explanations_are_in_italian() -> None:
     assert "verbi" in item_pps.steps[1].latex.lower() or "forma" in item_pps.steps[1].latex.lower()
     assert "verbo" in item_pps.answer.payload["explanation"][0].lower() or "forma" in item_pps.answer.payload["explanation"][0].lower()
 
-    rng = make_rng(42, RELATIVE_TOPIC.id, "easy", 0)
-    item_rc = RELATIVE_TOPIC.generate(rng, "easy", 42, 0)
+    rng = make_rng(42, RCK_TOPIC.id, "easy", 0)
+    item_rc = RCK_TOPIC.generate(rng, "easy", 42, 0)
     assert "persona" in item_rc.steps[0].latex.lower() or "antecedente" in item_rc.steps[0].latex.lower()
     assert "relative" in item_rc.steps[1].latex.lower() or "persone" in item_rc.steps[1].latex.lower()
 
@@ -159,107 +165,43 @@ def test_sequential_question_order() -> None:
         assert item.statement_key == PPS_EASY[i].sentence
 
     for i in range(20):
-        item = RELATIVE_TOPIC.generate(rng, "easy", 1, i)
-        assert item.statement_key == RC_EASY[i].sentence
-
-
-def test_relative_defining_non_defining_offers_pronoun_and_classification() -> None:
-    """The new exercise asks two things at once, and the commas decide the second one.
-
-    A defining clause has no commas and admits 'that'; a non-defining clause sits between
-    commas and forbids it. The invariants below are what make the exercise answerable: one
-    correct option, three distractors that fail for a stated reason, and 'that' never
-    correct inside a non-defining clause.
-    """
-    for pool in (RDN_EASY, RDN_MEDIUM):
-        assert len(pool) >= 20, "a batch of 20 needs at least 20 questions"
-        assert len({spec.sentence for spec in pool}) == len(pool), "duplicate sentence in the pool"
-        for spec in pool:
-            assert len(spec.options) == 4
-            assert len(set(spec.options)) == 4, spec.sentence
-            assert spec.correct in spec.options, spec.sentence
-
-            # every option carries both facts, or it cannot be answered
-            assert all(option_classification(option) for option in spec.options), spec.sentence
-
-            # the classification claimed by the answer is the one the punctuation shows
-            assert option_classification(spec.correct) == sentence_classification(spec.sentence), spec.sentence
-
-            # 'that' is forbidden in a non-defining clause, never the right answer there
-            assert spec.correct != "that (non-defining)", spec.sentence
-
-            for text in (spec.explanation, spec.clue, spec.rule):
-                assert text.strip(), spec.sentence
-                # the text is wrapped in \text{...}: a LaTeX special would break the render
-                assert not set(text) & set("%&$#_\\{}"), (spec.sentence, text)
-
-            # The depth bar, taken from the present-perfect topic: the explanation says WHY
-            # the clause is defining or non-defining before it says which pronoun fits.
-            explanation = spec.explanation.lower()
-            assert explanation.startswith(("defining:", "non-defining:")), spec.sentence
-            assert "virgol" in explanation, spec.sentence
-            assert option_classification(spec.correct) in explanation, spec.sentence
-            # ... and the clue carries the diagnostic signal without naming a pronoun, so it
-            # puts the student on the road without handing over the answer.
-            for pronoun in RDN_PRONOUNS:
-                assert not re.search(rf"\b{pronoun}\b", spec.clue, re.I), (spec.sentence, pronoun)
+        item = RCK_TOPIC.generate(rng, "easy", 1, i)
+        assert item.statement_key == RCK_QUESTIONS[i].sentence
 
 
 def test_the_comma_is_the_only_thing_that_changes_the_answer() -> None:
-    """At least one question offers the right pronoun under both classifications.
+    """The same pronoun is the right answer on both sides of the comma.
 
-    When the same pronoun appears as 'defining' and as 'non-defining', the pronoun cannot be
-    what decides: the commas are. Those are the cards that teach the rule instead of
-    rewarding a guess.
+    When 'which' is correct in a defining card and in a non-defining one, the pronoun
+    cannot be what decides: the commas are. Those are the cards that teach the rule
+    instead of rewarding a guess. The labelled twin ("which (defining)") used to carry
+    that contrast, and it was the label the operator rejected — here the same contrast is
+    carried by the picker, and the pool must still hold it.
     """
-    for pool in (RDN_EASY, RDN_MEDIUM):
-        comma_traps = [
-            spec for spec in pool
-            if any(
-                other.split(" (")[0] == spec.correct.split(" (")[0]
-                and other != spec.correct
-                for other in spec.options
-            )
-        ]
-        assert comma_traps, "no question where the comma alone decides the answer"
-
-
-def test_a_that_non_defining_answer_is_refused_by_verify() -> None:
-    """The grammar truth is enforced, not merely respected by the data."""
-    rng = make_rng(7, RDN_TOPIC.id, "easy", 0)
-    # a card whose punctuation really makes the clause non-defining
-    index = next(
-        i for i in range(len(RDN_EASY))
-        if sentence_classification(RDN_EASY[i].sentence) == "non-defining"
+    by_kind: dict[str, set[str]] = {"defining": set(), "non-defining": set()}
+    for spec in RCK_QUESTIONS:
+        by_kind[sentence_classification(spec.sentence)].add(spec.correct)
+    assert by_kind["defining"] & by_kind["non-defining"], (
+        "no pronoun is correct under both kinds: the comma would have nothing to decide"
     )
-    item = RDN_TOPIC.generate(rng, "easy", 7, index)
-    forged = type(item.answer)(
+
+
+def test_a_that_answer_between_commas_is_refused_by_verify() -> None:
+    """The grammar truth is enforced, not merely respected by the data."""
+    index = next(
+        i for i, spec in enumerate(RCK_QUESTIONS)
+        if sentence_classification(spec.sentence) == "non-defining"
+        and "that" in spec.options
+    )
+    item = RCK_TOPIC.generate(make_rng(7, RCK_TOPIC.id, "easy", index), "easy", 7, index)
+    forged = type(item)(**{**item.__dict__, "answer": type(item.answer)(
         latex=item.answer.latex,
         kind=item.answer.kind,
-        payload={**item.answer.payload, "correct": ["that (non-defining)"]},
-    )
-    result = RDN_TOPIC.verify(type(item)(**{**item.__dict__, "answer": forged}))
+        payload={**item.answer.payload, "correct": ["that"]},
+    )})
+    result = RCK_TOPIC.verify(forged)
     assert not result.ok
     assert result.reason == "that_in_non_defining"
-
-
-def test_a_classification_that_contradicts_the_commas_is_refused() -> None:
-    """A defining sentence whose answer claims to be non-defining is a broken question."""
-    rng = make_rng(7, RDN_TOPIC.id, "easy", 0)
-    index = next(
-        i for i in range(len(RDN_EASY))
-        if sentence_classification(RDN_EASY[i].sentence) == "defining"
-    )
-    item = RDN_TOPIC.generate(rng, "easy", 7, index)
-    pronoun = item.answer.payload["correct"][0].split(" (")[0]
-    forged = type(item.answer)(
-        latex=item.answer.latex,
-        kind=item.answer.kind,
-        payload={**item.answer.payload, "correct": [f"{pronoun} (non-defining)"]},
-    )
-    result = RDN_TOPIC.verify(type(item)(**{**item.__dict__, "answer": forged}))
-    assert not result.ok
-    assert result.reason == "classification_mismatch"
 
 
 def test_english_worksheet_html_rendering() -> None:
@@ -433,29 +375,58 @@ def test_the_correct_answer_is_not_always_the_first_option() -> None:
         )
 
 
-# --- Relative clauses: the kind is chosen, not labelled ---------------------
+# --- Relative clauses: one page, the kind chosen before the pronoun ---------
 # The operator rejected the previous page for a reason that is a design rule: an option
 # written as "who (defining)" repeats the correct classification across the four options,
 # so the answer is readable off the pattern instead of the commas. The page
 # `english-relative-classification` therefore asks the kind separately, with a selector
 # (frontend: `web/src/pages.js`, kind `classification_choice`) and grades both answers.
-# These tests hold the server side of that contract, and hold the pool to being *new*.
+# On 2026-11-11 the operator held this page up as the model and asked for the other two
+# relative pages to become this one, so these tests now hold the merged pool: one page,
+# every card answerable only by reading the punctuation, and the absorbed grammar points
+# (`which` for a whole clause, a preposition before `which`, `who` as object, `where`
+# between commas) really on the page.
 
 
-def test_relative_classification_pool_is_new_and_well_formed() -> None:
-    assert len(RCK_QUESTIONS) >= 20, "a batch of 20 needs at least 20 questions"
+def test_the_relative_pool_is_the_batch_and_holds_the_absorbed_grammar() -> None:
+    # MAX_COUNT is 20, so a pool longer than the batch would leave cards the page can
+    # never serve: the merged pool is exactly the batch.
+    assert len(RCK_QUESTIONS) == 20, "the pool must be the batch the page asks for"
     sentences = [spec.sentence for spec in RCK_QUESTIONS]
     assert len(set(sentences)) == len(sentences), "duplicate sentence in the pool"
 
-    # A new page, not the same questions with the label taken off: no sentence of the new
-    # pool appears in the three relative-clause pools (and the present perfect pools, which
-    # share the macro) already on the site.
+    # No sentence of this pool is already elsewhere in the English macro: the page has one
+    # subject, and a sentence shared with another page would be the same exercise twice.
     existing = {
         spec.sentence
-        for pool in (RC_EASY, RDN_EASY, RDN_MEDIUM, PPS_EASY, PPM_MEDIUM)
+        for pool in (PPS_EASY, PPM_MEDIUM, PPSC_QUESTIONS)
         for spec in pool
     }
-    assert set(sentences) & existing == set(), "a sentence was copied from an existing pool"
+    assert set(sentences) & existing == set(), "a sentence was copied from another page"
+
+    # The four cards absorbed from the fused pages carry grammar this pool did not have.
+    absorbed = {
+        "He arrived twenty minutes late, ______ annoyed the teacher greatly.": (
+            "which", "non-defining"),
+        "The village in ______ my grandparents lived had no paved roads.": (
+            "which", "defining"),
+        "The woman ______ you were talking to at the reception is the CEO.": (
+            "who", "defining"),
+        "The villa, ______ we spent the summer, has a view of the lake.": (
+            "where", "non-defining"),
+    }
+    by_sentence = {spec.sentence: spec for spec in RCK_QUESTIONS}
+    for sentence, (pronoun, kind) in absorbed.items():
+        assert sentence in by_sentence, f"absorbed card missing: {sentence}"
+        spec = by_sentence[sentence]
+        assert spec.correct == pronoun, sentence
+        assert sentence_classification(sentence) == kind, sentence
+    # and the trap the operator asked never to lose is still on the page: 'that' offered
+    # between commas, where it can only be wrong
+    assert any(
+        "that" in spec.options and sentence_classification(spec.sentence) == "non-defining"
+        for spec in RCK_QUESTIONS
+    ), "'that' after a comma: the rule is not taught"
 
     for spec in RCK_QUESTIONS:
         assert len(spec.options) == 4, spec.sentence
@@ -574,9 +545,9 @@ def test_the_chosen_kind_must_be_the_one_the_commas_show() -> None:
     assert RCK_TOPIC.verify(blankless).reason == "missing_blank"
 
 
-def test_the_classification_page_is_a_new_catalogue_entry() -> None:
+def test_the_classification_page_is_the_only_relative_page() -> None:
     page = find_page("english-relative-classification")
-    assert page is not None, "the new page is not in the catalogue"
+    assert page is not None, "the surviving page is not in the catalogue"
     assert page.macro == "english"
     assert page.sub == "grammatica"
     assert page.kind == "classification_choice"
@@ -589,21 +560,21 @@ def test_the_classification_page_is_a_new_catalogue_entry() -> None:
         "another name"
     )
 
-    # the previous page stays exactly as it was: two exercises, not two copies of one
-    sibling = find_page("english-relative-defining-non-defining")
-    assert sibling is not None and sibling.id != page.id
-    assert sibling.topic != page.topic
-    assert all("(" in option for spec in RDN_EASY for option in spec.options), (
-        "the old page carries the label on purpose; the new one is the page without it"
-    )
+    # The catalogue changed on the operator's request (task-281711): the page that wrote
+    # the classification inside every option is gone, so no option on the site carries a
+    # label any more, and the two removed ids are not served.
     assert all("(" not in option for spec in RCK_QUESTIONS for option in spec.options)
+    served_pages = client.get("/api/pages").json()["pages"]
+    served_ids = {p["id"] for p in served_pages}
+    assert "english-relative-classification" in served_ids
+    for removed in ("english-relative-clauses", "english-relative-defining-non-defining"):
+        assert removed not in served_ids, f"{removed} is still served"
 
     strings = load_strings("it")
     assert strings[page.label_key].strip()
     assert strings[RCK_TOPIC.label_key].strip()
-    assert strings[page.label_key] != strings[sibling.label_key], (
-        "the two pages must be tellable apart in the menu"
-    )
+    english_labels = [strings[p.label_key] for p in PAGES if p.macro == "english"]
+    assert len(set(english_labels)) == len(english_labels), "two pages share a label"
 
     served = next(p for p in client.get("/api/pages").json()["pages"] if p["id"] == page.id)
     assert served["kind"] == "classification_choice"
@@ -627,7 +598,7 @@ def test_present_perfect_simple_continuous_pool_is_new_and_well_formed() -> None
     # appears in any pool already on the site (the intersection is empty).
     existing = {
         spec.sentence
-        for pool in (RC_EASY, RDN_EASY, RDN_MEDIUM, PPS_EASY, PPM_MEDIUM, RCK_QUESTIONS)
+        for pool in (PPS_EASY, PPM_MEDIUM, RCK_QUESTIONS)
         for spec in pool
     }
     assert set(sentences) & existing == set(), "a sentence was copied from an existing pool"

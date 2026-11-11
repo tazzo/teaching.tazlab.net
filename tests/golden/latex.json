@@ -33,42 +33,6 @@
     "\\text{Defining clause, senza virgole: la relativa identifica il referente. Per le persone soggetto si usa 'who' ('that' è ammesso solo qui, mai tra virgole).}",
     "\\textbf{who}, \\text{defining}"
   ],
-  "english.grammar.relative_clauses|easy": [
-    "\\text{L'antecedente è una persona ('The girl') in una defining relative clause.}",
-    "\\text{Si usa 'who' per le persone nelle relative restrittive (defining clauses).}",
-    "\\textbf{who}",
-    "\\textbf{who}"
-  ],
-  "english.grammar.relative_clauses|hard": [
-    "\\text{Proposizione relativa che commenta l'intera situazione precedente, non un singolo sostantivo.}",
-    "\\text{Si usa 'which' in una frase non-defining per riferirsi all'intera azione o proposizione precedente.}",
-    "\\textbf{which}",
-    "\\textbf{which}"
-  ],
-  "english.grammar.relative_clauses|medium": [
-    "\\text{Proposizione relativa che commenta l'intera situazione precedente, non un singolo sostantivo.}",
-    "\\text{Si usa 'which' in una frase non-defining per riferirsi all'intera azione o proposizione precedente.}",
-    "\\textbf{which}",
-    "\\textbf{which}"
-  ],
-  "english.grammar.relative_defining_non_defining|easy": [
-    "\\text{Nessuna virgola; l'antecedente è una persona e il verbo della relativa ('won') non ha ancora il suo soggetto.}",
-    "\\text{Defining clause, senza virgole: la relativa identifica il referente. Per le persone soggetto si usa 'who' (oppure 'that', ammesso solo qui).}",
-    "\\textbf{who (defining)}",
-    "\\textbf{who (defining)}"
-  ],
-  "english.grammar.relative_defining_non_defining|hard": [
-    "\\text{Una sola virgola, e il pronome non ha un sostantivo a cui appoggiarsi: guarda che cosa c'è prima.}",
-    "\\text{Per commentare un'intera frase si usa ', which': non-defining e mai 'that'.}",
-    "\\textbf{which (non-defining)}",
-    "\\textbf{which (non-defining)}"
-  ],
-  "english.grammar.relative_defining_non_defining|medium": [
-    "\\text{Una sola virgola, e il pronome non ha un sostantivo a cui appoggiarsi: guarda che cosa c'è prima.}",
-    "\\text{Per commentare un'intera frase si usa ', which': non-defining e mai 'that'.}",
-    "\\textbf{which (non-defining)}",
-    "\\textbf{which (non-defining)}"
-  ],
   "math.equations.first_degree|easy": [
     "4 x = 20",
     "x = \\frac{20}{4}",

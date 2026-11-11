@@ -57,7 +57,7 @@ from app.generators.english.present_perfect_medium import (
     WORD,
     aspect,
 )
-from app.generators.english.relative_defining_non_defining import sentence_classification
+from app.generators.english.relative_grammar import sentence_classification
 
 
 class QuestionSpec(NamedTuple):

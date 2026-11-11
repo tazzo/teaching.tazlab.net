@@ -1,13 +1,26 @@
 """Relative clauses: the student names the *kind* of clause before answering.
 
-The sibling topic ``relative_defining_non_defining`` writes the classification inside every
-option — ``who (defining)``, ``that (non-defining)`` — and the operator rejected it for a
-reason that is a lesson in test design, not a matter of taste: the correct classification
-is the *only one that repeats* across the four options, so it can be read off the pattern
-without looking at the commas at all. The label hands the answer over.
+The page this one replaced wrote the classification inside every option — ``who
+(defining)``, ``that (non-defining)`` — and the operator rejected it for a reason that is a
+lesson in test design, not a matter of taste: the correct classification is the *only one
+that repeats* across the four options, so it can be read off the pattern without looking
+at the commas at all. The label handed the answer over.
 
 Here the sentence carries no label anywhere. Under it there is a selector with the two
-kinds, and the pronoun is asked separately:
+kinds, and the pronoun is asked separately.
+
+This is the **only** relative-clause page on the site: the other two
+(``relative_clauses``, ``relative_defining_non_defining``) were folded into this one at the
+operator's request (2026-11-11). Three pages asked the same grammar; one of them asked
+only the pronoun, the other printed the classification beside every option. Their
+sentences that taught something this pool did not were absorbed —
+the sentential ``which``, a preposition before ``which``, ``who`` as object, ``where`` in a
+non-defining clause — and the rest were dropped as the same trap already covered here, or
+because their answer (``whom``, ``when``, ``why``, or ``that`` as the only correct form)
+falls outside the five pronouns this picker offers. The pool is exactly the batch a page
+asks for (``MAX_COUNT`` is 20), so no card is born unreachable.
+
+The interaction, unchanged from the page the operator held up as the model:
 
     sentence:  The nurse ______ looked after my father works at the city hospital.
     type:      [ defining ] [ non-defining ]      <- must be chosen
@@ -21,7 +34,7 @@ drift from the grammar the exercise claims to teach.
 
 Two consequences the teacher will notice, both deliberate:
 
-* **no step prints the answer.** The sibling topic closes its steps with the correct form;
+* **no step prints the answer.** The folded pages closed their steps with the correct form;
   here the steps are the diagnostic clue and the rule only, because a page whose lock says
   "choose first" cannot put the answer in a drawer three centimetres below it.
 * **``that`` is never the right answer, and never offered in a defining card.** ``who`` and
@@ -38,7 +51,11 @@ from typing import NamedTuple
 
 from app.core.verify import VerificationResult
 from app.generators.base import Answer, Item, Step
-from app.generators.english.relative_defining_non_defining import sentence_classification
+from app.generators.english.relative_grammar import (
+    CLASSIFICATIONS,
+    PRONOUNS,
+    sentence_classification,
+)
 
 
 class QuestionSpec(NamedTuple):
@@ -50,11 +67,10 @@ class QuestionSpec(NamedTuple):
     rule: str
 
 
-#: The relative pronouns the exercise can offer, always bare: an option that carries the
-#: classification would be the label the operator asked to remove.
-PRONOUNS = ("who", "which", "that", "whose", "where")
-#: The two kinds the selector offers, spelled as the grammar spells them.
-CLASSIFICATIONS = ("defining", "non-defining")
+# The pronouns and the two kinds come from ``relative_grammar``: the present-perfect page
+# uses the same picker and the same vocabulary. An option that carried the classification
+# would be the label the operator asked to remove, so options are always bare.
+
 #: The same two kinds with the label key the client prints for each: the picker travels in
 #: the payload, so the renderer holds no pair of its own.
 CHOICES = (
@@ -66,6 +82,9 @@ CHOICES = (
 LABEL_IN_SENTENCE = re.compile(r"\bdefining\b", re.IGNORECASE)
 
 
+#: The cards, in the order a student meets them: defining and non-defining alternate so the
+#: comma is always the thing being decided, and the four cards absorbed from the pages the
+#: operator asked to fuse sit at 4, 10, 15 and 19.
 QUESTIONS: tuple[QuestionSpec, ...] = (
     QuestionSpec(
         sentence="The nurse ______ looked after my father works at the city hospital.",
@@ -81,6 +100,7 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Nessuna virgola; l'antecedente è una persona e il verbo 'looked after' non ha ancora il suo soggetto.",
         rule="Defining clause, senza virgole: la relativa identifica il referente. Per le persone soggetto si usa 'who' ('that' è ammesso solo qui, mai tra virgole).",
     ),
+
     QuestionSpec(
         sentence="My cousin Anna, ______ studied in Vienna, now works for a bank.",
         options=("who", "that", "which", "where"),
@@ -95,6 +115,7 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Due virgole e un nome proprio che identifica già la persona; il verbo 'studied' aspetta il soggetto.",
         rule="Non-defining clause, tra virgole: informazione accessoria. Per le persone si usa 'who'; 'that' è escluso.",
     ),
+
     QuestionSpec(
         sentence="This is the recipe ______ my grandmother wrote on a postcard.",
         options=("which", "who", "whose", "where"),
@@ -108,6 +129,7 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Nessuna virgola, antecedente inanimato, e 'wrote' cerca ancora il suo oggetto.",
         rule="Defining clause: per le cose oggetto si usa 'which' (oppure 'that').",
     ),
+
     QuestionSpec(
         sentence="The old bridge, ______ was built by the Romans, is still in use.",
         options=("which", "that", "who", "whose"),
@@ -121,6 +143,7 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Due virgole; l'antecedente è una cosa e il verbo passivo 'was built' non ha soggetto.",
         rule="Non-defining clause: per le cose soggetto si usa 'which'; 'that' non entra mai fra virgole.",
     ),
+
     QuestionSpec(
         sentence="The woman ______ car was stolen called the police immediately.",
         options=("whose", "who", "which", "where"),
@@ -134,6 +157,7 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Nessuna virgola; rapporto di possesso fra la donna e l'auto, e 'car' non ha articolo.",
         rule="'Whose' esprime possesso e regge il sostantivo che segue, sia in defining sia in non-defining.",
     ),
+
     QuestionSpec(
         sentence="Our neighbours, ______ son plays in the national team, moved to Spain.",
         options=("whose", "who", "that", "which"),
@@ -147,6 +171,7 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Due virgole; il figlio è dei vicini, e 'son' non ha articolo.",
         rule="'Whose' vale anche per i legami di famiglia: prende il posto di 'their' e regge il sostantivo.",
     ),
+
     QuestionSpec(
         sentence="The bicycle ______ belongs to my neighbour has a broken chain.",
         options=("which", "who", "whose", "where"),
@@ -160,32 +185,7 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Nessuna virgola; antecedente inanimato e il verbo 'belongs to' senza soggetto.",
         rule="Defining clause con una cosa soggetto: 'which' (oppure 'that').",
     ),
-    QuestionSpec(
-        sentence="Alberto, ______ works in my office, speaks four languages fluently.",
-        options=("who", "that", "which", "whose"),
-        correct="who",
-        explanation=(
-            "Non-defining: il nome proprio identifica già la persona e le virgole aggiungono "
-            "un dettaglio. Il pronome è 'who' perché l'antecedente è una persona e il pronome "
-            "è il soggetto di 'works'. 'that' è vietato tra virgole, 'which' sbaglia "
-            "l'antecedente e 'whose' esigerebbe un sostantivo posseduto."
-        ),
-        clue="Due virgole; nome proprio e il verbo 'works' che aspetta il soggetto.",
-        rule="Dopo un nome proprio la relativa è di norma accessoria: virgole e 'who', mai 'that'.",
-    ),
-    QuestionSpec(
-        sentence="The library ______ I borrowed this atlas is on the second floor.",
-        options=("where", "which", "whose", "who"),
-        correct="where",
-        explanation=(
-            "Defining: nessuna virgola e la relativa identifica la biblioteca. 'I borrowed "
-            "this atlas' ha già soggetto e oggetto, quindi manca il complemento di luogo e "
-            "serve 'where'. 'which' sarebbe corretto solo con una preposizione davanti ('from "
-            "which'), 'whose' esprime possesso e 'who' è riservato alle persone."
-        ),
-        clue="Nessuna virgola; 'I borrowed this atlas' ha già soggetto e oggetto, quindi non cerca un oggetto ma un luogo.",
-        rule="Se la relativa è completa si usa 'where' (in cui / nel quale); 'which' e 'that' servono solo come soggetto o oggetto.",
-    ),
+
     QuestionSpec(
         sentence="The conference, ______ took place in Lisbon, was attended by two hundred people.",
         options=("which", "that", "where", "who"),
@@ -199,32 +199,37 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Due virgole; il luogo è già nella relativa ('in Lisbon'), quindi manca il soggetto, non il luogo.",
         rule="Nelle non-defining una cosa soggetto richiede 'which'; 'where' sostituisce solo un complemento di luogo mancante.",
     ),
+
     QuestionSpec(
-        sentence="Children ______ eat too much sugar often have problems at school.",
-        options=("who", "which", "whose", "where"),
-        correct="who",
+        sentence="The library ______ I borrowed this atlas is on the second floor.",
+        options=("where", "which", "whose", "who"),
+        correct="where",
         explanation=(
-            "Defining: nessuna virgola e la relativa restringe il gruppo ai bambini che mangiano "
-            "troppo zucchero — è informazione essenziale. Il pronome è 'who' perché sono "
-            "persone e il pronome è il soggetto di 'eat'. 'which' sbaglia l'antecedente, "
-            "'whose' chiederebbe un sostantivo posseduto e 'where' non può fare da soggetto."
+            "Defining: nessuna virgola e la relativa identifica la biblioteca. 'I borrowed "
+            "this atlas' ha già soggetto e oggetto, quindi manca il complemento di luogo e "
+            "serve 'where'. 'which' sarebbe corretto solo con una preposizione davanti ('from "
+            "which'), 'whose' esprime possesso e 'who' è riservato alle persone."
         ),
-        clue="Nessuna virgola; antecedente personale e il verbo 'eat' senza soggetto.",
-        rule="Defining clause: per le persone soggetto si usa 'who' ('that' è ammesso solo qui).",
+        clue="Nessuna virgola; 'I borrowed this atlas' ha già soggetto e oggetto, quindi non cerca un oggetto ma un luogo.",
+        rule="Se la relativa è completa si usa 'where' (in cui / nel quale); 'which' e 'that' servono solo come soggetto o oggetto.",
     ),
+
     QuestionSpec(
-        sentence="Her grandfather, ______ health is sadly failing, lives with them now.",
-        options=("whose", "who", "that", "which"),
-        correct="whose",
+        sentence="He arrived twenty minutes late, ______ annoyed the teacher greatly.",
+        options=("which", "that", "where", "whose"),
+        correct="which",
         explanation=(
-            "Non-defining: il possessivo 'her' e le virgole rendono accessoria l'informazione. "
-            "Il pronome è 'whose' perché la salute è del nonno e 'health' è un sostantivo che "
-            "dipende dal relativo. 'who' non può reggere 'health', 'that' è vietato tra "
-            "virgole e 'which' sbaglia l'antecedente personale."
+            "Non-defining: la virgola separa un commento all'intera frase precedente, non un "
+            "dettaglio su un sostantivo. Il pronome è 'which' perché riprende tutto ciò che è "
+            "appena stato detto (il ritardo) e nessun altro relativo può farlo: 'that' è "
+            "vietato tra virgole, 'where' cercherà un luogo che qui non c'è e 'whose' "
+            "esigerebbe un sostantivo posseduto. È la relativa sentenziale: il soggetto di "
+            "'annoyed' è la frase intera."
         ),
-        clue="Due virgole; la salute è del nonno, e 'health' non ha articolo.",
-        rule="'Whose' è l'unico relativo che regge direttamente un sostantivo: vale in entrambe le classificazioni.",
+        clue="Una sola virgola e nessun sostantivo da riprendere: il pronome commenta l'intera frase che precede.",
+        rule="Dopo una virgola, 'which' può riprendere l'intera proposizione appena detta (relativa sentenziale): è l'unico relativo che lo fa, e 'that' non entra mai fra virgole.",
     ),
+
     QuestionSpec(
         sentence="The keys ______ I left on the table this morning have disappeared.",
         options=("which", "who", "whose", "where"),
@@ -238,32 +243,7 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Nessuna virgola; antecedente inanimato e 'left' cerca il suo oggetto.",
         rule="Defining clause: per le cose oggetto si usa 'which' (oppure 'that').",
     ),
-    QuestionSpec(
-        sentence="The photograph, ______ was taken in 1963, hangs in the hallway.",
-        options=("which", "that", "who", "where"),
-        correct="which",
-        explanation=(
-            "Non-defining: le virgole aggiungono una data a una fotografia già identificata. Il "
-            "pronome è 'which' perché la fotografia è il soggetto del passivo 'was taken'; "
-            "'where' indicherebbe il luogo di un'azione, non il soggetto che la subisce. 'that' "
-            "è vietato tra virgole e 'who' sbaglia l'antecedente."
-        ),
-        clue="Due virgole; la fotografia è il soggetto del verbo passivo.",
-        rule="Nelle non-defining un oggetto soggetto richiede 'which'; 'that' non è mai ammesso.",
-    ),
-    QuestionSpec(
-        sentence="A carpenter is a person ______ makes wooden furniture.",
-        options=("who", "which", "whose", "where"),
-        correct="who",
-        explanation=(
-            "Defining: nessuna virgola e la relativa definisce che cosa è un falegname. Il "
-            "pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di "
-            "'makes'. 'which' sbaglia l'antecedente, 'whose' esigerebbe un sostantivo "
-            "posseduto e 'where' non può fare da soggetto."
-        ),
-        clue="Nessuna virgola; 'a person' è una persona e 'makes' non ha ancora il soggetto.",
-        rule="Defining clause: con i nomi di mestiere si usa 'who' (o 'that') come soggetto.",
-    ),
+
     QuestionSpec(
         sentence="Our guide, ______ had never been to the castle before, got lost twice.",
         options=("who", "that", "which", "where"),
@@ -277,19 +257,21 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Due virgole; una persona e il verbo 'had been' senza soggetto.",
         rule="La virgola cambia la classificazione, non il pronome: per le persone soggetto resta 'who'.",
     ),
+
     QuestionSpec(
-        sentence="The village ______ my parents got married has a famous bridge.",
-        options=("where", "which", "whose", "who"),
-        correct="where",
+        sentence="Children ______ eat too much sugar often have problems at school.",
+        options=("who", "which", "whose", "where"),
+        correct="who",
         explanation=(
-            "Defining: nessuna virgola e la relativa identifica il paese. 'my parents got "
-            "married' è completa e non ha oggetto, quindi manca il complemento di luogo: "
-            "'where'. 'which' avrebbe bisogno di una preposizione ('in which'), 'whose' "
-            "esprime possesso e 'who' è riservato alle persone."
+            "Defining: nessuna virgola e la relativa restringe il gruppo ai bambini che mangiano "
+            "troppo zucchero — è informazione essenziale. Il pronome è 'who' perché sono "
+            "persone e il pronome è il soggetto di 'eat'. 'which' sbaglia l'antecedente, "
+            "'whose' chiederebbe un sostantivo posseduto e 'where' non può fare da soggetto."
         ),
-        clue="Nessuna virgola; 'got married' è intransitivo, quindi la relativa non cerca un oggetto.",
-        rule="Con i luoghi si usa 'where' quando la relativa è completa; 'which' e 'that' solo se servono da soggetto o oggetto.",
+        clue="Nessuna virgola; antecedente personale e il verbo 'eat' senza soggetto.",
+        rule="Defining clause: per le persone soggetto si usa 'who' ('that' è ammesso solo qui).",
     ),
+
     QuestionSpec(
         sentence="The little restaurant, ______ tables overlook the harbour, serves fresh fish.",
         options=("whose", "which", "that", "who"),
@@ -303,18 +285,36 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Due virgole; i tavoli sono del ristorante, e 'tables' non ha articolo.",
         rule="'Whose' si usa anche per gli oggetti e i locali, al posto di 'of which'.",
     ),
+
     QuestionSpec(
-        sentence="The athlete ______ ankle was injured during the race withdrew immediately.",
-        options=("whose", "who", "which", "where"),
-        correct="whose",
+        sentence="The village ______ my parents got married has a famous bridge.",
+        options=("where", "which", "whose", "who"),
+        correct="where",
         explanation=(
-            "Defining: nessuna virgola e la relativa identifica l'atleta. Il pronome è 'whose' "
-            "perché 'ankle' è parte di lui. 'who' non può reggere 'ankle', 'which' sbaglia "
-            "l'antecedente personale e 'where' indica un luogo."
+            "Defining: nessuna virgola e la relativa identifica il paese. 'my parents got "
+            "married' è completa e non ha oggetto, quindi manca il complemento di luogo: "
+            "'where'. 'which' avrebbe bisogno di una preposizione ('in which'), 'whose' "
+            "esprime possesso e 'who' è riservato alle persone."
         ),
-        clue="Nessuna virgola; la caviglia è dell'atleta, e 'ankle' non ha articolo.",
-        rule="'Whose' si usa anche per le parti del corpo, in entrambe le classificazioni.",
+        clue="Nessuna virgola; 'got married' è intransitivo, quindi la relativa non cerca un oggetto.",
+        rule="Con i luoghi si usa 'where' quando la relativa è completa; 'which' e 'that' solo se servono da soggetto o oggetto.",
     ),
+
+    QuestionSpec(
+        sentence="The village in ______ my grandparents lived had no paved roads.",
+        options=("which", "where", "who", "whose"),
+        correct="which",
+        explanation=(
+            "Defining: nessuna virgola e la relativa identifica il paese. La preposizione 'in' "
+            "è già scritta davanti al vuoto, quindi serve un pronome che la regga: per le cose "
+            "è 'which'. 'where' è la trappola, perché 'in where' non esiste in inglese ('in "
+            "which' sì), 'who' è riservato alle persone e 'whose' chiede un possesso che qui "
+            "non c'è."
+        ),
+        clue="Nessuna virgola; la preposizione è già lì davanti al vuoto e cerca il suo complemento: un paese.",
+        rule="Con una preposizione davanti si usa 'which' per le cose ('in which', 'for which'); 'where' non si combina con 'in'.",
+    ),
+
     QuestionSpec(
         sentence="The exam, ______ I had prepared for all winter, turned out to be easy.",
         options=("which", "that", "who", "whose"),
@@ -328,58 +328,47 @@ QUESTIONS: tuple[QuestionSpec, ...] = (
         clue="Due virgole; la preposizione 'for' è rimasta in fondo e cerca il suo oggetto.",
         rule="Nelle non-defining il pronome oggetto resta necessario: la preposizione in fondo regge 'which', mai 'that'.",
     ),
+
     QuestionSpec(
-        sentence="The mechanic ______ repaired our brakes did not charge for the parts.",
+        sentence="The athlete ______ ankle was injured during the race withdrew immediately.",
+        options=("whose", "who", "which", "where"),
+        correct="whose",
+        explanation=(
+            "Defining: nessuna virgola e la relativa identifica l'atleta. Il pronome è 'whose' "
+            "perché 'ankle' è parte di lui. 'who' non può reggere 'ankle', 'which' sbaglia "
+            "l'antecedente personale e 'where' indica un luogo."
+        ),
+        clue="Nessuna virgola; la caviglia è dell'atleta, e 'ankle' non ha articolo.",
+        rule="'Whose' si usa anche per le parti del corpo, in entrambe le classificazioni.",
+    ),
+
+    QuestionSpec(
+        sentence="The villa, ______ we spent the summer, has a view of the lake.",
+        options=("where", "which", "that", "whose"),
+        correct="where",
+        explanation=(
+            "Non-defining: le virgole aggiungono il soggiorno a una villa già identificata. "
+            "'we spent the summer' ha già il suo oggetto ('the summer'), quindi manca il "
+            "complemento di luogo e serve 'where'. 'which' non può essere l'oggetto di "
+            "'spent', 'that' è vietato tra virgole e 'whose' esigerebbe un sostantivo "
+            "posseduto."
+        ),
+        clue="Due virgole; 'spent' ha già il suo oggetto, quindi la relativa cerca un luogo e non una cosa.",
+        rule="'Where' si usa anche nelle non-defining, quando la relativa descrive ciò che avviene nel luogo.",
+    ),
+    QuestionSpec(
+        sentence="The woman ______ you were talking to at the reception is the CEO.",
         options=("who", "which", "whose", "where"),
         correct="who",
         explanation=(
-            "Defining: nessuna virgola e la relativa identifica il meccanico. Il pronome è "
-            "'who' perché è una persona e il pronome è il soggetto di 'repaired'. 'which' "
-            "sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non "
-            "può fare da soggetto."
+            "Defining: nessuna virgola e la relativa identifica la donna. Qui il pronome è "
+            "l'oggetto di 'you were talking to': per le persone resta 'who' (o 'whom' nella "
+            "lingua formale), con la preposizione lasciata in fondo. 'which' sbaglia "
+            "l'antecedente, 'whose' esigerebbe un sostantivo posseduto e 'where' "
+            "indicherebbe un luogo."
         ),
-        clue="Nessuna virgola; antecedente personale e 'repaired' senza soggetto.",
-        rule="Defining clause: per le persone soggetto si usa 'who' (oppure 'that').",
-    ),
-    QuestionSpec(
-        sentence="The school concert, ______ was held in the gym, raised five hundred euros.",
-        options=("which", "that", "who", "whose"),
-        correct="which",
-        explanation=(
-            "Non-defining: le virgole aggiungono un dettaglio su un concerto già identificato. "
-            "Il pronome è 'which' perché il concerto è il soggetto del passivo 'was held'. "
-            "'that' è vietato tra virgole, 'who' sbaglia l'antecedente e 'whose' esigerebbe un "
-            "sostantivo posseduto."
-        ),
-        clue="Due virgole; l'evento è il soggetto del verbo passivo.",
-        rule="Nelle non-defining una cosa soggetto richiede 'which'; 'that' non entra mai fra virgole.",
-    ),
-    QuestionSpec(
-        sentence="The mountain ______ we climbed last summer is covered in snow.",
-        options=("which", "who", "whose", "where"),
-        correct="which",
-        explanation=(
-            "Defining: nessuna virgola e la relativa identifica la montagna. 'climbed' è "
-            "transitivo e il suo oggetto è la montagna, quindi serve 'which'. 'where' è la "
-            "trappola: sostituirebbe un complemento di luogo, ma qui manca l'oggetto di "
-            "'climbed'. 'who' sbaglia l'antecedente e 'whose' esigerebbe un sostantivo "
-            "posseduto."
-        ),
-        clue="Nessuna virgola; 'we climbed' è transitivo e non ha ancora il suo oggetto.",
-        rule="Se il verbo della relativa è transitivo serve 'which' o 'that'; 'where' sostituisce solo un complemento di luogo mancante.",
-    ),
-    QuestionSpec(
-        sentence="The novel, ______ plot twists surprised every reader, has become a bestseller.",
-        options=("whose", "which", "that", "who"),
-        correct="whose",
-        explanation=(
-            "Non-defining: le virgole aggiungono un dettaglio su un romanzo già identificato. Il "
-            "pronome è 'whose' perché i colpi di scena sono del romanzo: 'plot twists' è il "
-            "sostantivo che dipende dal relativo. 'which' non può reggere 'plot twists', 'that' "
-            "è vietato tra virgole e 'who' sbaglia l'antecedente."
-        ),
-        clue="Due virgole; i colpi di scena appartengono al romanzo, e 'plot twists' non ha articolo.",
-        rule="'Whose' regge un sostantivo anche quando il possessore è una cosa, in entrambe le classificazioni.",
+        clue="Nessuna virgola; la persona è l'oggetto della preposizione rimasta in fondo, non il soggetto.",
+        rule="'Who' va bene anche come oggetto: la preposizione può restare in fondo ('the woman who you were talking to'), mentre 'whom' è la variante formale.",
     ),
 )
 
@@ -410,7 +399,7 @@ class RelativeClassificationTopic:
         shuffled = list(chosen.options)
         opt_rng.shuffle(shuffled)
 
-        # Two steps, not three: the sibling topic closes with the correct form, and a page
+        # Two steps, not three: the folded pages closed with the correct form, and a page
         # whose lock says "choose the kind first" cannot print the answer underneath it.
         steps = (
             Step("step.grammar_analysis", f"\\text{{{chosen.clue}}}"),

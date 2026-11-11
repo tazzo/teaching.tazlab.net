@@ -10,10 +10,6 @@ from app.generators.english.present_perfect_simple_continuous import (
     TOPIC as PRESENT_PERFECT_SIMPLE_CONTINUOUS,
 )
 from app.generators.english.relative_classification import TOPIC as RELATIVE_CLASSIFICATION
-from app.generators.english.relative_clauses import TOPIC as RELATIVE_CLAUSES
-from app.generators.english.relative_defining_non_defining import (
-    TOPIC as RELATIVE_DEFINING_NON_DEFINING,
-)
 from app.generators.math.first_degree import TOPIC as FIRST_DEGREE
 from app.generators.math.fractional import TOPIC as FRACTIONAL
 from app.generators.math.inequalities import TOPICS as INEQUALITY_TOPICS
@@ -41,8 +37,8 @@ TOPICS: dict[str, Topic] = {
     PRESENT_PERFECT.id: PRESENT_PERFECT,
     PRESENT_PERFECT_MEDIUM.id: PRESENT_PERFECT_MEDIUM,
     PRESENT_PERFECT_SIMPLE_CONTINUOUS.id: PRESENT_PERFECT_SIMPLE_CONTINUOUS,
-    RELATIVE_CLAUSES.id: RELATIVE_CLAUSES,
-    RELATIVE_DEFINING_NON_DEFINING.id: RELATIVE_DEFINING_NON_DEFINING,
+    # one relative-clause page only: the two pages that asked the pronoun without the
+    # kind were folded into this one (task-281711)
     RELATIVE_CLASSIFICATION.id: RELATIVE_CLASSIFICATION,
     # mathematics — equations
     FIRST_DEGREE.id: FIRST_DEGREE,

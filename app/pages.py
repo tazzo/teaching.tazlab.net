@@ -114,21 +114,15 @@ PAGES: tuple[Page, ...] = (
     Page("english-present-perfect-medium", "english", "grammatica", MULTIPLE_CHOICE,
          "english.grammar.present_perfect_medium", "medium",
          "page.english.present_perfect_medium", 15, count=20),
-    Page("english-relative-clauses", "english", "grammatica", MULTIPLE_CHOICE,
-         "english.grammar.relative_clauses", "easy", "page.english.relative_clauses", 20, count=20),
-    # Same grammar area, harder question: the blank asks for the pronoun *and* the
-    # classification at once, so the commas decide as much as the pronoun does.
-    Page("english-relative-defining-non-defining", "english", "grammatica", MULTIPLE_CHOICE,
-         "english.grammar.relative_defining_non_defining", "easy",
-         "page.english.relative_defining_non_defining", 30, count=20),
-    # The same grammar asked the other way round: no option carries its classification any
-    # more (that label was the answer, repeated), the sentence is followed by a selector
-    # with the two kinds, and the check stays disabled until one of them is chosen. Its own
-    # pool, disjoint from the three above — a page that repeated their sentences would be
-    # the third copy of one exercise.
+    # The one relative-clause page on the site. Three pages asked this grammar and two
+    # were duplicates (task-281711): one asked only the pronoun, the other printed the
+    # classification beside every option — the kind was the answer, repeated, so it could
+    # be read off the pattern without looking at the commas. Here the sentence carries no
+    # label: the student names the kind with a button, the check stays disabled until one
+    # is chosen, and only then does the pronoun get asked.
     Page("english-relative-classification", "english", "grammatica", CLASSIFICATION_CHOICE,
          "english.grammar.relative_classification", "easy",
-         "page.english.relative_classification", 40, count=20),
+         "page.english.relative_classification", 20, count=20),
     # The same two-move interaction, on the grammar the same schema pairs with it: the
     # present perfect simple against the continuous (result against duration, and the verbs
     # of state that refuse the continuous), with the relative pronouns closing the batch.
@@ -136,7 +130,7 @@ PAGES: tuple[Page, ...] = (
     # and the form is chosen only after, which is why this is not a multiple choice page.
     Page("english-present-perfect-simple-continuous", "english", "grammatica",
          CLASSIFICATION_CHOICE, "english.grammar.present_perfect_simple_continuous", "medium",
-         "page.english.present_perfect_simple_continuous", 50, count=20),
+         "page.english.present_perfect_simple_continuous", 30, count=20),
 )
 
 MACROS: tuple[str, ...] = ("matematica", "fisica", "english")
