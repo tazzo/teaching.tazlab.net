@@ -55,6 +55,12 @@ class QuestionSpec(NamedTuple):
 PRONOUNS = ("who", "which", "that", "whose", "where")
 #: The two kinds the selector offers, spelled as the grammar spells them.
 CLASSIFICATIONS = ("defining", "non-defining")
+#: The same two kinds with the label key the client prints for each: the picker travels in
+#: the payload, so the renderer holds no pair of its own.
+CHOICES = (
+    ("defining", "ui.classification_defining"),
+    ("non-defining", "ui.classification_non_defining"),
+)
 #: A classification written into the sentence itself — the label the operator removed. It
 #: matches inside 'non-defining' too, so one pattern covers both spellings.
 LABEL_IN_SENTENCE = re.compile(r"\bdefining\b", re.IGNORECASE)
@@ -417,6 +423,17 @@ class RelativeClassificationTopic:
                 "options": shuffled,
                 "correct": [chosen.correct],
                 "classification": [classification],
+                # The picker is data since the present-perfect page reused this interaction
+                # for its own two values (action/state verb): the client draws what the
+                # payload states instead of holding this pair in its own source.
+                # parallel lists of the same length, in the order of the buttons: the wire
+                # payload is a map of string lists (``WireAnswer.payload``)
+                "classification_values": [value for value, _ in CHOICES],
+                "classification_labels": [key for _, key in CHOICES],
+                "classification_prompt_key": ["ui.classification_prompt"],
+                "classification_locked_key": ["ui.classification_locked"],
+                "classification_wrong_key": ["ui.classification_wrong"],
+                "option_wrong_key": ["ui.pronoun_wrong"],
                 "explanation": [chosen.explanation],
             },
         )

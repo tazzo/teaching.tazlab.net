@@ -70,6 +70,13 @@ def main() -> None:
                "&difficulty=easy&seed=1&count=20&figure=full",
         "body": None,
     }
+    # the same interaction on a second grammar: the kind of the verb is chosen first
+    # (action against state), the form only after, and the picker itself is payload data
+    items["classification_verb"] = {
+        "url": "/api/generate?topic=english.grammar.present_perfect_simple_continuous"
+               "&difficulty=medium&seed=1&count=20&figure=full",
+        "body": None,
+    }
 
     for fixture in items.values():
         response = client.get(fixture["url"])

@@ -757,6 +757,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: non ci sono virgole e la relativa dice di quale infermiera si parla — senza di essa la frase non identifica una persona precisa. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'looked after'. 'which' sbaglia l'antecedente, 'whose' esigerebbe un sostantivo posseduto al posto di un verbo, e 'where' non può fare da soggetto."
               ]
@@ -797,6 +817,26 @@
               ],
               "classification": [
                 "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
               ],
               "explanation": [
                 "Non-defining: la relativa è chiusa fra due virgole e aggiunge un dettaglio su una persona già identificata dal nome, quindi la frase regge anche senza. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'studied'. 'that' è sempre vietato tra virgole, 'which' sbaglia l'antecedente personale e 'where' non può fare da soggetto."
@@ -839,6 +879,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: nessuna virgola e la relativa dice di quale ricetta si tratta. Il pronome è 'which' perché l'antecedente è una cosa e il pronome è l'oggetto di 'wrote'. 'who' sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non può essere l'oggetto di un verbo."
               ]
@@ -879,6 +939,26 @@
               ],
               "classification": [
                 "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
               ],
               "explanation": [
                 "Non-defining: le virgole aggiungono un'informazione su un ponte già identificato. Il pronome è 'which' perché l'antecedente è una cosa e il pronome è il soggetto del passivo 'was built'. 'that' è vietato tra virgole, 'who' sbaglia l'antecedente e 'whose' esigerebbe un sostantivo posseduto."
@@ -921,6 +1001,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: nessuna virgola e la relativa identifica la donna. Il pronome è 'whose' perché 'car' appartiene a lei: è l'unico relativo che regge direttamente un sostantivo. 'who' non può introdurre 'car', 'which' sbaglia l'antecedente personale e 'where' indica un luogo."
               ]
@@ -961,6 +1061,26 @@
               ],
               "classification": [
                 "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
               ],
               "explanation": [
                 "Non-defining: le virgole presentano il figlio come dettaglio di vicini già identificati. Il pronome è 'whose' perché 'son' appartiene a loro. 'who' non può reggere 'son', 'that' è vietato tra virgole e 'which' sbaglia l'antecedente personale."
@@ -1003,6 +1123,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: nessuna virgola e la relativa dice di quale bicicletta si parla. Il pronome è 'which' perché l'antecedente è una cosa e il pronome è il soggetto di 'belongs to'. 'who' sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non può fare da soggetto."
               ]
@@ -1043,6 +1183,26 @@
               ],
               "classification": [
                 "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
               ],
               "explanation": [
                 "Non-defining: il nome proprio identifica già la persona e le virgole aggiungono un dettaglio. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'works'. 'that' è vietato tra virgole, 'which' sbaglia l'antecedente e 'whose' esigerebbe un sostantivo posseduto."
@@ -1085,6 +1245,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: nessuna virgola e la relativa identifica la biblioteca. 'I borrowed this atlas' ha già soggetto e oggetto, quindi manca il complemento di luogo e serve 'where'. 'which' sarebbe corretto solo con una preposizione davanti ('from which'), 'whose' esprime possesso e 'who' è riservato alle persone."
               ]
@@ -1125,6 +1305,26 @@
               ],
               "classification": [
                 "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
               ],
               "explanation": [
                 "Non-defining: le virgole aggiungono il luogo a una conferenza già identificata. Il pronome è 'which' perché la conferenza è il soggetto di 'took place'; 'where' sarebbe sbagliato, perché il luogo è già detto ('in Lisbon') e 'took place' non cerca un complemento. 'that' è vietato tra virgole e 'who' sbaglia l'antecedente."
@@ -1167,6 +1367,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: nessuna virgola e la relativa restringe il gruppo ai bambini che mangiano troppo zucchero — è informazione essenziale. Il pronome è 'who' perché sono persone e il pronome è il soggetto di 'eat'. 'which' sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non può fare da soggetto."
               ]
@@ -1207,6 +1427,26 @@
               ],
               "classification": [
                 "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
               ],
               "explanation": [
                 "Non-defining: il possessivo 'her' e le virgole rendono accessoria l'informazione. Il pronome è 'whose' perché la salute è del nonno e 'health' è un sostantivo che dipende dal relativo. 'who' non può reggere 'health', 'that' è vietato tra virgole e 'which' sbaglia l'antecedente personale."
@@ -1249,6 +1489,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: nessuna virgola e la relativa dice di quali chiavi si parla. Il pronome è 'which' perché l'antecedente è una cosa e il pronome è l'oggetto di 'left'. 'who' sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non può essere l'oggetto di un verbo."
               ]
@@ -1289,6 +1549,26 @@
               ],
               "classification": [
                 "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
               ],
               "explanation": [
                 "Non-defining: le virgole aggiungono una data a una fotografia già identificata. Il pronome è 'which' perché la fotografia è il soggetto del passivo 'was taken'; 'where' indicherebbe il luogo di un'azione, non il soggetto che la subisce. 'that' è vietato tra virgole e 'who' sbaglia l'antecedente."
@@ -1331,6 +1611,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: nessuna virgola e la relativa definisce che cosa è un falegname. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'makes'. 'which' sbaglia l'antecedente, 'whose' esigerebbe un sostantivo posseduto e 'where' non può fare da soggetto."
               ]
@@ -1371,6 +1671,26 @@
               ],
               "classification": [
                 "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
               ],
               "explanation": [
                 "Non-defining: le virgole aggiungono un dettaglio su una guida già identificata. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'had been'. 'that' è vietato tra virgole, 'which' sbaglia l'antecedente e 'where' non può fare da soggetto."
@@ -1413,6 +1733,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: nessuna virgola e la relativa identifica il paese. 'my parents got married' è completa e non ha oggetto, quindi manca il complemento di luogo: 'where'. 'which' avrebbe bisogno di una preposizione ('in which'), 'whose' esprime possesso e 'who' è riservato alle persone."
               ]
@@ -1453,6 +1793,26 @@
               ],
               "classification": [
                 "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
               ],
               "explanation": [
                 "Non-defining: le virgole aggiungono un dettaglio su un ristorante già identificato. Il pronome è 'whose' perché i tavoli sono del ristorante e 'tables' è il sostantivo che dipende dal relativo. 'which' non può reggere 'tables', 'that' è vietato tra virgole e 'who' sbaglia l'antecedente."
@@ -1495,6 +1855,26 @@
               "classification": [
                 "defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Defining: nessuna virgola e la relativa identifica l'atleta. Il pronome è 'whose' perché 'ankle' è parte di lui. 'who' non può reggere 'ankle', 'which' sbaglia l'antecedente personale e 'where' indica un luogo."
               ]
@@ -1536,8 +1916,1259 @@
               "classification": [
                 "non-defining"
               ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
               "explanation": [
                 "Non-defining: le virgole aggiungono un dettaglio su un esame già identificato. Il pronome è 'which' perché l'esame è ciò per cui ci si è preparati: è l'oggetto della preposizione finale 'for'. 'that' è vietato tra virgole, 'who' sbaglia l'antecedente e 'whose' esigerebbe un sostantivo posseduto."
+              ]
+            }
+          },
+          "figure": null
+        }
+      ],
+      "options": {}
+    }
+  },
+  "classification_verb": {
+    "url": "/api/generate?topic=english.grammar.present_perfect_simple_continuous&difficulty=medium&seed=1&count=20&figure=full",
+    "body": {
+      "topic": "english.grammar.present_perfect_simple_continuous",
+      "difficulty": "medium",
+      "seed": 1,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "I ______ (already / send) the report, so the manager has it on her desk.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{L'invio è concluso e il risultato è ancora sul tavolo ('has it on her desk'); 'already' segna un punto raggiunto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Already' e 'just' vanno con il Present Perfect Simple quando il risultato dell'azione è compiuto e conta ancora adesso.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{have already sent}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "have already sent",
+                "am already sending",
+                "already sent",
+                "have already been sending"
+              ],
+              "correct": [
+                "have already sent"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "Il risultato è compiuto e il suo effetto è ancora presente ('has it on her desk'): 'already' segna il punto raggiunto, quindi Present Perfect Simple. 'have already been sending' mette al centro l'attività di invio ancora in corso, e un'attività in corso non lascia il rapporto sul tavolo. 'already sent' (past simple) chiude l'invio nel passato e taglia il legame con il presente. 'am already sending' descrive solo l'istante in cui si parla."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 1,
+          "statement": {
+            "key": "She ______ (just / finish) her homework, so she can go out with us.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il compito è concluso e il permesso di uscire è la sua conseguenza ('she can go out'); 'just' segna un risultato appena raggiunto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Just' con un risultato compiuto vuole il Present Perfect Simple.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{has just finished}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "has just been finishing",
+                "was just finishing",
+                "has just finished",
+                "is just finishing"
+              ],
+              "correct": [
+                "has just finished"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "Il permesso di uscire è la conseguenza di un compito concluso un attimo prima: 'just' segna il risultato appena raggiunto e vuole il Present Perfect Simple. 'has just been finishing' presenterebbe il compito come attività ancora aperta, e un compito aperto non fa uscire nessuno. 'was just finishing' (past continuous) chiude la scena nel passato. 'is just finishing' dice che sta finendo proprio ora, senza il risultato già acquisito."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 2,
+          "statement": {
+            "key": "We ______ (not / decide) yet where to spend the summer holidays.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{'yet' segna un risultato atteso e non ancora raggiunto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Con 'yet' il Present Perfect Simple dice che il risultato non è ancora arrivato.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{haven't decided}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "didn't decide",
+                "haven't been deciding",
+                "don't decide",
+                "haven't decided"
+              ],
+              "correct": [
+                "haven't decided"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'yet' dice che la decisione è attesa e non è ancora arrivata: il tempo non è concluso e si guarda al risultato mancante, quindi Present Perfect Simple alla forma negativa. 'haven't been deciding' descrive un'attività di decisione in corso, che 'yet' non chiede. 'didn't decide' (past simple) chiuderebbe la questione nel passato, come se non ci fosse più niente da decidere. 'don't decide' è un Present Simple: descrive un'abitudine."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 3,
+          "statement": {
+            "key": "______ (you / ever / eat) sushi in your life?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{'ever' chiede un'esperienza dentro un tempo che arriva fino a ora, senza un momento definito.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Ever' e 'never' con il Present Perfect Simple parlano di esperienze, senza dire quando.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Have you ever eaten}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "Do you ever eat",
+                "Have you ever been eating",
+                "Did you ever eat",
+                "Have you ever eaten"
+              ],
+              "correct": [
+                "Have you ever eaten"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'ever' chiede se l'esperienza esiste nel corso della vita fino a ora: il tempo non è definito e non è concluso, quindi Present Perfect Simple. 'have you ever been eating' mette in primo piano lo svolgersi dell'attività e non l'esperienza. 'did you ever eat' chiude l'esperienza in un passato concluso che la frase non nomina. 'do you ever eat' è un'abitudine, non un bilancio di esperienze."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 4,
+          "statement": {
+            "key": "He ______ (call) me three times so far this morning.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{'three times so far' conta azioni concluse dentro un tempo che non è ancora finito.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Con un conteggio ('once', 'three times', 'so far') il Present Perfect Simple somma risultati.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{has called}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "called",
+                "has called",
+                "has been calling",
+                "is calling"
+              ],
+              "correct": [
+                "has called"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'three times so far' conta i risultati raggiunti dentro un tempo ancora aperto ('this morning'): un numero di azioni concluse, quindi Present Perfect Simple. 'has been calling' descrive l'attività continua e non il conto delle chiamate. 'called' (past simple) metterebbe le chiamate in un tempo chiuso, mentre la mattina non è finita. 'is calling' dice soltanto che sta chiamando adesso."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 5,
+          "statement": {
+            "key": "He ______ (call) me all morning, and I still haven't picked up.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{'all morning' misura quanto dura un'attività che continua ancora adesso.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'All day' e 'all morning' misurano la durata di un'attività: Present Perfect Continuous.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{has been calling}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "has called",
+                "is calling",
+                "has been calling",
+                "calls"
+              ],
+              "correct": [
+                "has been calling"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'all morning' misura la durata di un'attività che arriva fino a ora e non è finita, e 'I still haven't picked up' dice che continua: Present Perfect Continuous. 'has called' conterebbe le chiamate concluse invece di descrivere l'attività. 'calls' è un'abitudine, senza il tratto di tempo che arriva ad adesso. 'is calling' descrive l'istante presente e perde la mattinata intera."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 6,
+          "statement": {
+            "key": "They ______ (play) football for two hours and nobody has scored yet.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{'for two hours' più una partita che non è finita ('nobody has scored yet').}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'For' con una durata misura l'attività: Present Perfect Continuous se l'attività non è conclusa.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{have been playing}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "are playing",
+                "play",
+                "have played",
+                "have been playing"
+              ],
+              "correct": [
+                "have been playing"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'for two hours' dice quanto dura un'attività ancora in corso, e 'nobody has scored yet' conferma che la partita continua: Present Perfect Continuous. 'have played' presenterebbe il gioco come concluso o come un computo di partite. 'play' è un'abitudine e 'are playing' solo il momento presente, senza le due ore già trascorse."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 7,
+          "statement": {
+            "key": "It ______ (rain) since yesterday evening, and the garden is flooded.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{'since' con un punto di partenza e un effetto visibile adesso.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Since' più un'attività che continua vuole il Present Perfect Continuous.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{has been raining}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "rained",
+                "rains",
+                "has been raining",
+                "has rained"
+              ],
+              "correct": [
+                "has been raining"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'since yesterday evening' dà il punto di partenza e il giardino allagato mostra l'effetto di un'attività che non si è fermata: Present Perfect Continuous. 'has rained' suonerebbe come un bilancio di piogge concluse. 'rains' descrive il clima in generale e 'rained' chiude la pioggia nel passato, mentre l'allagamento è di adesso."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 8,
+          "statement": {
+            "key": "My brother ______ (recently / start) a new job at the hospital.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{'recently' con un'azione puntuale, che si compie una volta sola.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Le azioni puntuali ('start', 'finish', 'send') con 'recently' prendono il Present Perfect Simple.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{has recently started}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "has recently been starting",
+                "has recently started",
+                "recently started",
+                "is recently starting"
+              ],
+              "correct": [
+                "has recently started"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'recently' colloca il fatto in un passato vicino che tocca il presente, e 'start' è un'azione puntuale che si compie una volta: Present Perfect Simple. 'has recently been starting' proporrebbe un inizio ripetuto e in corso, che 'start' non ammette. 'recently started' (past simple) rinuncia al legame con ora che 'recently' senza momento definito richiede. 'is recently starting' non esiste in inglese."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 9,
+          "statement": {
+            "key": "I ______ (sleep) badly lately, because the neighbours' dog barks all night.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{'lately' descrive un periodo aperto fino a oggi, e 'badly' riguarda il modo, non un conteggio.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Lately' con un'attività che continua prende il Present Perfect Continuous.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{have been sleeping}, \\text{action}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "have been sleeping",
+                "have slept",
+                "slept",
+                "sleep"
+              ],
+              "correct": [
+                "have been sleeping"
+              ],
+              "classification": [
+                "action"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'lately' descrive un periodo aperto che arriva a oggi e 'badly' riguarda il modo di dormire, non un conteggio di notti: Present Perfect Continuous. 'have slept' conterebbe le notti concluse invece di descrivere come vanno le cose ultimamente. 'sleep' è un'abitudine senza limite di tempo e 'slept' chiude il disturbo nel passato."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 10,
+          "statement": {
+            "key": "He ______ (know) my sister since primary school.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Un verbo di cognizione con un punto di partenza ('since primary school').}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{I verbi di stato non hanno la forma continua: con 'for' e 'since' prendono il Present Perfect Simple.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{has known}, \\text{state}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "knows",
+                "has known",
+                "has been knowing",
+                "knew"
+              ],
+              "correct": [
+                "has known"
+              ],
+              "classification": [
+                "state"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'know' è un verbo di stato: descrive una condizione della mente, non un'attività, e non ha la forma in -ing. La durata 'since primary school' va quindi con il Present Perfect Simple. 'has been knowing' è impossibile, come 'is knowing'. 'knows' dichiara la conoscenza di oggi ma perde il punto di partenza. 'knew' farebbe pensare che non la conosce più."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 11,
+          "statement": {
+            "key": "That painting ______ (belong) to my grandmother since 1962.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Un verbo di appartenenza con una data di inizio ('since 1962').}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Appartenenza e possesso si dicono con il Present Perfect Simple anche con 'since'.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{has belonged}, \\text{state}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "has been belonging",
+                "belongs",
+                "has belonged",
+                "belonged"
+              ],
+              "correct": [
+                "has belonged"
+              ],
+              "classification": [
+                "state"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'belong' esprime appartenenza ed è un verbo di stato, quindi la forma continua è esclusa e la durata 'since 1962' va con il Present Perfect Simple. 'has been belonging' è scorretto per la stessa ragione per cui non si dice 'is belonging'. 'belongs' direbbe a chi appartiene oggi, perdendo la data di partenza. 'belonged' chiuderebbe l'appartenenza nel passato."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 12,
+          "statement": {
+            "key": "I ______ (believe) her story from the very first minute.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Un verbo di opinione con un intervallo che parte dal primo minuto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Le opinioni (believe, think) restano al Present Perfect Simple anche quando la durata è espressa.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{have believed}, \\text{state}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "believe",
+                "have believed",
+                "believed",
+                "have been believing"
+              ],
+              "correct": [
+                "have believed"
+              ],
+              "classification": [
+                "state"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'believe' è un verbo di stato e non ammette la forma in -ing: l'intervallo 'from the very first minute' vuole quindi il Present Perfect Simple. 'have been believing' è agrammaticale. 'believe' al presente direbbe che ci credo adesso, senza il percorso cominciato al primo minuto. 'believed' chiuderebbe la fiducia nel passato, come se fosse finita."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 13,
+          "statement": {
+            "key": "Nobody ______ (understand) the instructions so far, so the teacher will explain them again.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Un verbo di comprensione più 'so far', che guarda fino a questo momento.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Con 'so far' un verbo di stato prende il Present Perfect Simple: la forma continua non esiste.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{has understood}, \\text{state}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "has been understanding",
+                "has understood",
+                "is understanding",
+                "understood"
+              ],
+              "correct": [
+                "has understood"
+              ],
+              "classification": [
+                "state"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'understand' è un verbo di stato: la forma in -ing è esclusa, e con 'so far' il risultato mancante si dice con il Present Perfect Simple. 'has been understanding' è agrammaticale. 'understood' (past simple) metterebbe la comprensione in un tempo chiuso, mentre 'so far' guarda fino a questo momento. 'is understanding' descrive una comprensione in divenire che il verbo non ammette."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 14,
+          "statement": {
+            "key": "He ______ (have) my dictionary for two weeks, and I need it back.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{'Have' nel senso di possedere, con una durata misurata ('for two weeks').}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Have' che significa possedere è un verbo di stato: Present Perfect Simple, mai la forma continua.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{has had}, \\text{state}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "is having",
+                "has been having",
+                "has had",
+                "had"
+              ],
+              "correct": [
+                "has had"
+              ],
+              "classification": [
+                "state"
+              ],
+              "classification_values": [
+                "action",
+                "state"
+              ],
+              "classification_labels": [
+                "ui.classification_verb_action",
+                "ui.classification_verb_state"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt_verb"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked_verb"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong_verb"
+              ],
+              "option_wrong_key": [
+                "ui.form_wrong"
+              ],
+              "explanation": [
+                "'have' qui significa possedere, non svolgere: è un verbo di stato e non ha la forma continua, quindi la durata 'for two weeks' va con il Present Perfect Simple. 'has been having' sarebbe possibile solo con un altro senso di 'have', per esempio 'have a shower'. 'had' chiuderebbe il prestito nel passato e 'is having' descrive il possesso nel solo istante presente."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 15,
+          "statement": {
+            "key": "The electrician ______ fixed our boiler last week has just sent the invoice.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola; l'antecedente è una persona e il verbo 'fixed' non ha ancora il suo soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Defining clause per le persone soggetto: si usa 'who'; 'that' è ammesso solo qui, mai tra virgole.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{who}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "whose",
+                "where",
+                "which"
+              ],
+              "correct": [
+                "who"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
+              "explanation": [
+                "Defining: non ci sono virgole e la relativa dice quale elettricista ha mandato la fattura, quindi serve a identificarlo. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'fixed'. 'which' sbaglia l'antecedente, 'whose' chiederebbe un sostantivo posseduto e 'where' non può fare da soggetto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 16,
+          "statement": {
+            "key": "The film ______ we watched last night was much better than the reviews said.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola, antecedente inanimato, e 'watched' cerca ancora il suo oggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Defining clause per le cose oggetto: si usa 'which' oppure 'that'.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{which}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "whose",
+                "which",
+                "where"
+              ],
+              "correct": [
+                "which"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa identifica il film di cui parla la frase. Il pronome è 'which' perché l'antecedente è una cosa e il pronome è l'oggetto di 'watched'. 'who' sbaglia l'antecedente, 'whose' esigerebbe un sostantivo posseduto e 'where' non può essere l'oggetto di un verbo."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 17,
+          "statement": {
+            "key": "My uncle Giorgio, ______ has lived in Canada since 1990, is coming home for Christmas.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due virgole e un nome proprio che identifica già la persona; il verbo 'has lived' aspetta il soggetto.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Tra virgole 'that' non si usa mai: per le persone si sceglie 'who'.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{who}, \\text{non-defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "that",
+                "which",
+                "who",
+                "whose"
+              ],
+              "correct": [
+                "who"
+              ],
+              "classification": [
+                "non-defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
+              "explanation": [
+                "Non-defining: la relativa è chiusa fra due virgole e aggiunge un dettaglio su una persona già identificata dal nome. Il pronome è 'who' perché l'antecedente è una persona e il pronome è il soggetto di 'has lived'. 'that' è sempre vietato dopo la virgola, in qualunque frase. 'which' sbaglia l'antecedente e 'whose' chiederebbe un sostantivo posseduto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 18,
+          "statement": {
+            "key": "The village ______ my grandparents met has become a tourist attraction.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola e 'met' ha già soggetto e oggetto: manca il luogo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Per i luoghi, quando il verbo è già completo, si usa 'where'.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{where}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "whose",
+                "which",
+                "where"
+              ],
+              "correct": [
+                "where"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa dice di quale paese si parla. Il pronome è 'where' perché nel buco della frase manca un complemento di luogo: 'my grandparents met' ha già soggetto e oggetto. 'which' non può fare da complemento di luogo senza preposizione, 'who' sbaglia l'antecedente e 'whose' chiederebbe un sostantivo posseduto."
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 19,
+          "statement": {
+            "key": "The student ______ essay won the prize is only sixteen.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Nessuna virgola e un sostantivo senza articolo ('essay') che appartiene a qualcuno.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{'Whose' esprime possesso e regge un sostantivo, per le persone come per le cose.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{whose}, \\text{defining}",
+            "kind": "multiple_choice",
+            "payload": {
+              "options": [
+                "who",
+                "which",
+                "where",
+                "whose"
+              ],
+              "correct": [
+                "whose"
+              ],
+              "classification": [
+                "defining"
+              ],
+              "classification_values": [
+                "defining",
+                "non-defining"
+              ],
+              "classification_labels": [
+                "ui.classification_defining",
+                "ui.classification_non_defining"
+              ],
+              "classification_prompt_key": [
+                "ui.classification_prompt"
+              ],
+              "classification_locked_key": [
+                "ui.classification_locked"
+              ],
+              "classification_wrong_key": [
+                "ui.classification_wrong"
+              ],
+              "option_wrong_key": [
+                "ui.pronoun_wrong"
+              ],
+              "explanation": [
+                "Defining: nessuna virgola e la relativa identifica lo studente. 'essay' è un sostantivo senza articolo che dipende dal pronome, quindi il tema appartiene allo studente e serve 'whose'. 'who' non può reggere un sostantivo, 'which' sbaglia l'antecedente e 'where' non esprime possesso."
               ]
             }
           },

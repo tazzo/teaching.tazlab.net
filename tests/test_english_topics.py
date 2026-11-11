@@ -32,6 +32,13 @@ from app.generators.english.relative_classification import (
     PRONOUNS as RCK_PRONOUNS,
     CLASSIFICATIONS as RCK_CLASSIFICATIONS,
 )
+from app.generators.english.present_perfect_simple_continuous import (
+    TOPIC as PPSC_TOPIC,
+    QUESTIONS as PPSC_QUESTIONS,
+    CLASSIFICATIONS as PPSC_CLASSIFICATIONS,
+    aspect_of,
+    expected_classification,
+)
 from app.generators.registry import TOPICS
 from app.main import app
 from app.pages import KINDS, PAGES, find_page
@@ -602,3 +609,275 @@ def test_the_classification_page_is_a_new_catalogue_entry() -> None:
     assert served["kind"] == "classification_choice"
     assert served["count"] == 20
     assert served["difficulties"] == ["easy"]
+
+
+# --- Present Perfect Simple vs Continuous, and the pronoun: one page, two moves ---
+# The operator asked for an online page, not a PDF, and for the interaction the site
+# already had: the kind of the sentence is chosen first and the check is born disabled
+# (`classification_choice`). This pool is what backs it — three groups of statements in
+# the order the schema lists them, and two facts graded per card.
+
+
+def test_present_perfect_simple_continuous_pool_is_new_and_well_formed() -> None:
+    assert len(PPSC_QUESTIONS) >= 20, "a batch of 20 needs at least 20 questions"
+    sentences = [spec.sentence for spec in PPSC_QUESTIONS]
+    assert len(set(sentences)) == len(sentences), "duplicate sentence in the pool"
+
+    # A new page, not the same questions with a new label: no sentence of this pool
+    # appears in any pool already on the site (the intersection is empty).
+    existing = {
+        spec.sentence
+        for pool in (RC_EASY, RDN_EASY, RDN_MEDIUM, PPS_EASY, PPM_MEDIUM, RCK_QUESTIONS)
+        for spec in pool
+    }
+    assert set(sentences) & existing == set(), "a sentence was copied from an existing pool"
+
+    for spec in PPSC_QUESTIONS:
+        assert len(spec.options) == 4, spec.sentence
+        assert len(set(spec.options)) == 4, spec.sentence
+        assert spec.correct in spec.options, spec.sentence
+        assert "______" in spec.sentence, spec.sentence
+
+        for text in (spec.explanation, spec.clue, spec.rule):
+            assert text.strip(), spec.sentence
+            # the text is wrapped in \text{...}: a LaTeX special would break the render
+            assert not set(text) & set("%&$#_\\{}"), (spec.sentence, text)
+
+        # the family is one of the two the picker knows, and the claimed kind is one of the
+        # two values that picker shows
+        assert spec.family in PPSC_CLASSIFICATIONS, spec.sentence
+        assert spec.classification in [value for value, _ in PPSC_CLASSIFICATIONS[spec.family]]
+
+        # the hint names the diagnostic signal, never the answer
+        assert spec.correct.lower() not in spec.clue.lower(), spec.sentence
+
+        if spec.family == "verb":
+            # the explanation is the WHY of the aspect, and it names the tempting twin
+            assert "present perfect" in spec.explanation.lower(), spec.sentence
+            # quoted in the running text, a sentence-initial option loses its capital
+            explanation = spec.explanation.lower()
+            assert any(option != spec.correct and option.lower() in explanation
+                       for option in spec.options), (
+                "the explanation must say why a tempting option fails", spec.sentence
+            )
+
+
+def test_the_page_keeps_the_progression_the_schema_asks_for() -> None:
+    """10 by indicator, 5 that only the Simple can answer, 6 on the pronoun."""
+    verb_cards = [spec for spec in PPSC_QUESTIONS if spec.family == "verb"]
+    clause_cards = [spec for spec in PPSC_QUESTIONS if spec.family == "clause"]
+    by_indicator = [spec for spec in verb_cards if spec.classification == "action"]
+    stative = [spec for spec in verb_cards if spec.classification == "state"]
+
+    assert 8 <= len(by_indicator) <= 10, "8-10 statements decide by the indicator"
+    assert len(stative) >= 4, "4-5 cards where the Continuous is impossible"
+    assert 4 <= len(clause_cards) <= 6, "4-6 statements on the relative pronouns"
+
+    # neither aspect wins the first group by habit, and the twin is always on the table
+    assert {aspect_of(spec.correct) for spec in by_indicator} == {"simple", "continuous"}
+    for spec in by_indicator:
+        assert aspect_of(spec.correct) in ("simple", "continuous"), spec.sentence
+        assert any(aspect_of(option) != aspect_of(spec.correct) for option in spec.options), (
+            "the other aspect must be offered, or there is nothing to choose", spec.sentence
+        )
+
+    # a verb of state: the Simple is right and the -ing twin is offered and wrong
+    for spec in stative:
+        assert aspect_of(spec.correct) == "simple", spec.sentence
+        assert any(aspect_of(option) == "continuous" for option in spec.options), spec.sentence
+
+    # the indicators of the schema are really in the sentences
+    def has(word: str) -> bool:
+        return any(word in spec.sentence.lower() for spec in by_indicator)
+
+    for marker in ("already", "just", "yet", "ever", "so far", "recently", "lately",
+                   "all morning", "for two hours", "since"):
+        assert has(marker), f"no statement carries {marker}"
+
+    # the relative cards claim the class their commas show, and the forbidden `that` after
+    # a comma is on the page, offered where it can only be wrong
+    for spec in clause_cards:
+        assert spec.classification == sentence_classification(spec.sentence), spec.sentence
+        assert all(option in RCK_PRONOUNS for option in spec.options), spec.sentence
+        assert not (spec.correct == "that" and spec.classification == "non-defining"), spec.sentence
+        assert not ("that" in spec.options and spec.classification == "defining"), spec.sentence
+    comma_that = [spec for spec in clause_cards if "that" in spec.options]
+    assert comma_that, "'that' is never offered after a comma: the rule is not taught"
+    for spec in comma_that:
+        assert spec.classification == "non-defining", spec.sentence
+        assert spec.correct != "that", spec.sentence
+
+
+def test_the_picker_travels_in_the_payload_not_in_the_client() -> None:
+    """Which question is asked, and with which two values, is data the server sends."""
+    strings = load_strings("it")
+    seen_families = set()
+    for index in range(len(PPSC_QUESTIONS)):
+        item = PPSC_TOPIC.generate(make_rng(4242, PPSC_TOPIC.id, "medium", index),
+                                   "medium", 4242, index)
+        assert PPSC_TOPIC.verify(item).ok, PPSC_TOPIC.verify(item).reason
+        payload = item.answer.payload
+        family = PPSC_QUESTIONS[index].family
+        seen_families.add(family)
+
+        values = payload["classification_values"]
+        labels = payload["classification_labels"]
+        assert values == [value for value, _ in PPSC_CLASSIFICATIONS[family]]
+        assert len(labels) == len(values)
+        assert all(label in strings and strings[label].strip() for label in labels), labels
+
+        # the two lines that explain the lock and the mistake follow the same grammar, and
+        # so does the line that names what was answered wrong
+        for key in ("classification_prompt_key", "classification_locked_key",
+                    "classification_wrong_key", "option_wrong_key"):
+            assert len(payload[key]) == 1, (family, key)
+            assert payload[key][0] in strings and strings[payload[key][0]].strip(), key
+
+        # and the kind the card asks for is the one the sentence itself shows
+        assert payload["classification"][0] == expected_classification(
+            item.statement_key, tuple(payload["options"])), item.statement_key
+    assert seen_families == {"verb", "clause"}, "one picker only: a group lost its question"
+
+
+def test_verify_refuses_the_continuous_on_a_verb_of_state() -> None:
+    """The grammar truth is enforced, not merely respected by the data."""
+    index = next(i for i, spec in enumerate(PPSC_QUESTIONS) if spec.classification == "state")
+    spec = PPSC_QUESTIONS[index]
+    continuous = next(option for option in spec.options if aspect_of(option) == "continuous")
+    item = PPSC_TOPIC.generate(make_rng(3, PPSC_TOPIC.id, "medium", index), "medium", 3, index)
+    forged = type(item)(**{**item.__dict__, "answer": type(item.answer)(
+        latex=item.answer.latex,
+        kind=item.answer.kind,
+        payload={**item.answer.payload, "correct": [continuous]},
+    )})
+    result = PPSC_TOPIC.verify(forged)
+    assert not result.ok
+    assert result.reason == "stative_in_continuous"
+
+
+def test_verify_refuses_that_between_commas() -> None:
+    index = next(i for i, spec in enumerate(PPSC_QUESTIONS)
+                 if "that" in spec.options and spec.classification == "non-defining")
+    item = PPSC_TOPIC.generate(make_rng(3, PPSC_TOPIC.id, "medium", index), "medium", 3, index)
+    forged = type(item)(**{**item.__dict__, "answer": type(item.answer)(
+        latex=item.answer.latex,
+        kind=item.answer.kind,
+        payload={**item.answer.payload, "correct": ["that"]},
+    )})
+    assert PPSC_TOPIC.verify(forged).reason == "that_in_non_defining"
+
+
+def test_verify_refuses_a_label_a_missing_blank_and_a_foreign_picker() -> None:
+    item = PPSC_TOPIC.generate(make_rng(3, PPSC_TOPIC.id, "medium", 0), "medium", 3, 0)
+
+    labelled = type(item)(**{
+        **item.__dict__,
+        "statement_key": "I ______ (already / send) it, so she has it (azione).",
+    })
+    assert PPSC_TOPIC.verify(labelled).reason == "statement_carries_the_label"
+
+    blankless = type(item)(**{**item.__dict__, "statement_key": "I have already sent it."})
+    assert PPSC_TOPIC.verify(blankless).reason == "missing_blank"
+
+    # a picker that asks about the relative clause on a card about a verb of state is the
+    # opposite page: the values are checked against the card, not trusted
+    foreign = type(item)(**{**item.__dict__, "answer": type(item.answer)(
+        latex=item.answer.latex,
+        kind=item.answer.kind,
+        payload={**item.answer.payload,
+                 "classification_values": ["defining", "non-defining"],
+                 "classification_labels": ["ui.classification_defining",
+                                           "ui.classification_non_defining"]},
+    )})
+    assert PPSC_TOPIC.verify(foreign).reason == "picker_does_not_match_the_card"
+
+    # a kind that contradicts the sentence is a broken question, not a hard one
+    wrong_kind = type(item)(**{**item.__dict__, "answer": type(item.answer)(
+        latex=item.answer.latex,
+        kind=item.answer.kind,
+        payload={**item.answer.payload, "classification": ["state"]},
+    )})
+    assert PPSC_TOPIC.verify(wrong_kind).reason == "classification_mismatch"
+
+
+def test_the_choice_page_is_a_new_catalogue_entry() -> None:
+    page = find_page("english-present-perfect-simple-continuous")
+    assert page is not None, "the new page is not in the catalogue"
+    assert page.macro == "english"
+    assert page.sub == "grammatica"
+    assert page.kind == "classification_choice"
+    assert page.kind in KINDS
+    assert page.count == 20, "a batch of 20: MAX_COUNT is 20, so the count cannot be raised"
+    assert page.topic == PPSC_TOPIC.id
+    assert PPSC_TOPIC.id in TOPICS
+    assert PPSC_TOPIC.difficulties == ("medium",), (
+        "one level only: a level this pool does not have is refused, not served under "
+        "another name"
+    )
+
+    # the page it borrows the interaction from stays exactly as it was
+    sibling = find_page("english-relative-classification")
+    assert sibling is not None and sibling.id != page.id
+    assert sibling.topic != page.topic
+    assert sibling.kind == page.kind
+
+    strings = load_strings("it")
+    assert strings[page.label_key].strip()
+    assert strings[PPSC_TOPIC.label_key].strip()
+    english_pages = [p for p in PAGES if p.macro == "english"]
+    labels = [strings[p.label_key] for p in english_pages]
+    assert len(set(labels)) == len(labels), "two pages share a label in the menu"
+
+    served = next(p for p in client.get("/api/pages").json()["pages"] if p["id"] == page.id)
+    assert served["kind"] == "classification_choice"
+    assert served["count"] == 20
+    assert served["difficulties"] == ["medium"]
+
+
+def test_the_choice_page_serves_twenty_distinct_questions_in_pool_order() -> None:
+    rng = make_rng(1, PPSC_TOPIC.id, "medium", 0)
+    for i in range(20):
+        item = PPSC_TOPIC.generate(rng, "medium", 1, i)
+        assert item.statement_key == PPSC_QUESTIONS[i].sentence
+        assert PPSC_TOPIC.verify(item).ok, PPSC_TOPIC.verify(item).reason
+
+    base = f"/api/generate?topic={PPSC_TOPIC.id}&seed=12345&count=20"
+    response = client.get(f"{base}&difficulty=medium")
+    assert response.status_code == 200, response.text
+    items = response.json()["items"]
+    assert len(items) == 20
+    statements = [item["statement"]["key"] for item in items]
+    assert len(set(statements)) == 20, "a batch of 20 must be 20 distinct questions"
+
+    # the answer position is a coincidence, not a habit
+    positions = [
+        item["answer"]["payload"]["options"].index(item["answer"]["payload"]["correct"][0])
+        for item in items
+    ]
+    for position in range(4):
+        assert 2 <= positions.count(position) <= 8, (
+            f"the correct answer sits in position {position} {positions.count(position)} "
+            "times out of 20"
+        )
+
+    # both pickers are on the page, and every card carries its own question
+    prompts = {
+        item["answer"]["payload"]["classification_prompt_key"][0] for item in items
+    }
+    assert prompts == {"ui.classification_prompt_verb", "ui.classification_prompt"}
+
+    refused = client.get(f"{base}&difficulty=easy")
+    assert refused.status_code == 400, "a level this topic does not have must be refused"
+    assert refused.json()["error"]["code"] == "invalid_difficulty"
+
+
+def test_the_choice_page_prints_its_worksheet() -> None:
+    """The same batch must still export: the statements carry the blank and the answers key."""
+    strings = load_strings("it")
+    items = [PPSC_TOPIC.generate(make_rng(42, PPSC_TOPIC.id, "medium", i), "medium", 42, i)
+             for i in range(3)]
+    html = worksheet_html(items, answers=False, strings=strings)
+    assert '<ol class="options"' in html
+    assert items[0].statement_key in html
+    html_answers = worksheet_html(items, answers=True, strings=strings)
+    assert '<section class="key">' in html_answers

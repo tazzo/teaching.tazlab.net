@@ -546,6 +546,22 @@
       "bare_graph": false,
       "config": [],
       "defaults": {}
+    },
+    {
+      "id": "english-present-perfect-simple-continuous",
+      "macro": "english",
+      "sub": "grammatica",
+      "kind": "classification_choice",
+      "topic": "english.grammar.present_perfect_simple_continuous",
+      "difficulty": "medium",
+      "difficulties": [
+        "medium"
+      ],
+      "label_key": "page.english.present_perfect_simple_continuous",
+      "count": 20,
+      "bare_graph": false,
+      "config": [],
+      "defaults": {}
     }
   ]
 }

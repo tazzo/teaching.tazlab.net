@@ -6,6 +6,9 @@ from typing import Protocol
 
 from app.generators.english.present_perfect import TOPIC as PRESENT_PERFECT
 from app.generators.english.present_perfect_medium import TOPIC as PRESENT_PERFECT_MEDIUM
+from app.generators.english.present_perfect_simple_continuous import (
+    TOPIC as PRESENT_PERFECT_SIMPLE_CONTINUOUS,
+)
 from app.generators.english.relative_classification import TOPIC as RELATIVE_CLASSIFICATION
 from app.generators.english.relative_clauses import TOPIC as RELATIVE_CLAUSES
 from app.generators.english.relative_defining_non_defining import (
@@ -37,6 +40,7 @@ TOPICS: dict[str, Topic] = {
     # english — grammar
     PRESENT_PERFECT.id: PRESENT_PERFECT,
     PRESENT_PERFECT_MEDIUM.id: PRESENT_PERFECT_MEDIUM,
+    PRESENT_PERFECT_SIMPLE_CONTINUOUS.id: PRESENT_PERFECT_SIMPLE_CONTINUOUS,
     RELATIVE_CLAUSES.id: RELATIVE_CLAUSES,
     RELATIVE_DEFINING_NON_DEFINING.id: RELATIVE_DEFINING_NON_DEFINING,
     RELATIVE_CLASSIFICATION.id: RELATIVE_CLASSIFICATION,

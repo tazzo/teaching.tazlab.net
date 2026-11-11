@@ -129,6 +129,14 @@ PAGES: tuple[Page, ...] = (
     Page("english-relative-classification", "english", "grammatica", CLASSIFICATION_CHOICE,
          "english.grammar.relative_classification", "easy",
          "page.english.relative_classification", 40, count=20),
+    # The same two-move interaction, on the grammar the same schema pairs with it: the
+    # present perfect simple against the continuous (result against duration, and the verbs
+    # of state that refuse the continuous), with the relative pronouns closing the batch.
+    # The picker asks the kind first — action/state verb, or defining/non-defining clause —
+    # and the form is chosen only after, which is why this is not a multiple choice page.
+    Page("english-present-perfect-simple-continuous", "english", "grammatica",
+         CLASSIFICATION_CHOICE, "english.grammar.present_perfect_simple_continuous", "medium",
+         "page.english.present_perfect_simple_continuous", 50, count=20),
 )
 
 MACROS: tuple[str, ...] = ("matematica", "fisica", "english")

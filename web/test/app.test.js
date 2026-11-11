@@ -457,3 +457,132 @@ describe("the page where the sentence's kind is chosen", () => {
     plain.remove();
   });
 });
+
+// --- the same interaction, a second grammar --------------------------------
+// The operator asked for a *page* (not a PDF) on the present perfect simple against the
+// continuous, with the interaction the site already had: the kind is chosen first and the
+// check is born disabled. The kind is not the same question as on the relative page — it is
+// the class of the verb ("azione" or "stato"), and only after that the form — so what is
+// asserted here is that the picker comes from the payload and not from the client: the same
+// renderer, a different prompt, a different pair of values, a different wrong-answer line.
+// The batch is the one the server sends (`fixtures/items.json`, pinned by
+// `tests/test_web_fixture.py`).
+
+describe("the page where the kind of the verb is chosen, then the form", () => {
+  const page = catalogue.pages.find(
+    (entry) => entry.topic === "english.grammar.present_perfect_simple_continuous");
+  const batch = items.classification_verb.body.items;
+
+  const open = async () => {
+    await goTo(`#/${page.macro}/${page.sub}/${page.id}`);
+    await vi.waitFor(() => expect(view().querySelectorAll("article.card"))
+      .toHaveLength(batch.length));
+    return [...view().querySelectorAll("article.card")];
+  };
+
+  const kindButtons = (card) => [...card.querySelectorAll("button.classification-option")];
+  const kindButton = (card, value) =>
+    card.querySelector(`button.classification-option[data-classification="${value}"]`);
+  const optionButton = (card, text) =>
+    [...card.querySelectorAll(".choice-option")]
+      .find((button) => button.querySelector(".choice-text").textContent.trim() === text);
+
+  test("it is a catalogue page of its own, with twenty cards and no configurator", async () => {
+    expect(page).toBeTruthy();
+    expect(page.kind).toBe("classification_choice");
+    expect(page.difficulty).toBe("medium");
+    await open();
+    expect(view().querySelector("form.controls")).toBeNull();
+    const generate = requested.filter((url) => url.startsWith("/api/generate"));
+    expect(new Set(generate).size).toBe(1);
+    const url = new URL(generate[0], "https://teaching.tazlab.net");
+    expect(url.searchParams.get("topic")).toBe(page.topic);
+    expect(url.searchParams.get("count")).toBe("20");
+    expect(url.searchParams.get("seed")).toBe("1");
+  });
+
+  test("twenty cards, twenty distinct sentences, and no card prints its own kind", async () => {
+    const cards = await open();
+    expect(cards).toHaveLength(20);
+    const statements = cards.map((card) => card.querySelector(".statement").textContent.trim());
+    expect(new Set(statements).size).toBe(20);
+    for (const card of cards) {
+      const statement = card.querySelector(".statement").textContent;
+      // the hint in the statement names the verb; the kind is never written beside it
+      expect(statement).not.toMatch(/\b(azione|stato|action|state)\b/i);
+      for (const option of card.querySelectorAll(".choice-text")) {
+        expect(option.textContent).not.toMatch(/\b(azione|stato|action|state)\b/i);
+      }
+    }
+  });
+
+  test("the picker asks about the verb, with the payload's two values", async () => {
+    const [card] = await open();
+    const picker = card.querySelector(".classification-picker");
+    expect(picker.querySelector(".classification-prompt").textContent)
+      .toBe(strings["ui.classification_prompt_verb"]);
+    // ... which is not the question the relative page asks
+    expect(strings["ui.classification_prompt_verb"])
+      .not.toBe(strings["ui.classification_prompt"]);
+    expect(kindButtons(card).map((button) => button.dataset.classification))
+      .toEqual(["action", "state"]);
+    expect(kindButtons(card).map((button) => button.textContent))
+      .toEqual([strings["ui.classification_verb_action"],
+                strings["ui.classification_verb_state"]]);
+    expect(card.innerHTML.indexOf("classification-picker"))
+      .toBeLessThan(card.innerHTML.indexOf("choice-list"));
+  });
+
+  test("every card opens locked, and the lock speaks about the verb, not the relative", async () => {
+    const cards = await open();
+    for (const card of cards) {
+      const check = card.querySelector(".page-actions button");
+      expect(check.disabled).toBe(true);
+      const hint = card.querySelector(".classification-hint");
+      expect(hint.hidden).toBe(false);
+      // the card's own payload decides the wording: a verb card cannot borrow the line
+      // written for a relative clause
+      const payload = batch[cards.indexOf(card)].answer.payload;
+      expect(hint.textContent).toBe(strings[payload.classification_locked_key[0]]);
+    }
+  });
+
+  test("the form does not unlock the check; the kind does", async () => {
+    const [card] = await open();
+    const check = card.querySelector(".page-actions button");
+    const expected = batch[0].answer.payload;
+    optionButton(card, expected.correct[0]).click();
+    expect(check.disabled).toBe(true);            // still locked: the kind is the key
+    kindButton(card, expected.classification[0]).click();
+    expect(check.disabled).toBe(false);
+    expect(card.querySelector(".classification-hint").hidden).toBe(true);
+  });
+
+  test("the right form with the wrong kind is wrong, and only the kind is reported", async () => {
+    const [card] = await open();
+    const expected = batch[0].answer.payload;
+    const other = expected.classification[0] === "action" ? "state" : "action";
+    optionButton(card, expected.correct[0]).click();
+    kindButton(card, other).click();
+    card.querySelector(".page-actions button").click();
+
+    const status = card.querySelector(".choice-status");
+    expect(status.className).toContain("bad");
+    expect(status.textContent).toContain(strings["ui.classification_wrong_verb"]);
+    expect(status.textContent).not.toContain(strings["ui.form_wrong"]);
+    expect(status.textContent).not.toContain(strings["ui.classification_wrong"]);
+  });
+
+  test("both facts right is right, and the explanation is the one the server sent", async () => {
+    const [card] = await open();
+    const expected = batch[0].answer.payload;
+    optionButton(card, expected.correct[0]).click();
+    kindButton(card, expected.classification[0]).click();
+    card.querySelector(".page-actions button").click();
+
+    const status = card.querySelector(".choice-status");
+    expect(status.className).toContain("good");
+    expect(status.textContent).toContain(expected.explanation[0].slice(0, 30));
+    expect(card.querySelectorAll(".page-actions button")[0].style.display).toBe("none");
+  });
+});

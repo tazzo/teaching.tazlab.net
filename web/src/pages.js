@@ -330,7 +330,30 @@ export function renderMultipleChoicePage(item, index, context) {
  * has to be visible before the click, not an error after it. `data-classification` on each
  * selector button is the value compared with `payload.classification[0]`; the server checks
  * the same grammar in `verify()`, so the lock is a teaching device, not the only guard.
+ *
+ * The picker is **data, not a layout**: which question is asked, which two values answer it
+ * and the two lines under the buttons all travel in the payload
+ * (`classification_values` and `classification_labels`, `classification_prompt_key`,
+ * `classification_locked_key`, `classification_wrong_key`, `option_wrong_key`). That is
+ * what lets the same interaction host a different grammar — the kind of a relative clause
+ * on one page, the kind of verb (action against state) then the form on another — without
+ * a second renderer or a copy of this one. The defining/non-defining pair stays as the
+ * fallback: a card whose payload lost the field must stay answerable, and that pair is what
+ * the page that predates the data-driven picker asks.
  */
+const DEFAULT_KIND_CHOICES = [
+  { value: "defining", label_key: "ui.classification_defining" },
+  { value: "non-defining", label_key: "ui.classification_non_defining" },
+];
+
+/** The two parallel lists the payload carries, as one list of {value, label_key}. */
+function kindChoicesOf(payload) {
+  const values = payload.classification_values ?? [];
+  const labels = payload.classification_labels ?? [];
+  if (!values.length) return DEFAULT_KIND_CHOICES;
+  return values.map((value, i) => ({ value, label_key: labels[i] ?? value }));
+}
+
 export function renderClassificationChoicePage(item, index, context) {
   const { strings } = context;
   const t = translate(strings);
@@ -345,6 +368,13 @@ export function renderClassificationChoicePage(item, index, context) {
   const correctAnswer = payload.correct?.[0] ?? "";
   const correctClassification = payload.classification?.[0] ?? "";
   const explanation = payload.explanation?.[0] ?? "";
+  // what the selector asks, and what it offers: the payload decides, the pair of the
+  // relative page is only the fallback for a payload that does not say.
+  const kindChoices = kindChoicesOf(payload);
+  const promptKey = payload.classification_prompt_key?.[0] ?? "ui.classification_prompt";
+  const lockedKey = payload.classification_locked_key?.[0] ?? "ui.classification_locked";
+  const wrongKindKey = payload.classification_wrong_key?.[0] ?? "ui.classification_wrong";
+  const wrongOptionKey = payload.option_wrong_key?.[0] ?? "ui.pronoun_wrong";
 
   let selectedOption = null;
   let selectedClassification = null;
@@ -353,22 +383,20 @@ export function renderClassificationChoicePage(item, index, context) {
 
   // --- the kind: the first question, and the lock on the second ------------------
   const kindHost = el("div", "classification-picker");
-  const kindPrompt = t("ui.classification_prompt", "Che tipo di relativa \u00e8 questa frase?");
+  const kindPrompt = t(promptKey, "Che tipo di frase \u00e8 questa?");
   kindHost.append(el("p", "classification-prompt", kindPrompt));
   const kindGroup = el("div", "classification-choices");
   kindGroup.setAttribute("role", "radiogroup");
   kindGroup.setAttribute("aria-label", kindPrompt);
 
-  [
-    ["defining", t("ui.classification_defining", "Defining")],
-    ["non-defining", t("ui.classification_non_defining", "Non-defining")],
-  ].forEach(([value, label]) => {
+  kindChoices.forEach((choice) => {
+    const { value, label_key: labelKey } = choice;
     const btn = el("button", "classification-option");
     btn.type = "button";
     btn.dataset.classification = value;
     btn.setAttribute("role", "radio");
     btn.setAttribute("aria-checked", "false");
-    btn.append(el("span", "classification-text", label));
+    btn.append(el("span", "classification-text", t(labelKey, value)));
     btn.addEventListener("click", () => {
       if (card.dataset.checked === "true") return;
       classificationButtons.forEach((other) => {
@@ -424,8 +452,7 @@ export function renderClassificationChoicePage(item, index, context) {
 
   const status = el("div", "choice-status");
   const lockedHint = el("p", "classification-hint",
-    t("ui.classification_locked",
-      "Scegli il tipo di relativa: finch\u00e9 non scegli, la verifica resta bloccata."));
+    t(lockedKey, "Scegli il tipo: finch\u00e9 non scegli, la verifica resta bloccata."));
 
   const actions = el("div", "page-actions");
   const checkBtn = el("button", "btn btn-quiet", t("ui.check_answer", "Verifica"));
@@ -453,7 +480,9 @@ export function renderClassificationChoicePage(item, index, context) {
     retryBtn.style.display = "";
     lockedHint.hidden = true;
 
-    const pronounRight = selectedOption.trim() === correctAnswer.trim();
+    // the second fact is a form on one page and a pronoun on another: the payload
+    // decides which line reports it, so the variable says "option", not "pronoun".
+    const optionRight = selectedOption.trim() === correctAnswer.trim();
     const kindRight = selectedClassification === correctClassification;
 
     optionButtons.forEach((btn) => {
@@ -475,7 +504,7 @@ export function renderClassificationChoicePage(item, index, context) {
     });
 
     status.replaceChildren();
-    if (pronounRight && kindRight) {
+    if (optionRight && kindRight) {
       status.className = "choice-status good";
       status.append(el("strong", "status-badge", `\u2713 ${t("ui.correct", "Corretto!")}`));
     } else {
@@ -483,11 +512,10 @@ export function renderClassificationChoicePage(item, index, context) {
       status.append(el("strong", "status-badge", `\u2717 ${t("ui.incorrect", "Non corretto")}`));
       // two facts were asked, so the sentence says which one fell
       if (!kindRight) {
-        status.append(el("p", "choice-hint",
-          t("ui.classification_wrong", "Il tipo di relativa non \u00e8 quello giusto.")));
+        status.append(el("p", "choice-hint", t(wrongKindKey, "Il tipo non \u00e8 quello giusto.")));
       }
-      if (!pronounRight) {
-        status.append(el("p", "choice-hint", t("ui.pronoun_wrong", "Il pronome non \u00e8 quello giusto.")));
+      if (!optionRight) {
+        status.append(el("p", "choice-hint", t(wrongOptionKey, "La risposta non \u00e8 quella giusta.")));
       }
     }
     if (explanation) status.append(el("p", "choice-explanation", explanation));
