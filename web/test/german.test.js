@@ -367,3 +367,66 @@ describe("the German page on a phone, at 360 px", () => {
     expect(view().querySelectorAll(".choice-option")).toHaveLength(36);
   });
 });
+
+describe("the solution is behind the answer, not beside the question", () => {
+  test("no card says which option is right, and none carries the reason, before the answer", async () => {
+    const cards = await openPage();
+    for (const card of cards) {
+      expect(card.querySelector(".choice-correct")).toBeNull();
+      expect(card.querySelector(".choice-explanation")).toBeNull();
+      // the clue and the rule are the reason: on the German cards the rule names the answer
+      expect(card.querySelector("details.steps")).toBeNull();
+    }
+    // and a completion's solution is nowhere in the card's own text
+    cards.filter((card) => fieldOf(card)).forEach((card) => {
+      const index = cards.indexOf(card);
+      const solution = BATCH[index].answer.payload.correct[0].toLowerCase();
+      const words = card.textContent.toLowerCase().split(/[^a-zäöüß]+/u);
+      expect(words).not.toContain(solution);
+    });
+  });
+
+  test("«Mostra la soluzione» is the way out, and it brings the reason with it", async () => {
+    const cards = await openPage();
+    const card = choiceCard(cards);
+    const index = cards.indexOf(card);
+    const payload = BATCH[index].answer.payload;
+    const reveal = [...card.querySelectorAll("button")]
+      .find((button) => button.textContent === strings["ui.reveal"]);
+    expect(reveal).toBeTruthy();
+
+    reveal.click();
+    const status = statusOf(card);
+    expect(status.textContent).toContain(
+      strings["ui.solution_is"].replace("{answer}", payload.correct[0]));
+    expect(status.textContent).toContain(payload.explanation[0]);
+    const right = [...card.querySelectorAll(".choice-option")]
+      .find((option) => option.querySelector(".choice-text").textContent === payload.correct[0]);
+    expect(right.classList.contains("choice-correct")).toBe(true);
+    expect(card.querySelector("details.steps")).not.toBeNull();
+    // the check is gone: a revealed card is not an answered one
+    expect([...card.querySelectorAll("button")]
+      .find((button) => button.textContent === strings["ui.check_answer"]).style.display)
+      .toBe("none");
+  });
+
+  test("the reason of a correct choice arrives with the check, and Riprova puts it away", async () => {
+    const cards = await openPage();
+    const card = choiceCard(cards);
+    const index = cards.indexOf(card);
+    const payload = BATCH[index].answer.payload;
+    [...card.querySelectorAll(".choice-option")]
+      .find((option) => option.querySelector(".choice-text").textContent === payload.correct[0])
+      .click();
+    [...card.querySelectorAll("button")]
+      .find((button) => button.textContent === strings["ui.check_answer"]).click();
+    expect(statusOf(card).textContent).toContain(payload.explanation[0]);
+    expect(card.querySelector("details.steps")).not.toBeNull();
+
+    [...card.querySelectorAll("button")]
+      .find((button) => button.textContent === strings["ui.try_again"]).click();
+    // the rule went with the answer: a retry must not be a reading exercise
+    expect(card.querySelector("details.steps")).toBeNull();
+    expect(card.querySelector(".choice-explanation")).toBeNull();
+  });
+});

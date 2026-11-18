@@ -194,6 +194,13 @@ export function renderGraphFillingPage(item, index, context) {
 
 /**
  * kind: multiple_choice — multiple choice fill-in-the-blank question with instant feedback.
+ *
+ * The card is a question and four options; nothing says which one is right until the
+ * student has answered. «Mostra la soluzione» is the way out for a student who does not
+ * know: it marks the right option and brings the reason with it, because a solution
+ * without its «perché» teaches the answer and not the grammar. The steps (clue and rule)
+ * are appended only after an answer or a reveal: they are the answer's own explanation,
+ * and on the German cards the rule names the right form in so many words.
  */
 export function renderMultipleChoicePage(item, index, context) {
   const { strings } = context;
@@ -250,11 +257,31 @@ export function renderMultipleChoicePage(item, index, context) {
   const actions = el("div", "page-actions");
   const checkBtn = el("button", "btn btn-quiet", t("ui.check_answer", "Verifica"));
   checkBtn.type = "button";
+  // The solution is a door, not a printed line: the student may open it when she is stuck,
+  // and until she does (or until she checks) nothing on the card says which option is right.
+  // The reason travels with the solution, because «perché» is the point of the card.
+  const revealBtn = el("button", "btn btn-quiet", t("ui.reveal", "Mostra la soluzione"));
+  revealBtn.type = "button";
   const retryBtn = el("button", "btn btn-quiet", t("ui.try_again", "Riprova"));
   retryBtn.type = "button";
   retryBtn.style.display = "none";
-  actions.append(checkBtn, retryBtn);
+  actions.append(checkBtn, revealBtn, retryBtn);
   card.append(actions, status);
+
+  // The two steps carry the rule that decides the answer, and on 44 of the 45 German
+  // choice cards that rule spells the right form out loud. They are therefore appended
+  // only after the answer — a `<details>` in the DOM before it is the solution one tap
+  // away, and the payload is not a hiding place.
+  let stepsNode = null;
+  const revealSteps = () => {
+    if (stepsNode || !item.steps?.length) return;
+    stepsNode = stepsBlock(item, t);
+    card.append(stepsNode);
+  };
+  const hideSteps = () => {
+    stepsNode?.remove();
+    stepsNode = null;
+  };
 
   checkBtn.addEventListener("click", () => {
     if (!selectedOption) {
@@ -265,6 +292,7 @@ export function renderMultipleChoicePage(item, index, context) {
 
     card.dataset.checked = "true";
     checkBtn.style.display = "none";
+    revealBtn.style.display = "none";
     retryBtn.style.display = "";
 
     const isCorrect = selectedOption.trim() === correctAnswer.trim();
@@ -293,6 +321,27 @@ export function renderMultipleChoicePage(item, index, context) {
       const explP = el("p", "choice-explanation", explanation);
       status.append(explP);
     }
+    revealSteps();
+  });
+
+  revealBtn.addEventListener("click", () => {
+    if (card.dataset.checked === "true") return;
+    card.dataset.checked = "true";
+    checkBtn.style.display = "none";
+    revealBtn.style.display = "none";
+    retryBtn.style.display = "";
+    optionButtons.forEach((btn) => {
+      btn.disabled = true;
+      if (btn.querySelector(".choice-text")?.textContent?.trim() === correctAnswer.trim()) {
+        btn.classList.add("choice-correct");
+      }
+    });
+    status.replaceChildren();
+    status.className = "choice-status";
+    status.append(el("p", "choice-hint", t("ui.solution_is", "La soluzione è: {answer}")
+      .replace("{answer}", correctAnswer)));
+    if (explanation) status.append(el("p", "choice-explanation", explanation));
+    revealSteps();
   });
 
   retryBtn.addEventListener("click", () => {
@@ -304,14 +353,12 @@ export function renderMultipleChoicePage(item, index, context) {
       btn.setAttribute("aria-checked", "false");
     });
     checkBtn.style.display = "";
+    revealBtn.style.display = "";
     retryBtn.style.display = "none";
+    hideSteps();
     status.replaceChildren();
     status.className = "choice-status";
   });
-
-  if (item.steps && item.steps.length) {
-    card.append(stepsBlock(item, t));
-  }
 
   return card;
 }
@@ -647,11 +694,15 @@ export function renderCompletionChoicePage(item, index, context) {
   status.setAttribute("aria-live", "polite");
   card.append(status);
 
-  let revealed = false;
+  let stepsNode = null;
   const revealSteps = () => {
-    if (revealed) return;
-    revealed = true;
-    if (item.steps?.length) card.append(stepsBlock(item, t));
+    if (stepsNode || !item.steps?.length) return;
+    stepsNode = stepsBlock(item, t);
+    card.append(stepsNode);
+  };
+  const hideSteps = () => {
+    stepsNode?.remove();
+    stepsNode = null;
   };
 
   const finish = (right) => {
@@ -692,6 +743,8 @@ export function renderCompletionChoicePage(item, index, context) {
     input.value = "";
     checkBtn.hidden = false;
     retryBtn.hidden = true;
+    // the rule goes with the answer: leaving it on screen would hand the retry the word
+    hideSteps();
     status.replaceChildren();
     status.className = "choice-status";
     input.focus();

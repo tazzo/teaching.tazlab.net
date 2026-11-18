@@ -283,6 +283,7 @@
   "ui.points_placed": "Punti tracciati: {n}",
   "ui.problemi_intro": "Generatori di esercizi: scegli la materia.",
   "ui.pronoun_wrong": "Il pronome non è quello giusto.",
+  "ui.solution_is": "La soluzione è: {answer}",
   "ui.reveal": "Mostra la soluzione",
   "ui.seed": "Seed",
   "ui.seed_number": "Numero",
