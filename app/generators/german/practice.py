@@ -17,7 +17,9 @@ The house rules that shaped this file:
 * **one exercise, not two doubles**: the five pools are disjoint, and a test asserts it
   (``tests/test_german_topics.py``); a sentence may appear on exactly one page.
 * **difficulty is order, not a label**: one level per page, and the pool is written from
-  the easiest card to the hardest, because the girl meets them in that order.
+  the easiest card to the hardest — the order *inside each format*, because a batch is
+  served with the two formats alternating (`serving_order`), so a phone meets both ways of
+  answering on the first screen instead of after nine cards of one kind.
 * **Italian explains, German speaks**: clue, rule and explanation are Italian; the
   sentence, the options and the answers are German, umlauts included.
 * **the keyboard is the only tool**: nothing here needs a mouse — the renderer gives every
@@ -86,6 +88,32 @@ def choice(sentence: str, correct: str, options: tuple[str, str, str, str],
                 clue=clue, rule=rule)
 
 
+def serving_order(cards: tuple[Card, ...]) -> tuple[Card, ...]:
+    """The order a batch is served in: the two formats alternate.
+
+    The pool is written easiest first, and that order is kept *inside each format* — but a
+    batch that printed nine completions and then nine choices was read on a phone as a
+    page with no multiple choice at all: the ninth completion is several screens down, and
+    the first four-option card was the tenth (operator, 2026-11-18, on 360 px). Alternating
+    the two puts both ways of answering on the first screen, which is the only thing that
+    makes «restino entrambe le tipologie» true where the page is read.
+
+    The first card stays the pool's first, so a card's position-zero output (the LaTeX
+    golden, the option shuffle keyed on the index) does not move because of this function.
+    """
+    pending = {
+        "completion": [card for card in cards if card.format == "completion"],
+        "choice": [card for card in cards if card.format == "choice"],
+    }
+    ordered: list[Card] = []
+    turn = cards[0].format if cards else "completion"
+    while pending["completion"] or pending["choice"]:
+        if pending[turn]:
+            ordered.append(pending[turn].pop(0))
+        turn = "choice" if turn == "completion" else "completion"
+    return tuple(ordered)
+
+
 class GermanPractice:
     """The shared topic: a pool, one level, and a verifier that refuses a broken card.
 
@@ -106,7 +134,8 @@ class GermanPractice:
 
     def generate(self, rng: random.Random, difficulty: str, seed: int, index: int,
                  options: dict | None = None) -> Item:
-        card = self.cards[index % len(self.cards)]
+        pool = serving_order(self.cards)
+        card = pool[index % len(pool)]
 
         payload: dict[str, list[str]] = {
             "format": [card.format],

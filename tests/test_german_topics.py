@@ -200,6 +200,39 @@ def test_no_exercise_is_repeated_between_pages() -> None:
     assert not (set(seen) & english), "a German card repeats an English one"
 
 
+def test_a_batch_serves_both_formats_whatever_its_count() -> None:
+    """«restino entrambe le tipologie» must hold for the batch, not only for the pool.
+
+    A pool of nine completions and nine choices served in pool order gives a batch of two
+    that is two completions: the kind the girl never meets is the kind the page does not
+    have. The served order alternates the two (`serving_order`), so a batch of any size
+    holds both — and a batch of eighteen opens with a completion and a choice inside its
+    first three cards.
+    """
+    for page in GERMAN_PAGES:
+        for count in (2, 3, 18):
+            response = client.get(f"/api/generate?topic={page.topic}&difficulty=easy"
+                                  f"&seed=7&count={count}")
+            assert response.status_code == 200, response.text
+            items = response.json()["items"]
+            formats = [item["answer"]["payload"]["format"][0] for item in items]
+            assert set(formats) == {"completion", "choice"}, (
+                f"{page.id}: a batch of {count} holds only {set(formats)}"
+            )
+            if count == 18:
+                assert set(formats[:3]) == {"completion", "choice"}, (
+                    f"{page.id}: the first three cards are all {formats[0]} — on a 360 px "
+                    "phone the other format is several screens down"
+                )
+                # difficulty is still order *inside* a format: the pool is easiest first
+                topic = TOPICS[page.topic]
+                for kind in ("completion", "choice"):
+                    served = [item["statement"]["key"] for item in items
+                              if item["answer"]["payload"]["format"][0] == kind]
+                    pool = [card.sentence for card in topic.cards if card.format == kind]
+                    assert served == pool, f"{page.id}: the {kind} cards left their order"
+
+
 def test_the_batch_the_server_serves_is_eighteen_distinct_cards() -> None:
     for page in GERMAN_PAGES:
         response = client.get(f"/api/generate?topic={page.topic}&difficulty=easy"

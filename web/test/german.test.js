@@ -8,6 +8,8 @@
 // notice: the cards are all there, the field takes the answer (and its `ss` spelling), a
 // wrong answer says what the right one was and why, and the index reaches every page.
 
+import { readFileSync } from "node:fs";
+
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 
 import catalogue from "./fixtures/pages.json";
@@ -36,7 +38,10 @@ function stubFetch() {
   });
 }
 
-const goTo = async (hash) => {
+const goTo = async (hash, search = "") => {
+  // the address is rebuilt on every navigation: a seed one test pinned is that test's,
+  // and a page opened with no parameter is opened the way a browser opens it
+  history.replaceState(null, "", `${location.pathname}${search}`);
   location.hash = hash;
   await new Promise((resolve) => setTimeout(resolve, 0));
   window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -99,6 +104,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.stubGlobal("fetch", stubFetch());
 });
+
 
 describe("the section is in the index", () => {
   test("«Tedesco» is a voice of the top bar, and it leads to the section", async () => {
@@ -195,8 +201,11 @@ describe("a page of the German section", () => {
 
   test("Enter in the field checks, as the button does", async () => {
     const cards = await openPage();
-    const card = cards[1];
-    typeAndCheck(card, BATCH[1].answer.payload.correct[0], { enter: true });
+    // the batch alternates the two formats, so the second card is not a field: the card is
+    // found by what it is, not by where it sits
+    const card = cards.filter((entry) => fieldOf(entry))[1];
+    const index = cards.indexOf(card);
+    typeAndCheck(card, BATCH[index].answer.payload.correct[0], { enter: true });
     expect(statusOf(card).textContent).toContain(strings["ui.completion_correct"]);
     // and the button is a submit button inside the form: that is what makes Enter work
     expect(checkOf(cards[0]).getAttribute("type")).toBe("submit");
@@ -269,5 +278,92 @@ describe("the numbers page", () => {
     expect(text).toContain("siebzehn");
     expect(text).toContain("30 = ______");
     expect(text).toContain("dreißig");
+  });
+});
+
+// ---------------------------------------------------------------- what a phone sees
+// The operator's report of 2026-11-18: on a 360 px phone he saw only the completion
+// cards, and the solution was already printed under the question. What is measured here
+// is what can be measured from this box: the DOM the client builds (jsdom has no layout
+// engine, so "visible" has to mean "in the document, and not hidden by a rule that holds
+// at that width"), and the stylesheet itself — which rule could hide a card's options.
+
+// jsdom rewrites `import.meta.url` to a http:// address, so the sheet is read by path:
+// the suite always runs from the web/ directory (vitest's root)
+const SHEET = readFileSync(`${process.cwd()}/src/styles.css`, "utf8");
+
+/** Every @media block in the sheet, with its condition and its body. */
+function mediaBlocks() {
+  const blocks = [];
+  const opening = /@media([^{]+)\{/g;
+  let match;
+  while ((match = opening.exec(SHEET)) !== null) {
+    let depth = 1;
+    let at = opening.lastIndex;
+    while (depth > 0 && at < SHEET.length) {
+      if (SHEET[at] === "{") depth += 1;
+      else if (SHEET[at] === "}") depth -= 1;
+      at += 1;
+    }
+    blocks.push({ condition: match[1].trim(), body: SHEET.slice(opening.lastIndex, at - 1) });
+  }
+  return blocks;
+}
+
+/** Does this media condition hold on a viewport `width` px wide? Only width is judged. */
+function holdsAt(condition, width) {
+  const rem = 16;
+  const maxPx = [...condition.matchAll(/(?:max-)?width\s*<=?\s*([\d.]+)rem|max-width\s*:\s*([\d.]+)rem/g)]
+    .map((m) => Number(m[1] ?? m[2]) * rem);
+  if (maxPx.length) return width <= Math.min(...maxPx);
+  const minPx = [...condition.matchAll(/min-width\s*:\s*([\d.]+)rem/g)].map((m) => Number(m[1]) * rem);
+  if (minPx.length) return width >= Math.max(...minPx);
+  return false;               // print, prefers-reduced-motion, and anything that is not width
+}
+
+describe("the German page on a phone, at 360 px", () => {
+  test("both formats are on the first screen, not after nine cards of one kind", async () => {
+    const cards = await openPage();
+    const formats = cards.map((card) => (fieldOf(card) ? "completion" : "choice"));
+    // 360 px holds one card at a time: the first three are the first screens, and both
+    // ways of answering must be among them — the old order put the first choice tenth
+    expect(formats.slice(0, 3)).toContain("completion");
+    expect(formats.slice(0, 3)).toContain("choice");
+  });
+
+  test("no rule that holds at 360 px hides the options, the field or the card", async () => {
+    const blocks = mediaBlocks();
+    // the phone rule is the one the operator's hypothesis pointed at; it must exist and it
+    // must compact, not hide
+    const phone = blocks.filter((block) => holdsAt(block.condition, 360));
+    expect(phone.length).toBeGreaterThan(0);
+    const watched = [".choice-list", ".choice-option", ".completion-form",
+      ".completion-input", ".card"];
+    for (const block of phone) {
+      expect(block.body).not.toMatch(/display\s*:\s*none/);
+      expect(block.body).not.toMatch(/visibility\s*:\s*hidden/);
+      // and no rule of that block hides one of the card's controls: the phone rule
+      // compacts (padding, gap, font size), it does not remove anything
+      for (const rule of block.body.split("}")) {
+        const [selectors, declarations] = rule.split("{");
+        if (!selectors || !declarations) continue;
+        const named = watched.some((selector) => selectors.includes(selector));
+        if (!named) continue;
+        expect(declarations).not.toMatch(/display\s*:\s*none|visibility\s*:\s*hidden/);
+      }
+    }
+    // and the same block does not hold on a desktop viewport: 1280 px is untouched by it
+    const desk = blocks.filter((block) => holdsAt(block.condition, 1280));
+    expect(desk).toHaveLength(0);
+  });
+
+  test("the two counts are the same at 360 px and at 1280 px", async () => {
+    const cards = await openPage();
+    const completions = cards.filter((card) => fieldOf(card)).length;
+    const choices = cards.filter((card) => !fieldOf(card)).length;
+    // the numbers the operator asked for: nine and nine, at both widths — the DOM does not
+    // depend on the viewport, and the sheet (asserted above) hides neither
+    expect([cards.length, completions, choices]).toEqual([18, 9, 9]);
+    expect(view().querySelectorAll(".choice-option")).toHaveLength(36);
   });
 });
