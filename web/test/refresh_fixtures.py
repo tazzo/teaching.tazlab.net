@@ -77,6 +77,19 @@ def main() -> None:
                "&difficulty=medium&seed=1&count=20&figure=full",
         "body": None,
     }
+    # the German page: the whole batch at the seed and the count the page itself asks for,
+    # so the suite renders real cards of that page — completions and multiple choices in
+    # one pool — and not a hand-written imitation of one
+    items["german_completion"] = {
+        "url": "/api/generate?topic=german.unit1a.laender&difficulty=easy&seed=1&count=18"
+               "&figure=full",
+        "body": None,
+    }
+    items["german_zahlen"] = {
+        "url": "/api/generate?topic=german.zahlen&difficulty=easy&seed=1&count=18"
+               "&figure=full",
+        "body": None,
+    }
 
     for fixture in items.values():
         response = client.get(fixture["url"])

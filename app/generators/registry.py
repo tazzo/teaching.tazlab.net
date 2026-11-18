@@ -10,6 +10,11 @@ from app.generators.english.present_perfect_simple_continuous import (
     TOPIC as PRESENT_PERFECT_SIMPLE_CONTINUOUS,
 )
 from app.generators.english.relative_classification import TOPIC as RELATIVE_CLASSIFICATION
+from app.generators.german.unit1a import TOPIC as GERMAN_UNIT1A
+from app.generators.german.unit1b_articles import TOPIC as GERMAN_UNIT1B_ARTIKEL
+from app.generators.german.unit1b_possessives import TOPIC as GERMAN_UNIT1B_POSSESSIVI
+from app.generators.german.unit1c_family import TOPIC as GERMAN_UNIT1C
+from app.generators.german.zahlen import TOPIC as GERMAN_ZAHLEN
 from app.generators.math.first_degree import TOPIC as FIRST_DEGREE
 from app.generators.math.fractional import TOPIC as FRACTIONAL
 from app.generators.math.inequalities import TOPICS as INEQUALITY_TOPICS
@@ -40,6 +45,12 @@ TOPICS: dict[str, Topic] = {
     # one relative-clause page only: the two pages that asked the pronoun without the
     # kind were folded into this one (task-281711)
     RELATIVE_CLASSIFICATION.id: RELATIVE_CLASSIFICATION,
+    # german — Einheit 1, one topic per page (1B holds two pages: articles and possessives)
+    GERMAN_UNIT1A.id: GERMAN_UNIT1A,
+    GERMAN_UNIT1B_ARTIKEL.id: GERMAN_UNIT1B_ARTIKEL,
+    GERMAN_UNIT1B_POSSESSIVI.id: GERMAN_UNIT1B_POSSESSIVI,
+    GERMAN_UNIT1C.id: GERMAN_UNIT1C,
+    GERMAN_ZAHLEN.id: GERMAN_ZAHLEN,
     # mathematics — equations
     FIRST_DEGREE.id: FIRST_DEGREE,
     SECOND_DEGREE.id: SECOND_DEGREE,

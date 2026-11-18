@@ -3177,5 +3177,1453 @@
       ],
       "options": {}
     }
+  },
+  "german_completion": {
+    "url": "/api/generate?topic=german.unit1a.laender&difficulty=easy&seed=1&count=18&figure=full",
+    "body": {
+      "topic": "german.unit1a.laender",
+      "difficulty": "easy",
+      "seed": 1,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "Hallo, ich ______ Anna.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il soggetto è ich: il verbo prende la desinenza -e.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{heißen: ich heiße, du heißt, er/sie/es heißt, wir heißen, ihr heißt, sie heißen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{heiße}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "heiße"
+              ],
+              "explanation": [
+                "«heißen» al presente fa ich heiße: la desinenza di «ich» è -e. Non si dice «ich heißen»."
+              ],
+              "accept": [
+                "heiße",
+                "heisse"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 1,
+          "statement": {
+            "key": "Ich ______ aus Italien.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto ich, verbo kommen: desinenza -e.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{kommen: ich komme, du kommst, er/sie/es kommt, wir kommen, ihr kommt, sie kommen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{komme}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "komme"
+              ],
+              "explanation": [
+                "«kommen» dice da dove vieni: ich komme aus Italien. Con ich la desinenza è -e."
+              ],
+              "accept": [
+                "komme"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 2,
+          "statement": {
+            "key": "Das ______ mein Freund Luca.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il soggetto è das, cioè er: sein diventa ist.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{sein: ich bin, du bist, er/sie/es ist, wir sind, ihr seid, sie sind.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{ist}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "ist"
+              ],
+              "explanation": [
+                "«sein» è il verbo essere: ich bin, du bist, er/sie/es ist. Con «das» serve ist."
+              ],
+              "accept": [
+                "ist"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 3,
+          "statement": {
+            "key": "Woher ______ du?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto du: la desinenza è -st.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{La domanda con Woher chiede la provenienza: Woher kommst du? — Ich komme aus Italien.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{kommst}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "kommst"
+              ],
+              "explanation": [
+                "Con du il verbo prende -st: du kommst. «Woher?» chiede «da dove?»."
+              ],
+              "accept": [
+                "kommst"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 4,
+          "statement": {
+            "key": "Wir ______ aus Italien.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto wir: la desinenza è -en.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{kommen: wir kommen, sie kommen, Sie kommen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{kommen}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "kommen"
+              ],
+              "explanation": [
+                "Con wir la desinenza è -en: wir kommen. La forma è la stessa di sie/Sie kommen."
+              ],
+              "accept": [
+                "kommen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 5,
+          "statement": {
+            "key": "______ du Maria?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il verbo è in prima posizione e il soggetto è du.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Domanda sì/no: verbo + soggetto + resto: Bist du …? Kommst du …?}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Bist}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Bist"
+              ],
+              "explanation": [
+                "Domanda sì/no: il verbo va davanti al soggetto. Con du, sein fa bist: Bist du Maria?"
+              ],
+              "accept": [
+                "Bist"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 6,
+          "statement": {
+            "key": "______ ihr aus Frankreich?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto ihr: desinenza -t, verbo in prima posizione.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{kommen: ihr kommt. La domanda sì/no mette il verbo davanti al soggetto.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Kommt}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Kommt"
+              ],
+              "explanation": [
+                "Con ihr la desinenza è -t: ihr kommt. Nella domanda il verbo va davanti."
+              ],
+              "accept": [
+                "Kommt"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 7,
+          "statement": {
+            "key": "Guten ______, Frau Müller!",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{È un saluto che comincia con Guten … e vale per tutto il giorno.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Saluti: Guten Morgen, Guten Tag, Guten Abend; tra amici anche Hallo.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Tag}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Tag"
+              ],
+              "explanation": [
+                "«Guten Tag» è il saluto della giornata; al mattino «Guten Morgen», la sera «Guten Abend»."
+              ],
+              "accept": [
+                "Tag"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 8,
+          "statement": {
+            "key": "Auf ______, bis morgen!",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Con Auf … si saluta quando si va via.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Saluto d'addio: Auf Wiedersehen (formale), Tschüs (informale).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Wiedersehen}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Wiedersehen"
+              ],
+              "explanation": [
+                "«Auf Wiedersehen» è l'arrivederci formale; tra amici si dice «Tschüs»."
+              ],
+              "accept": [
+                "Wiedersehen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 9,
+          "statement": {
+            "key": "Ich komme ______ Italien.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{La frase dice da dove vieni, non dove abiti.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{aus + paese: Ich komme aus Italien.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{aus}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "aus"
+              ],
+              "explanation": [
+                "La provenienza si dice con aus: aus Italien, aus Deutschland. «in» direbbe dove sei, «von» da una persona, «bei» vicino a qualcuno."
+              ],
+              "options": [
+                "von",
+                "in",
+                "aus",
+                "bei"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 10,
+          "statement": {
+            "key": "Meine Eltern ______ aus Spanien.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il soggetto è plurale: meine Eltern = sie.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{kommen: sie kommen (come wir kommen).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{kommen}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "kommen"
+              ],
+              "explanation": [
+                "«Meine Eltern» sono due persone, quindi il verbo va al plurale: sie kommen. «kommt» è per er/sie/es e per ihr."
+              ],
+              "options": [
+                "komme",
+                "kommen",
+                "kommst",
+                "kommt"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 11,
+          "statement": {
+            "key": "Er ______ aus Deutschland.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto er: desinenza -t.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{kommen: er/sie/es kommt.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{kommt}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "kommt"
+              ],
+              "explanation": [
+                "Con er la desinenza è -t: er kommt. «komme» è la forma di ich, «kommst» quella di du."
+              ],
+              "options": [
+                "komme",
+                "kommst",
+                "kommen",
+                "kommt"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 12,
+          "statement": {
+            "key": "Anna und Petra ______ aus Österreich.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due persone: il soggetto è plurale.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Plurale: die Mädchen kommen, Anna und Petra kommen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{kommen}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "kommen"
+              ],
+              "explanation": [
+                "Due nomi insieme valgono «sie» (loro): Anna und Petra kommen. Il verbo resta al plurale anche se i nomi sono femminili."
+              ],
+              "options": [
+                "kommt",
+                "kommen",
+                "komme",
+                "kommst"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 13,
+          "statement": {
+            "key": "Wie ______ du?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Domanda sul nome, soggetto du.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{heißen: ich heiße, du heißt, er heißt.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{heißt}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "heißt"
+              ],
+              "explanation": [
+                "Con du, heißen fa heißt: la radice è heiß- e la desinenza di du è -t. «heißst» non esiste."
+              ],
+              "options": [
+                "heißt",
+                "heißen",
+                "heiße",
+                "heißst"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 14,
+          "statement": {
+            "key": "______ kommst du?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{La risposta comincia con «aus»: la domanda chiede la provenienza.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Woher kommst du? — Ich komme aus …}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Woher}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Woher"
+              ],
+              "explanation": [
+                "«Woher» chiede la provenienza (da dove?). «Wo» chiede dove sei, «was» che cosa, «wer» chi."
+              ],
+              "options": [
+                "Wo",
+                "Wer",
+                "Woher",
+                "Was"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 15,
+          "statement": {
+            "key": "Ich komme aus ______ Schweiz.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{die Schweiz + la preposizione aus.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Paesi con articolo: aus der Schweiz, aus der Türkei, aus dem Iran, aus den USA.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{der}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "der"
+              ],
+              "explanation": [
+                "La Svizzera è femminile (die Schweiz). Dopo «aus» il femminile diventa der: aus der Schweiz. È uno dei pochi paesi con l'articolo."
+              ],
+              "options": [
+                "die",
+                "der",
+                "das",
+                "den"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 16,
+          "statement": {
+            "key": "Ich komme aus ______ Niederlanden.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{die Niederlande è plurale, e aus vuole il dativo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{aus + plurale = den: aus den Niederlanden, aus den USA.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{den}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "den"
+              ],
+              "explanation": [
+                "I Paesi Bassi sono plurali (die Niederlande). Dopo «aus» il plurale diventa den: aus den Niederlanden."
+              ],
+              "options": [
+                "der",
+                "die",
+                "den",
+                "dem"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 17,
+          "statement": {
+            "key": "Es ist 8 Uhr morgens. Du sagst: «______»",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Guarda l'ora: sono le otto di mattina.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Guten Morgen (mattina), Guten Tag (giorno), Guten Abend (sera).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Guten Morgen}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Guten Morgen"
+              ],
+              "explanation": [
+                "Alle otto del mattino si saluta con Guten Morgen. «Guten Abend» è la sera, «Gute Nacht» si dice prima di dormire, «Auf Wiedersehen» quando si va via."
+              ],
+              "options": [
+                "Auf Wiedersehen",
+                "Guten Abend",
+                "Gute Nacht",
+                "Guten Morgen"
+              ]
+            }
+          },
+          "figure": null
+        }
+      ],
+      "options": {}
+    }
+  },
+  "german_zahlen": {
+    "url": "/api/generate?topic=german.zahlen&difficulty=easy&seed=1&count=18&figure=full",
+    "body": {
+      "topic": "german.zahlen",
+      "difficulty": "easy",
+      "seed": 1,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "In Worten: 12 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Dodici non segue la regola di «due + zehn».}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{1–12: eins, zwei, drei, vier, fünf, sechs, sieben, acht, neun, zehn, elf, zwölf.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{zwölf}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "zwölf"
+              ],
+              "explanation": [
+                "12 è zwölf, una forma irregolare: non si dice «zweizehn». Fino a 12 i numeri si imparano a memoria."
+              ],
+              "accept": [
+                "zwölf",
+                "zwoelf"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 1,
+          "statement": {
+            "key": "In Worten: 17 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{sieben + zehn, ma senza la -en di sieben.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{13–19: dreizehn, vierzehn, fünfzehn, sechzehn, siebzehn, achtzehn, neunzehn.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{siebzehn}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "siebzehn"
+              ],
+              "explanation": [
+                "17 è siebzehn: da sieben si toglie la -en e si aggiunge -zehn."
+              ],
+              "accept": [
+                "siebzehn"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 2,
+          "statement": {
+            "key": "In Worten: 16 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{sechs + zehn, ma senza la -s di sechs.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{sechs → sechzehn (e sechzig): la -s cade davanti alla desinenza.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{sechzehn}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "sechzehn"
+              ],
+              "explanation": [
+                "16 è sechzehn: da sechs si toglie la -s e si aggiunge -zehn."
+              ],
+              "accept": [
+                "sechzehn"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 3,
+          "statement": {
+            "key": "In Worten: 60 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{sechs + zig, ma senza la -s.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Le decine: zwanzig, dreißig, vierzig, fünfzig, sechzig, siebzig, achtzig, neunzig.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{sechzig}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "sechzig"
+              ],
+              "explanation": [
+                "60 è sechzig, senza la -s di sechs, con la desinenza -zig delle decine."
+              ],
+              "accept": [
+                "sechzig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 4,
+          "statement": {
+            "key": "In Worten: 30 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Trenta: attenzione alla lettera ß.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{dreißig (30) non «dreizig»; 13 è dreizehn.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{dreißig}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "dreißig"
+              ],
+              "explanation": [
+                "30 è dreißig: è l'unica decina con la ß, e finisce in -ig come le altre."
+              ],
+              "accept": [
+                "dreißig",
+                "dreissig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 5,
+          "statement": {
+            "key": "In Worten: 44 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Da 21 in poi si comincia dall'unità.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{21–99: unità + und + decina: einundzwanzig, vierundvierzig.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{vierundvierzig}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "vierundvierzig"
+              ],
+              "explanation": [
+                "44 = vier + und + vierzig: prima l'unità, poi la decina. In tedesco si dice «quattro e quaranta»."
+              ],
+              "accept": [
+                "vierundvierzig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 6,
+          "statement": {
+            "key": "In Worten: 21 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Ventuno: in tedesco «uno e venti».}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{21 = einundzwanzig, scritto tutto attaccato.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{einundzwanzig}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "einundzwanzig"
+              ],
+              "explanation": [
+                "21 è einundzwanzig: ein + und + zwanzig. L'unità viene prima della decina e le due parole si scrivono attaccate."
+              ],
+              "accept": [
+                "einundzwanzig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 7,
+          "statement": {
+            "key": "In Worten: 99 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Novantanove: «nove e novanta».}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{99 = neunundneunzig.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{neunundneunzig}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "neunundneunzig"
+              ],
+              "explanation": [
+                "99 = neun + und + neunzig: unità, und, decina. Due volte neun, ma solo la decina prende -zig."
+              ],
+              "accept": [
+                "neunundneunzig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 8,
+          "statement": {
+            "key": "In Worten: 100 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Cento: una parola sola.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{100 = hundert / einhundert.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{hundert}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "hundert"
+              ],
+              "explanation": [
+                "100 è hundert (oppure einhundert). «einhundert» è la forma più lunga, entrambe sono corrette."
+              ],
+              "accept": [
+                "hundert",
+                "einhundert"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 9,
+          "statement": {
+            "key": "In Worten: 14 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Quattordici: vier + zehn.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{13–19 finiscono in -zehn; le decine in -zig.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{vierzehn}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "vierzehn"
+              ],
+              "explanation": [
+                "14 è vier + zehn = vierzehn. «vierzig» è 40, e la desinenza dei numeri 13–19 è sempre -zehn."
+              ],
+              "options": [
+                "vierzeht",
+                "vierzig",
+                "vierzehn",
+                "vierzen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 10,
+          "statement": {
+            "key": "In Worten: 40 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Quaranta è una decina: -zig.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{40 = vierzig, 14 = vierzehn.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{vierzig}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "vierzig"
+              ],
+              "explanation": [
+                "Le decine finiscono in -zig, con la z: vierzig. «vierzehn» è 14."
+              ],
+              "options": [
+                "vierzich",
+                "vierzig",
+                "fierzig",
+                "vierzehn"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 11,
+          "statement": {
+            "key": "In Worten: 32 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Trentadue: in tedesco «due e trenta».}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{32 = zweiunddreißig.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{zweiunddreißig}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "zweiunddreißig"
+              ],
+              "explanation": [
+                "32 = zwei + und + dreißig: unità, und, decina. La decina tiene la sua ß: dreißig."
+              ],
+              "options": [
+                "dreißigundzwei",
+                "zweiunddreizig",
+                "zweizigunddrei",
+                "zweiunddreißig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 12,
+          "statement": {
+            "key": "7 + 8 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Sette più otto fa quindici.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{15 = fünfzehn; 50 = fünfzig.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{fünfzehn}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "fünfzehn"
+              ],
+              "explanation": [
+                "7 + 8 = 15, cioè fünfzehn (fünf + zehn). «fünfzig» è 50."
+              ],
+              "options": [
+                "fünfzig",
+                "sechzehn",
+                "fünfzehn",
+                "vierzehn"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 13,
+          "statement": {
+            "key": "Die Zahl zwischen 29 und 31 ist ______.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Trenta: la lettera ß.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{dreißig (30), dreizehn (13).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{dreißig}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "dreißig"
+              ],
+              "explanation": [
+                "30 è dreißig: la ß sta dopo la vocale lunga e la desinenza è -ig. «dreizehn» è 13."
+              ],
+              "options": [
+                "dreißich",
+                "dreizig",
+                "dreisig",
+                "dreißig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 14,
+          "statement": {
+            "key": "In Worten: 66 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Sessantasei: unità sechs, decina sechzig.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{sechs (6) → sechzig (60) → sechsundsechzig (66).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{sechsundsechzig}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "sechsundsechzig"
+              ],
+              "explanation": [
+                "66 = sechs + und + sechzig. Il primo sechs tiene la -s, la decina no: sechzig."
+              ],
+              "options": [
+                "sechsundsechszig",
+                "sechzigundsechs",
+                "sechzigsechs",
+                "sechsundsechzig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 15,
+          "statement": {
+            "key": "In Worten: 80 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Ottanta è una decina.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{80 = achtzig, 18 = achtzehn.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{achtzig}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "achtzig"
+              ],
+              "explanation": [
+                "80 è achtzig; 18 è achtzehn. La -zehn è per i numeri da 13 a 19, la -zig per le decine."
+              ],
+              "options": [
+                "achtzg",
+                "achtzehn",
+                "achtzich",
+                "achtzig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 16,
+          "statement": {
+            "key": "In Worten: 70 = ______",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Settanta, come 17: sieben perde la -en.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{sieben (7) → siebzehn (17), siebzig (70).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{siebzig}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "siebzig"
+              ],
+              "explanation": [
+                "70 è siebzig: come 17 (siebzehn), anche 70 perde la -en di sieben."
+              ],
+              "options": [
+                "siebzig",
+                "siebzich",
+                "siebzehn",
+                "siebenzig"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 17,
+          "statement": {
+            "key": "Die Zahl nach 99 ist ______.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Dopo novantanove viene cento.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{99 = neunundneunzig, 100 = hundert.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{hundert}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "hundert"
+              ],
+              "explanation": [
+                "Dopo 99 viene 100 = hundert. «neunzig» è 90 e «neunundneunzig» è 99."
+              ],
+              "options": [
+                "hundert",
+                "einhundertundeins",
+                "neunzig",
+                "neunundneunzig"
+              ]
+            }
+          },
+          "figure": null
+        }
+      ],
+      "options": {}
+    }
   }
 }

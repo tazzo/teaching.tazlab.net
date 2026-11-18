@@ -84,6 +84,9 @@ class PageInfo(BaseModel):
     count: int | None = None
     # true on a page read by the teacher: the card is the graph and nothing else
     bare_graph: bool = False
+    # the page's short explanation in Italian, above the exercises (see app/pages.py):
+    # an i18n key, so the client draws words the server owns. Empty = the page has none.
+    intro_key: str = ""
     config: list[ConfigControl] = []
     defaults: dict = {}
 

@@ -1,7 +1,7 @@
 """The page catalogue: the site's information architecture (three levels).
 
-    macro (Matematica | Fisica | English)
-      └── sub (Equazioni, Disequazioni, Cinematica, Grammatica, ...)
+    macro (Matematica | Fisica | English | Tedesco)
+      └── sub (Equazioni, Disequazioni, Cinematica, Grammatica, 1A, 1B, 1C, Zahlen ...)
            └── page — a *kind of exercise* with its own layout:
                 problem        statement + steps + answer
                 graph_reading  a graph is shown and the answer is read off it
@@ -9,6 +9,9 @@
                 multiple_choice fill-in-the-blank with multiple choice options
                 classification_choice  the kind of sentence is chosen first, and only then
                                        can the multiple choice answer be checked
+                completion_choice  a sentence with a gap: the missing word is typed in, or
+                                   chosen among four — the card itself says which, so one
+                                   page can hold both and the reason comes after the answer
 
 A page binds a kind to a topic (and optionally a difficulty), because the same
 generator can be presented in different ways: reading a graph and completing one use
@@ -32,7 +35,14 @@ MULTIPLE_CHOICE = "multiple_choice"
 # because the interaction is different (a selector, a check that starts disabled), not
 # because the grammar is.
 CLASSIFICATION_CHOICE = "classification_choice"
-KINDS = (PROBLEM, GRAPH_READING, GRAPH_FILLING, MULTIPLE_CHOICE, CLASSIFICATION_CHOICE)
+# German fills a gap with a word of its own, or picks it among four: the exercise is the
+# same sentence, and the card says in its payload which of the two it is
+# (`format: completion|choice`). One kind, because the layout is one — a sentence, a
+# control under it, and the reason once the answer is given — and because a girl of ten
+# should not meet a different page for every way a word can be asked.
+COMPLETION_CHOICE = "completion_choice"
+KINDS = (PROBLEM, GRAPH_READING, GRAPH_FILLING, MULTIPLE_CHOICE, CLASSIFICATION_CHOICE,
+         COMPLETION_CHOICE)
 
 
 @dataclass(frozen=True)
@@ -56,6 +66,11 @@ class Page:
     # and nothing else — no statement, no steps, no solution, and nothing drawn on the
     # graph that names the reading or the kind of motion.
     bare_graph: bool = False
+    # The short explanation in Italian a page opens with, above the exercises: three to six
+    # lines with the examples in the language being learnt. Empty = the page has none, and
+    # the client draws nothing (no empty box). The text lives in ``app/i18n`` like every
+    # other label, so the client never holds a page's words in its own source.
+    intro_key: str = ""
 
 
 PAGES: tuple[Page, ...] = (
@@ -131,9 +146,31 @@ PAGES: tuple[Page, ...] = (
     Page("english-present-perfect-simple-continuous", "english", "grammatica",
          CLASSIFICATION_CHOICE, "english.grammar.present_perfect_simple_continuous", "medium",
          "page.english.present_perfect_simple_continuous", 30, count=20),
+    # --- Tedesco / Einheit 1 «Du und ich» ------------------------------------
+    # The operator's section for Emma (prima media), built on the book's index: four
+    # topics, five pages. 1B is the one topic with two pages because the book gives it two
+    # things at once — the articles and the possessive — and one page asking both would be
+    # the duplicate the operator refuses. Every page carries its own short explanation in
+    # Italian (``intro_key``), fifteen to eighteen exercises, and both a completion and a
+    # multiple choice; the reasons come from the topic's payload.
+    Page("tedesco-1a-laender-kommen", "tedesco", "1a", COMPLETION_CHOICE,
+         "german.unit1a.laender", "easy", "page.tedesco.unit1a", 10, count=18,
+         intro_key="intro.tedesco.unit1a"),
+    Page("tedesco-1b-artikel", "tedesco", "1b", COMPLETION_CHOICE,
+         "german.unit1b.artikel", "easy", "page.tedesco.unit1b_artikel", 20, count=18,
+         intro_key="intro.tedesco.unit1b_artikel"),
+    Page("tedesco-1b-possessivi", "tedesco", "1b", COMPLETION_CHOICE,
+         "german.unit1b.possessivi", "easy", "page.tedesco.unit1b_possessivi", 30, count=18,
+         intro_key="intro.tedesco.unit1b_possessivi"),
+    Page("tedesco-1c-familie", "tedesco", "1c", COMPLETION_CHOICE,
+         "german.unit1c.familie", "easy", "page.tedesco.unit1c", 40, count=18,
+         intro_key="intro.tedesco.unit1c"),
+    Page("tedesco-zahlen", "tedesco", "zahlen", COMPLETION_CHOICE,
+         "german.zahlen", "easy", "page.tedesco.zahlen", 50, count=18,
+         intro_key="intro.tedesco.zahlen"),
 )
 
-MACROS: tuple[str, ...] = ("matematica", "fisica", "english")
+MACROS: tuple[str, ...] = ("matematica", "fisica", "english", "tedesco")
 
 
 def subs(macro: str) -> list[str]:

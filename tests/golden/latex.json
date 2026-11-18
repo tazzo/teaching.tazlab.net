@@ -33,6 +33,31 @@
     "\\text{Defining clause, senza virgole: la relativa identifica il referente. Per le persone soggetto si usa 'who' ('that' è ammesso solo qui, mai tra virgole).}",
     "\\textbf{who}, \\text{defining}"
   ],
+  "german.unit1a.laender|easy": [
+    "\\text{Il soggetto è ich: il verbo prende la desinenza -e.}",
+    "\\text{heißen: ich heiße, du heißt, er/sie/es heißt, wir heißen, ihr heißt, sie heißen.}",
+    "\\textbf{heiße}"
+  ],
+  "german.unit1b.artikel|easy": [
+    "\\text{Pensa al genere di Hund: maschile, femminile o neutro?}",
+    "\\text{der = maschile, die = femminile, das = neutro.}",
+    "\\textbf{Der}"
+  ],
+  "german.unit1b.possessivi|easy": [
+    "\\text{Guarda il genere del nome che viene dopo: der Hund.}",
+    "\\text{mein con maschile e neutro: mein Hund, mein Pferd.}",
+    "\\textbf{mein}"
+  ],
+  "german.unit1c.familie|easy": [
+    "\\text{La madre è una persona sola: sie.}",
+    "\\text{wohnen: er/sie/es wohnt.}",
+    "\\textbf{wohnt}"
+  ],
+  "german.zahlen|easy": [
+    "\\text{Dodici non segue la regola di «due + zehn».}",
+    "\\text{1–12: eins, zwei, drei, vier, fünf, sechs, sieben, acht, neun, zehn, elf, zwölf.}",
+    "\\textbf{zwölf}"
+  ],
   "math.equations.first_degree|easy": [
     "4 x = 20",
     "x = \\frac{20}{4}",

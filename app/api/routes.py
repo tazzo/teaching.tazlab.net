@@ -162,6 +162,7 @@ async def pages() -> PagesResponse:
                 difficulty=p.difficulty,
                 difficulties=list(TOPICS[p.topic].difficulties) if p.topic in TOPICS else [],
                 label_key=p.label_key, count=p.count, bare_graph=p.bare_graph,
+                intro_key=p.intro_key,
                 config=TOPICS[p.topic].configurer() if p.configurable
                        and hasattr(TOPICS[p.topic], "configurer") else [],
                 defaults=(TOPICS[p.topic].default_options() if p.configurable
@@ -182,7 +183,9 @@ async def catalog() -> Catalog:
             scenarios=list(getattr(topic, "scenarios", ())),
             # a topic with a figure belongs to the graph area too; the figure is a
             # property of the generated item, so only the family can decide it here
-            modes=["problemi", "grafici"] if topic.family == "physics" else ["esercizi"] if topic.family == "english" else ["problemi"],
+            modes=(["problemi", "grafici"] if topic.family == "physics"
+                   else ["esercizi"] if topic.family in ("english", "german")
+                   else ["problemi"]),
         )
         for topic in sorted(TOPICS.values(), key=lambda item: item.id)
     ]

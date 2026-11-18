@@ -20,7 +20,7 @@ dependencies = [
 [tool.setuptools]
 # Explicit: flat-layout auto-discovery is a heuristic and would break the image
 # build the moment a second top-level directory appears.
-packages = ["app", "app.api", "app.core", "app.generators", "app.generators.english", "app.generators.math", "app.generators.physics", "app.i18n", "app.llm", "app.render"]
+packages = ["app", "app.api", "app.core", "app.generators", "app.generators.english", "app.generators.german", "app.generators.math", "app.generators.physics", "app.i18n", "app.llm", "app.render"]
 
 [tool.setuptools.package-data]
 app = ["i18n/*.json"]
