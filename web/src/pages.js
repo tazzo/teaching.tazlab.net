@@ -551,12 +551,162 @@ export function renderClassificationChoicePage(item, index, context) {
   return card;
 }
 
+/**
+ * The comparison the completion field makes: forgiving about case, extra spaces and a
+ * final full stop, and about nothing else. The spellings themselves are data — the
+ * payload's `accept` list, which starts with the solution — so a card that also takes
+ * «heisse» for «heiße» says so itself and the client never holds a German word.
+ */
+export function normaliseCompletion(value) {
+  return String(value ?? "")
+    .normalize("NFC")
+    .replace(/\s+/gu, " ")
+    .trim()
+    .replace(/[.,!?;:]+$/u, "")
+    .toLowerCase();
+}
+
+/**
+ * kind: completion_choice — a sentence with a gap; the missing word is typed in, or
+ * picked among four.
+ *
+ * The page kind is one because the exercise is one: a German sentence with a hole in it,
+ * a control under it, and the reason that appears once the student has answered. The
+ * card's payload says which of the two ways it is answered (`format`), so no page carries
+ * a second layout and no list of pages has to be split by format. The four-option branch
+ * IS the multiple choice the site already had — `renderMultipleChoicePage`, called as it
+ * is — so the two cannot drift apart.
+ *
+ * The completion branch, and why it is built this way:
+ *
+ *   Ich ______ aus Italien.        <- the gap is in the sentence (the topic's data)
+ *   [ komme            ] Verifica  <- Enter in the field checks, as the button does
+ *   La risposta è: komme           <- only after a wrong answer
+ *   Perché è «komme»…              <- the reason, after the answer, never before
+ *
+ * The reasons (the card's two steps) are appended **after the check**, not before: on a
+ * completion the rule that explains the form is a conjugation table, and a table above an
+ * empty field is the answer written beside it — the lesson of the relative-clause page.
+ * Feedback is a word and a mark (✓ / ✗), not a colour alone; the status is an `aria-live`
+ * region so a screen reader hears the verdict; and everything is reachable from the
+ * keyboard because it is a form with a submit button, not a div with a click handler.
+ */
+export function renderCompletionChoicePage(item, index, context) {
+  const { strings } = context;
+  const t = translate(strings);
+  const payload = item.answer?.payload ?? {};
+  const format = payload.format?.[0] ?? (payload.options?.length ? "choice" : "completion");
+  if (format === "choice") return renderMultipleChoicePage(item, index, context);
+
+  const card = el("article", "card completion-card");
+  const { header, statement } = cardHeader(item, index);
+  statement.append(renderText(t(item.statement.key, item.statement.key), item.statement.params));
+  header.append(statement);
+  card.append(header);
+
+  const solution = payload.correct?.[0] ?? "";
+  const accepted = (payload.accept?.length ? payload.accept : [solution])
+    .map(normaliseCompletion)
+    .filter(Boolean);
+  const explanation = payload.explanation?.[0] ?? "";
+
+  const fieldId = `completion-${index + 1}`;
+  const form = el("form", "completion-form");
+  form.noValidate = true;
+
+  const label = el("label", "completion-field");
+  label.htmlFor = fieldId;
+  label.append(el("span", "completion-label", t("ui.completion_label", "La parola che manca")));
+  const input = el("input", "completion-input");
+  input.type = "text";
+  input.id = fieldId;
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.setAttribute("autocapitalize", "off");
+  input.setAttribute("aria-describedby", `${fieldId}-hint`);
+  input.placeholder = t("ui.completion_placeholder", "scrivi la parola in tedesco");
+  label.append(input);
+  form.append(label);
+
+  const hint = el("p", "completion-hint", t("ui.completion_hint", "Basta una parola."));
+  hint.id = `${fieldId}-hint`;
+  form.append(hint);
+
+  const actions = el("div", "page-actions");
+  const checkBtn = el("button", "btn btn-quiet", t("ui.check_answer", "Verifica"));
+  checkBtn.type = "submit";
+  const retryBtn = el("button", "btn btn-quiet", t("ui.try_again", "Riprova"));
+  retryBtn.type = "button";
+  retryBtn.hidden = true;
+  actions.append(checkBtn, retryBtn);
+  form.append(actions);
+  card.append(form);
+
+  const status = el("div", "choice-status");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  card.append(status);
+
+  let revealed = false;
+  const revealSteps = () => {
+    if (revealed) return;
+    revealed = true;
+    if (item.steps?.length) card.append(stepsBlock(item, t));
+  };
+
+  const finish = (right) => {
+    input.disabled = true;
+    checkBtn.hidden = true;
+    retryBtn.hidden = false;
+    status.replaceChildren();
+    status.className = right ? "choice-status good" : "choice-status bad";
+    status.append(el("strong", "status-badge",
+      right ? `\u2713 ${t("ui.completion_correct", "Giusto!")}`
+            : `\u2717 ${t("ui.completion_wrong", "Non è giusto.")}`));
+    if (!right) {
+      const line = t("ui.completion_answer", "La risposta è: {answer}")
+        .replace("{answer}", solution);
+      status.append(el("p", "choice-hint", line));
+    }
+    if (explanation) status.append(el("p", "choice-explanation", explanation));
+    revealSteps();
+  };
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (input.disabled) return;
+    const typed = normaliseCompletion(input.value);
+    if (!typed) {
+      status.replaceChildren();
+      status.className = "choice-status bad";
+      status.append(el("p", "choice-hint",
+        t("ui.completion_empty", "Scrivi la parola che manca, poi verifica.")));
+      input.focus();
+      return;
+    }
+    finish(accepted.includes(typed));
+  });
+
+  retryBtn.addEventListener("click", () => {
+    input.disabled = false;
+    input.value = "";
+    checkBtn.hidden = false;
+    retryBtn.hidden = true;
+    status.replaceChildren();
+    status.className = "choice-status";
+    input.focus();
+  });
+
+  return card;
+}
+
 const RENDERERS = {
   problem: renderProblemPage,
   graph_reading: renderGraphReadingPage,
   graph_filling: renderGraphFillingPage,
   multiple_choice: renderMultipleChoicePage,
   classification_choice: renderClassificationChoicePage,
+  completion_choice: renderCompletionChoicePage,
 };
 
 

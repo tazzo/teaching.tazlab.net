@@ -4625,5 +4625,2171 @@
       ],
       "options": {}
     }
+  },
+  "german_artikel": {
+    "url": "/api/generate?topic=german.unit1b.artikel&difficulty=easy&seed=1&count=18&figure=full",
+    "body": {
+      "topic": "german.unit1b.artikel",
+      "difficulty": "easy",
+      "seed": 1,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "______ Hund heißt Rex.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Pensa al genere di Hund: maschile, femminile o neutro?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{der = maschile, die = femminile, das = neutro.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Der}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Der"
+              ],
+              "explanation": [
+                "Hund è maschile: der Hund. A inizio frase l'articolo si scrive con la maiuscola."
+              ],
+              "accept": [
+                "Der"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 1,
+          "statement": {
+            "key": "______ Katze ist klein.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Katze: quale dei tre articoli?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Katze, die Maus, die Schlange.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Die}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Die"
+              ],
+              "explanation": [
+                "Katze è femminile: die Katze. L'articolo non dipende dall'animale, ma dal nome."
+              ],
+              "accept": [
+                "Die"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 2,
+          "statement": {
+            "key": "______ Pferd läuft schnell.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Pferd: maschile, femminile o neutro?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{das Pferd, das Kaninchen, das Mädchen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Das}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Das"
+              ],
+              "explanation": [
+                "Pferd è neutro: das Pferd. Anche Kaninchen e Mädchen sono neutri."
+              ],
+              "accept": [
+                "Das"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 3,
+          "statement": {
+            "key": "Das ist ein Hund. ______ heißt Rex.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Sostituisci «der Hund» con un pronome.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Pronomi: er (maschile), sie (femminile), es (neutro), sie (plurale).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Er}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Er"
+              ],
+              "explanation": [
+                "Per riprendere un nome maschile si usa er, come «lui» in italiano."
+              ],
+              "accept": [
+                "Er"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 4,
+          "statement": {
+            "key": "Das ist eine Katze. ______ ist klein.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Katze è femminile: quale pronome?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Katze → sie.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Sie}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Sie"
+              ],
+              "explanation": [
+                "Per un nome femminile il pronome è sie. In tedesco il pronome segue il genere del nome, non il sesso dell'animale."
+              ],
+              "accept": [
+                "Sie"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 5,
+          "statement": {
+            "key": "Das ist ein Pferd. ______ ist groß.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Pferd è neutro: quale pronome?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{das Pferd → es.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Es}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Es"
+              ],
+              "explanation": [
+                "Per un nome neutro il pronome è es."
+              ],
+              "accept": [
+                "Es"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 6,
+          "statement": {
+            "key": "Der Hund und die Katze: ______ sind Freunde.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il soggetto è «der Hund und die Katze»: due esseri.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Plurale: sie sind (come wir sind, ihr seid).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Sie}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Sie"
+              ],
+              "explanation": [
+                "Due animali insieme sono un plurale: il pronome è sie, che vale anche per «loro»."
+              ],
+              "accept": [
+                "Sie"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 7,
+          "statement": {
+            "key": "______ Mädchen hat einen Hund.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Guarda la desinenza del nome: -chen.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{I diminutivi in -chen e -lein sono neutri: das Mädchen, das Kaninchen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Das}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Das"
+              ],
+              "explanation": [
+                "Mädchen finisce in -chen: tutti i nomi in -chen sono neutri, anche se indicano una ragazza. Quindi das Mädchen."
+              ],
+              "accept": [
+                "Das"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 8,
+          "statement": {
+            "key": "Ich habe zwei ______ (die Katze).",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Plurale femminile: spesso si aggiunge -n o -en.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Plurali: die Katze → die Katzen, der Hund → die Hunde, das Pferd → die Pferde.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Katzen}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Katzen"
+              ],
+              "explanation": [
+                "Il plurale di Katze è Katzen: si aggiunge -n. Tra parentesi c'è il nome da mettere al plurale."
+              ],
+              "accept": [
+                "Katzen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 9,
+          "statement": {
+            "key": "______ Maus ist klein.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Maus: quale articolo?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Maus (femminile).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Die}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Die"
+              ],
+              "explanation": [
+                "Maus è femminile: die Maus. «Den» è l'accusativo maschile e qui non serve."
+              ],
+              "options": [
+                "Der",
+                "Das",
+                "Den",
+                "Die"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 10,
+          "statement": {
+            "key": "______ Vogel singt.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Vogel: maschile, femminile o neutro?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{der Vogel (maschile).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Der}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Der"
+              ],
+              "explanation": [
+                "Vogel è maschile: der Vogel. «Dem» è il dativo e non serve al soggetto."
+              ],
+              "options": [
+                "Dem",
+                "Das",
+                "Die",
+                "Der"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 11,
+          "statement": {
+            "key": "______ Kaninchen frisst Gras.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{La desinenza -chen decide il genere.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{das Kaninchen (neutro, come das Mädchen).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Das}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Das"
+              ],
+              "explanation": [
+                "Kaninchen finisce in -chen, quindi è neutro: das Kaninchen."
+              ],
+              "options": [
+                "Den",
+                "Der",
+                "Die",
+                "Das"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 12,
+          "statement": {
+            "key": "Das ist mein Hund. ______ ist braun.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Hund è maschile.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{der Hund → er.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Er}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Er"
+              ],
+              "explanation": [
+                "Hund è maschile, quindi il pronome è er. «Ihr» è «voi», non un pronome per l'animale."
+              ],
+              "options": [
+                "Sie",
+                "Ihr",
+                "Er",
+                "Es"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 13,
+          "statement": {
+            "key": "Meine Katze heißt Mimi. ______ schläft viel.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Katze è femminile.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Katze → sie.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Sie}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Sie"
+              ],
+              "explanation": [
+                "Katze è femminile: sie. Attenzione: «sie» con la minuscola è «lei» o «loro»."
+              ],
+              "options": [
+                "Er",
+                "Sie",
+                "Ihr",
+                "Es"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 14,
+          "statement": {
+            "key": "Das Kaninchen ist weiß. ______ frisst Gras.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Kaninchen è neutro.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{das Kaninchen → es.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Es}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Es"
+              ],
+              "explanation": [
+                "Kaninchen è neutro: il pronome è es."
+              ],
+              "options": [
+                "Er",
+                "Es",
+                "Sie",
+                "Ihr"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 15,
+          "statement": {
+            "key": "Die ______ (der Fisch) schwimmen im Wasser.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il verbo è al plurale: schwimmen.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{der Fisch → die Fische.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Fische}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Fische"
+              ],
+              "explanation": [
+                "Il plurale di Fisch è Fische: die Fische. «schwimmen» è già al plurale e lo dice."
+              ],
+              "options": [
+                "Fisch",
+                "Fische",
+                "Fisches",
+                "Fischen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 16,
+          "statement": {
+            "key": "______ Schlange ist gefährlich.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Schlange: quale articolo?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Schlange (femminile).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Die}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Die"
+              ],
+              "explanation": [
+                "Schlange è femminile: die Schlange."
+              ],
+              "options": [
+                "Den",
+                "Die",
+                "Das",
+                "Der"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 17,
+          "statement": {
+            "key": "______ Pferde laufen auf der Wiese.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Pferde è plurale: l'articolo del plurale è uno solo.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Plurale: die Hunde, die Katzen, die Pferde.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Die}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Die"
+              ],
+              "explanation": [
+                "Al plurale l'articolo è sempre die, per tutti e tre i generi: die Pferde."
+              ],
+              "options": [
+                "Das",
+                "Die",
+                "Den",
+                "Der"
+              ]
+            }
+          },
+          "figure": null
+        }
+      ],
+      "options": {}
+    }
+  },
+  "german_possessivi": {
+    "url": "/api/generate?topic=german.unit1b.possessivi&difficulty=easy&seed=1&count=18&figure=full",
+    "body": {
+      "topic": "german.unit1b.possessivi",
+      "difficulty": "easy",
+      "seed": 1,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "Das ist ______ Hund.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Guarda il genere del nome che viene dopo: der Hund.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{mein con maschile e neutro: mein Hund, mein Pferd.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{mein}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "mein"
+              ],
+              "explanation": [
+                "Hund è maschile (der Hund): il possessivo prende la stessa desinenza dell'articolo, quindi mein. Il nome che segue non cambia."
+              ],
+              "accept": [
+                "mein"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 1,
+          "statement": {
+            "key": "______ Katze heißt Mimi.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{die Katze: che desinenza prende mein?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{meine con il femminile: meine Katze, meine Schwester.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Meine}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Meine"
+              ],
+              "explanation": [
+                "Katze è femminile (die Katze): il possessivo prende -e, quindi meine Katze."
+              ],
+              "accept": [
+                "Meine"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 2,
+          "statement": {
+            "key": "Wo ist ______ Pferd?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{das Pferd e «di te»: quale possessivo?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{dein con maschile e neutro: dein Hund, dein Pferd.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{dein}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "dein"
+              ],
+              "explanation": [
+                "Pferd è neutro (das Pferd) e l'animale è di un'altra persona: dein Pferd. Con maschile e neutro il possessivo resta senza desinenza."
+              ],
+              "accept": [
+                "dein"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 3,
+          "statement": {
+            "key": "Sind das ______ Bücher?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{das Buch → die Bücher: è plurale.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{meine/deine con il plurale: meine Bücher, deine Bücher.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{deine}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "deine"
+              ],
+              "explanation": [
+                "Bücher è plurale (die Bücher): al plurale il possessivo prende -e, deine."
+              ],
+              "accept": [
+                "deine"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 4,
+          "statement": {
+            "key": "______ Eltern wohnen in Rom.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Eltern è plurale anche in italiano.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Eltern → meine Eltern, deine Eltern.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Meine}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Meine"
+              ],
+              "explanation": [
+                "«Eltern» (i genitori) è sempre plurale: die Eltern, quindi meine Eltern."
+              ],
+              "accept": [
+                "Meine"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 5,
+          "statement": {
+            "key": "Ist das ______ Bruder?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{der Bruder: maschile.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{dein Bruder, mein Bruder.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{dein}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "dein"
+              ],
+              "explanation": [
+                "Bruder è maschile (der Bruder): dein Bruder. Nella domanda il possessivo non cambia."
+              ],
+              "accept": [
+                "dein"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 6,
+          "statement": {
+            "key": "______ Kaninchen ist weiß.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{das Kaninchen: neutro.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{mein Kaninchen, dein Kaninchen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Mein}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "Mein"
+              ],
+              "explanation": [
+                "Kaninchen è neutro (das Kaninchen): mein Kaninchen, senza desinenza."
+              ],
+              "accept": [
+                "Mein"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 7,
+          "statement": {
+            "key": "Wie heißt ______ Schwester?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{die Schwester: femminile.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{deine Schwester, meine Schwester.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{deine}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "deine"
+              ],
+              "explanation": [
+                "Schwester è femminile (die Schwester): deine Schwester. «Wie heißt …?» chiede il nome."
+              ],
+              "accept": [
+                "deine"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 8,
+          "statement": {
+            "key": "Das sind ______ Hunde.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Hunde è plurale.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{meine Hunde, deine Hunde.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{meine}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "meine"
+              ],
+              "explanation": [
+                "Hunde è plurale (die Hunde): meine Hunde. «Das sind» introduce più di uno."
+              ],
+              "accept": [
+                "meine"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 9,
+          "statement": {
+            "key": "______ Bruder spielt Fußball.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{der Bruder: maschile.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{mein + maschile/neutro, meine + femminile/plurale.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Mein}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Mein"
+              ],
+              "explanation": [
+                "Bruder è maschile (der Bruder): mein Bruder. «Meine» è per il femminile e il plurale."
+              ],
+              "options": [
+                "Mein",
+                "Meine",
+                "Meinen",
+                "Meiner"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 10,
+          "statement": {
+            "key": "Ist das ______ Buch?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{das Buch: neutro.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{dein Buch, dein Heft.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{dein}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "dein"
+              ],
+              "explanation": [
+                "Buch è neutro (das Buch): dein Buch, senza desinenza. «deine» è per il femminile e il plurale."
+              ],
+              "options": [
+                "dein",
+                "deine",
+                "deiner",
+                "deinen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 11,
+          "statement": {
+            "key": "Wo sind ______ Schuhe?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Schuhe è plurale.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Schuhe → meine Schuhe.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{meine}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "meine"
+              ],
+              "explanation": [
+                "Schuhe è plurale (die Schuhe): meine Schuhe. «Wo sind» è già plurale."
+              ],
+              "options": [
+                "meinen",
+                "meiner",
+                "meine",
+                "mein"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 12,
+          "statement": {
+            "key": "Das ist nicht ______ Katze!",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{die Katze: femminile.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{meine Katze, nicht meine Katze.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{meine}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "meine"
+              ],
+              "explanation": [
+                "Katze è femminile (die Katze): meine Katze, anche con «nicht»."
+              ],
+              "options": [
+                "mein",
+                "meine",
+                "meiner",
+                "meinen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 13,
+          "statement": {
+            "key": "Wie alt ist ______ Hund?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{der Hund: maschile.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{dein Hund, mein Hund.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{dein}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "dein"
+              ],
+              "explanation": [
+                "Hund è maschile (der Hund): dein Hund. «Wie alt ist …?» chiede l'età."
+              ],
+              "options": [
+                "deiner",
+                "deine",
+                "dein",
+                "deinen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 14,
+          "statement": {
+            "key": "______ Eltern sind im Urlaub.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Eltern è plurale, e «sind» lo dice.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Eltern → meine Eltern.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Meine}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Meine"
+              ],
+              "explanation": [
+                "Eltern è plurale: meine Eltern. Il verbo «sind» conferma il plurale."
+              ],
+              "options": [
+                "Meiner",
+                "Meinen",
+                "Meine",
+                "Mein"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 15,
+          "statement": {
+            "key": "Ist das ______ Pferd?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{das Pferd: neutro.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{dein Pferd, mein Pferd.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{dein}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "dein"
+              ],
+              "explanation": [
+                "Pferd è neutro (das Pferd): dein Pferd. «deine» sarebbe per un nome femminile o plurale."
+              ],
+              "options": [
+                "dein",
+                "deine",
+                "deiner",
+                "deinen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 16,
+          "statement": {
+            "key": "Warum heißt es «mein Hund», aber «______ Katze»?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Guarda l'articolo di Katze: die.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{mein + der/das, meine + die (femminile e plurale).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{meine}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "meine"
+              ],
+              "explanation": [
+                "Il possessivo prende la desinenza dell'articolo del nome: der Hund → mein Hund, die Katze → meine Katze. La desinenza dipende dal nome che segue, non da chi possiede."
+              ],
+              "options": [
+                "meiner",
+                "meine",
+                "mein",
+                "meinen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 17,
+          "statement": {
+            "key": "______ Schwester ist zehn Jahre alt.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{die Schwester: femminile.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{meine Schwester, meine Katze, meine Bücher.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Meine}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Meine"
+              ],
+              "explanation": [
+                "Schwester è femminile (die Schwester): meine Schwester. L'età si dice con sein: sie ist zehn Jahre alt."
+              ],
+              "options": [
+                "Meinen",
+                "Meine",
+                "Mein",
+                "Meiner"
+              ]
+            }
+          },
+          "figure": null
+        }
+      ],
+      "options": {}
+    }
+  },
+  "german_familie": {
+    "url": "/api/generate?topic=german.unit1c.familie&difficulty=easy&seed=1&count=18&figure=full",
+    "body": {
+      "topic": "german.unit1c.familie",
+      "difficulty": "easy",
+      "seed": 1,
+      "items": [
+        {
+          "index": 0,
+          "statement": {
+            "key": "Meine Mutter ______ in Rom.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{La madre è una persona sola: sie.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{wohnen: er/sie/es wohnt.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{wohnt}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "wohnt"
+              ],
+              "explanation": [
+                "wohnen: ich wohne, du wohnst, er/sie/es wohnt. «Meine Mutter» è sie, quindi wohnt."
+              ],
+              "accept": [
+                "wohnt"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 1,
+          "statement": {
+            "key": "Ich ______ Schülerin.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto ich: quale forma di sein?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{sein: ich bin, du bist, er/sie/es ist, wir sind, ihr seid, sie sind.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{bin}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "bin"
+              ],
+              "explanation": [
+                "«sein» dice chi sei: ich bin Schülerin. Con ich la forma è bin."
+              ],
+              "accept": [
+                "bin"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 2,
+          "statement": {
+            "key": "Wie ______ deine Schwester?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{La domanda chiede il nome di una persona: sie.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{heißen: er/sie/es heißt.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{heißt}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "heißt"
+              ],
+              "explanation": [
+                "Per chiedere il nome si usa heißen: Wie heißt deine Schwester? Con sie la forma è heißt."
+              ],
+              "accept": [
+                "heißt"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 3,
+          "statement": {
+            "key": "Mein Bruder ______ 15 Jahre alt.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il fratello è er: quale forma di sein?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{sein: er ist. L'età non si dice con haben.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{ist}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "ist"
+              ],
+              "explanation": [
+                "L'età si dice con sein: er ist 15 Jahre alt. Con er la forma è ist."
+              ],
+              "accept": [
+                "ist"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 4,
+          "statement": {
+            "key": "Wir ______ in Italien.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto wir: desinenza -en.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{wohnen: wir wohnen, sie wohnen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{wohnen}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "wohnen"
+              ],
+              "explanation": [
+                "Con wir la desinenza è -en: wir wohnen. wohnen dice dove abiti."
+              ],
+              "accept": [
+                "wohnen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 5,
+          "statement": {
+            "key": "Meine Schwester ______ Emma.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{La sorella è sie.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{heißen: sie heißt.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{heißt}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "heißt"
+              ],
+              "explanation": [
+                "«Meine Schwester» è sie: sie heißt Emma. La terza persona singolare di heißen finisce in -t."
+              ],
+              "accept": [
+                "heißt"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 6,
+          "statement": {
+            "key": "Wo ______ ihr?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto ihr: desinenza -t.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{wohnen: ihr wohnt.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{wohnt}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "wohnt"
+              ],
+              "explanation": [
+                "Con ihr la desinenza è -t: ihr wohnt. «Wo?» chiede il luogo."
+              ],
+              "accept": [
+                "wohnt"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 7,
+          "statement": {
+            "key": "Meine Großeltern ______ in Neapel.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Due nonni: il soggetto è plurale.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Großeltern → sie wohnen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{wohnen}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "wohnen"
+              ],
+              "explanation": [
+                "«Großeltern» sono i nonni, due persone: il verbo va al plurale, sie wohnen."
+              ],
+              "accept": [
+                "wohnen"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 8,
+          "statement": {
+            "key": "Meine Mutter ______ Lehrerin.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{sie + sein: quale forma?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{sein: sie ist (anche per il mestiere: sie ist Lehrerin).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{ist}",
+            "kind": "completion",
+            "payload": {
+              "format": [
+                "completion"
+              ],
+              "correct": [
+                "ist"
+              ],
+              "explanation": [
+                "Per dire che lavoro fa una persona si usa sein: sie ist Lehrerin. La madre è sie, quindi ist."
+              ],
+              "accept": [
+                "ist"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 9,
+          "statement": {
+            "key": "Die Mutter von meinem Vater ist meine ______.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{La madre del padre è la nonna.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Großmutter / die Oma, der Großvater / der Opa.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Oma}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Oma"
+              ],
+              "explanation": [
+                "La madre di mio padre è mia nonna: die Oma (o die Großmutter). La zia è la sorella di un genitore."
+              ],
+              "options": [
+                "Tante",
+                "Schwester",
+                "Oma",
+                "Cousine"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 10,
+          "statement": {
+            "key": "Der Bruder von meiner Mutter ist mein ______.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il fratello della madre è lo zio.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{der Onkel, die Tante.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Onkel}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Onkel"
+              ],
+              "explanation": [
+                "Il fratello di mia madre è mio zio: der Onkel. «Opa» è il nonno, «Cousin» il cugino."
+              ],
+              "options": [
+                "Vater",
+                "Opa",
+                "Onkel",
+                "Cousin"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 11,
+          "statement": {
+            "key": "Wie alt ______ du?",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto du e verbo sein.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{sein: du bist. L'età: Ich bin … Jahre alt.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{bist}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "bist"
+              ],
+              "explanation": [
+                "La domanda sull'età usa sein: Wie alt bist du? — Ich bin 11 Jahre alt. «hast» sarebbe il verbo avere, che non si usa per l'età."
+              ],
+              "options": [
+                "ist",
+                "bist",
+                "sind",
+                "hast"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 12,
+          "statement": {
+            "key": "Wie heißt deine Schwester? — «______ heißt Emma.»",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il nome «Schwester» è femminile.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Schwester → sie.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Sie}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Sie"
+              ],
+              "explanation": [
+                "Schwester è femminile: il pronome è sie. In italiano diremmo «lei», e il pronome segue il genere del nome."
+              ],
+              "options": [
+                "Sie",
+                "Er",
+                "Es",
+                "Du"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 13,
+          "statement": {
+            "key": "Ich ______ 11 Jahre alt.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Soggetto ich: sein o haben?}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{sein: ich bin … Jahre alt.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{bin}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "bin"
+              ],
+              "explanation": [
+                "L'età si dice con sein: ich bin 11 Jahre alt. «Ich habe 11 Jahre» è l'errore che si fa dall'italiano."
+              ],
+              "options": [
+                "ist",
+                "bin",
+                "sind",
+                "habe"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 14,
+          "statement": {
+            "key": "Meine Eltern ______ in Mailand.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Eltern è plurale.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{wohnen: sie wohnen.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{wohnen}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "wohnen"
+              ],
+              "explanation": [
+                "«Eltern» è plurale: sie wohnen. «wohnt» è per er/sie/es e per ihr."
+              ],
+              "options": [
+                "wohnt",
+                "wohnen",
+                "wohnst",
+                "wohne"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 15,
+          "statement": {
+            "key": "Die Frau von meinem Onkel ist meine ______.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{La moglie dello zio è la zia.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{die Tante, der Onkel.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Tante}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Tante"
+              ],
+              "explanation": [
+                "La moglie di mio zio è mia zia: die Tante, la stessa parola per la sorella di un genitore."
+              ],
+              "options": [
+                "Mutter",
+                "Oma",
+                "Cousine",
+                "Tante"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 16,
+          "statement": {
+            "key": "Ich wohne ______ Italien.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{Il verbo è wohnen, non kommen.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{wohnen in + paese; kommen aus + paese.}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{in}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "in"
+              ],
+              "explanation": [
+                "wohnen vuole in + paese: Ich wohne in Italien. «aus» dice la provenienza: Ich komme aus Italien."
+              ],
+              "options": [
+                "von",
+                "aus",
+                "in",
+                "bei"
+              ]
+            }
+          },
+          "figure": null
+        },
+        {
+          "index": 17,
+          "statement": {
+            "key": "Meine Schwester und ich: ______ sind Geschwister.",
+            "params": {}
+          },
+          "steps": [
+            {
+              "label_key": "step.grammar_analysis",
+              "latex": "\\text{«Meine Schwester und ich» = noi.}",
+              "note_key": null
+            },
+            {
+              "label_key": "step.rule_application",
+              "latex": "\\text{Pronomi: wir (noi), ihr (voi), sie (loro).}",
+              "note_key": null
+            }
+          ],
+          "answer": {
+            "latex": "\\textbf{Wir}",
+            "kind": "multiple_choice",
+            "payload": {
+              "format": [
+                "choice"
+              ],
+              "correct": [
+                "Wir"
+              ],
+              "explanation": [
+                "«io e mia sorella» è noi: wir. «Ihr» è «voi», «sie» è «loro»."
+              ],
+              "options": [
+                "Sie",
+                "Du",
+                "Wir",
+                "Ihr"
+              ]
+            }
+          },
+          "figure": null
+        }
+      ],
+      "options": {}
+    }
   }
 }

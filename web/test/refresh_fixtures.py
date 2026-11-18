@@ -90,6 +90,15 @@ def main() -> None:
                "&figure=full",
         "body": None,
     }
+    # the other three pages, so the suite can open every page of the section and not only
+    # the two it drives card by card
+    for name, topic in (("german_artikel", "german.unit1b.artikel"),
+                        ("german_possessivi", "german.unit1b.possessivi"),
+                        ("german_familie", "german.unit1c.familie")):
+        items[name] = {
+            "url": f"/api/generate?topic={topic}&difficulty=easy&seed=1&count=18&figure=full",
+            "body": None,
+        }
 
     for fixture in items.values():
         response = client.get(fixture["url"])

@@ -40,8 +40,8 @@ function crumb(pairs) {
   return nav;
 }
 
-function linkList(entries) {
-  const list = el("ul", "link-list");
+function linkList(entries, className = "link-list") {
+  const list = el("ul", className);
   entries.forEach(([label, target, hint]) => {
     const item = el("li");
     const link = el("a");
@@ -76,6 +76,18 @@ function renderMacro(macro) {
     const count = pagesOf(macro, sub).length;
     return [t(`sub.${sub}`, sub), href(macro, sub), `${count} pagine`];
   })));
+  // The pages themselves, under the topics: a section's index is the place where a
+  // student sees what there is to do, and a topic that says only "2 pagine" makes her
+  // open it to find out. The list is derived from the same catalogue (`/api/pages`), so
+  // it costs no second source — and a page that is not in the index is a page only its
+  // author can reach.
+  const pages = (state.nav?.pages ?? []).filter((page) => page.macro === macro);
+  if (pages.length) {
+    view.append(el("h3", "pages-heading", t("ui.pages_intro", "Le pagine di questa sezione")));
+    view.append(linkList(pages.map((page) => [
+      t(page.label_key, page.id), href(macro, page.sub, page.id), t(`sub.${page.sub}`, page.sub),
+    ]), "page-list"));
+  }
   return view;
 }
 
@@ -194,7 +206,11 @@ async function fetchItems(topic, difficulty, seed, count, figureMode, options) {
 
 // The exercise kinds that fill themselves on entry: a grammar worksheet shows the whole
 // batch immediately, so there is no seed, no count and no "Genera" for it to wait for.
-const SELF_LOADING_KINDS = new Set(["multiple_choice", "classification_choice"]);
+// `completion_choice` belongs here for the same reason: the German pages are a worksheet
+// of eighteen cards, and a student opens them to work, not to roll a dice.
+const SELF_LOADING_KINDS = new Set([
+  "multiple_choice", "classification_choice", "completion_choice",
+]);
 
 function renderPage(macro, sub, page) {
   const view = el("section", "page");
@@ -204,6 +220,11 @@ function renderPage(macro, sub, page) {
   ]));
   view.append(el("h2", null, t(page.label_key, page.id)));
   view.append(el("p", "kind-tag", t(`kind.${page.kind}`, page.kind)));
+  // The page's own short explanation in Italian, above the exercises: three to six lines
+  // with the examples in German. It is the server's words (an i18n key on the page), so a
+  // page without one draws nothing rather than an empty box.
+  const intro = page.intro_key ? t(page.intro_key, "") : "";
+  if (intro) view.append(el("p", "page-intro", intro));
 
   const status = el("p", "status");
   const results = el("main", "results");
