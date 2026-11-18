@@ -16,6 +16,29 @@ function parseRoute() {
 
 const href = (...parts) => `#/${parts.filter(Boolean).join("/")}`;
 
+// ---------------------------------------------------------------- the seed in the URL
+// A page drawn from a seed is reproducible only if the seed can be read back. `?seed=N`
+// on the address is that handle: the same address gives the same exercises, so a student
+// can be sent a page, and a test can pin one. Absent, nothing changes — the worksheets
+// keep their own fixed seed and a control form still rolls its own dice.
+const SEED_PARAM = "seed";
+
+function seedFromUrl() {
+  const raw = new URLSearchParams(location.search).get(SEED_PARAM);
+  if (raw === null || raw.trim() === "") return null;
+  const value = Number(raw);
+  return Number.isInteger(value) && value >= 0 ? value : null;
+}
+
+/** Write the seed that produced the batch into the address, keeping the route (the hash). */
+function rememberSeed(seed) {
+  if (!Number.isInteger(seed)) return;
+  const url = new URL(location.href);
+  if (url.searchParams.get(SEED_PARAM) === String(seed)) return;
+  url.searchParams.set(SEED_PARAM, String(seed));
+  history.replaceState(null, "", url);
+}
+
 function pagesOf(macro, sub) {
   return (state.nav?.pages ?? []).filter((page) => page.macro === macro && page.sub === sub);
 }
@@ -153,7 +176,9 @@ function controls(page, reload) {
   const seed = el("input");
   seed.id = "seed";
   seed.type = "number";
-  seed.value = String(Math.floor(Math.random() * 1e6));
+  // a seed on the address is the operator's own: it arrives pinned, not random
+  const pinned = seedFromUrl();
+  seed.value = String(pinned ?? Math.floor(Math.random() * 1e6));
 
   // A page that pins its count (a teacher asking for one graph to question a student on)
   // shows no count field: one click, one graph.
@@ -174,17 +199,21 @@ function controls(page, reload) {
   const randomSeed = () => {
     seed.value = String(Math.floor(Math.random() * 1e6));
   };
-  randomSeed();
+  if (pinned === null) randomSeed();
   const syncSeedField = () => { seed.disabled = seedMode.value === "random"; };
+  if (pinned !== null) seedMode.value = "number";
   seedMode.addEventListener("change", syncSeedField);
   syncSeedField();
 
   const read = () => {
     const random = seedMode.value === "random";
     if (random) randomSeed();
+    const chosen = Number(seed.value) || 1;
+    // the batch about to be drawn is the one this address names from now on
+    rememberSeed(chosen);
     return {
       difficulty: difficulty ?? form.querySelector("#difficulty")?.value ?? page.difficulties?.[0],
-      seed: Number(seed.value) || 1,
+      seed: chosen,
       count: page.count ?? (Number(count.value) || 3),
       options: configurator ? configurator.read() : null,
     };
@@ -240,7 +269,9 @@ function renderPage(macro, sub, page) {
       try {
         const count = page.count ?? 20;
         const difficulty = page.difficulty ?? "easy";
-        const items = await fetchItems(page.topic, difficulty, 1, count, "full", null);
+        // the seed on the address, when there is one: the same link gives the same page
+        const seed = seedFromUrl() ?? 1;
+        const items = await fetchItems(page.topic, difficulty, seed, count, "full", null);
         status.textContent = "";
         items.forEach((item, index) => {
           results.append(renderItemForKind(page.kind, item, index, { strings, page }));

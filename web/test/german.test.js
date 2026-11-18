@@ -430,3 +430,34 @@ describe("the solution is behind the answer, not beside the question", () => {
     expect(card.querySelector(".choice-explanation")).toBeNull();
   });
 });
+describe("the seed on the address", () => {
+  const openAt = async (search) => {
+    await goTo(HREF, search);
+    await vi.waitFor(() => expect(view().querySelectorAll("article.card")).toHaveLength(18));
+    const generate = requested.filter((url) => url.startsWith("/api/generate"));
+    const url = new URL(generate[generate.length - 1], "https://teaching.tazlab.net");
+    const cards = [...view().querySelectorAll("article.card")];
+    return {
+      seed: url.searchParams.get("seed"),
+      page: cards.map((card) => [
+        card.querySelector(".statement").textContent,
+        [...card.querySelectorAll(".choice-text")].map((node) => node.textContent).join("|"),
+      ].join(" ")),
+    };
+  };
+
+  test("the batch is drawn from the seed the address names", async () => {
+    const pinned = await openAt("?seed=42");
+    expect(pinned.seed).toBe("42");
+    // no parameter on the address: the worksheet keeps the seed it always had
+    const plain = await openAt("");
+    expect(plain.seed).toBe("1");
+  });
+
+  test("the same seed gives the same page, twice", async () => {
+    const first = await openAt("?seed=42");
+    const second = await openAt("?seed=42");
+    expect(second.page).toEqual(first.page);
+    expect(new Set(first.page).size).toBe(18);
+  });
+});

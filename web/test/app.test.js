@@ -79,6 +79,9 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   vi.stubGlobal("fetch", stubFetch());
+  // a fresh address: the seed one test pinned is that test's, and a reloaded site starts
+  // without one (jsdom keeps location across the tests of a file)
+  history.replaceState(null, "", `${location.pathname}${location.hash}`);
   await goTo("");
   requested.length = 0;
 });
