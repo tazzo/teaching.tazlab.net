@@ -1,24 +1,32 @@
 %% ---------------------------------------------------------------------
-%%  I Radicali: Schema Visivo — la scheda del modello
+%%  I Radicali: la Scheda Unica — campo di esistenza, operazioni e
+%%  semplificazione in UNA pagina A4.
 %%
-%%  Riproduce la scheda mandata dall'operatore il 25/11/2026: due sezioni
-%%  (campo di esistenza, operazioni), le forme al posto dei numeri.
-%%  Qui non c'è grafica: tutto sta in ../schede.sty.
+%%  Ordine dell'operatore, 26/11/2026: «la scheda delle formule deve essere
+%%  unita alla scheda delle semplificazioni: deve essere un'unica scheda con
+%%  tutte le formule». Prima erano due file (radicali-1 e radicali-2): qui
+%%  c'è tutto, e le sezioni sono le tre di prima nell'ordine in cui si
+%%  studiano — prima DOVE la radice esiste, poi come si opera, poi come si
+%%  semplifica.
+%%
+%%  Qui non c'è grafica: tutto sta in ../schede.sty. Le formule sono quelle
+%%  della scheda dell'operatore (il PDF Chromium «Schema sui Radicali»,
+%%  124364 B, in tests/golden/schede/) e quelle della seconda scheda: nessuna
+%%  è stata tolta per far stare la pagina — il respiro sì, ed è la libreria a
+%%  deciderlo (\schedaCompatta, \schedaMarginiSicuri).
 %% ---------------------------------------------------------------------
 \documentclass[10pt]{article}
 \usepackage{schede}
 
-%% La scheda intera sta in UNA pagina, e non solo sullo schermo: testata e
-%% piede dentro la zona che ogni stampante sa stampare (il piede di norma
-%% sta a 5,4 mm dal bordo della carta, e a stampa finiva su un secondo
-%% foglio). IL RESPIRO RESTA QUELLO DI NORMA: misurato il 26/11 su questa
-%% scheda, il corpo finisce a 793 px di 1170 (100 dpi) e sopra il piede
-%% restano 78 mm di bianco — \schedaCompatta toglieva 10 mm di spazi a
-%% fronte di 78 liberi, e schiacciava le formule senza che servisse. La
-%% pagina è una con i margini sicuri da soli (pdfinfo: Pages: 1).
+%% Testata e piede dentro la zona che ogni stampante sa stampare (senza,
+%% il piede finiva su un secondo foglio: misurato il 26/11).
 \schedaMarginiSicuri
+%% Tre sezioni e undici righe in una pagina: si toglie respiro agli SPAZI
+%% (righe più basse, margini delle celle più stretti), non al testo.
+\schedaCompatta
 
-\schedaTitolo{I Radicali: Schema Visivo}{Campo di esistenza \& operazioni base}
+\schedaTitolo{I Radicali: la Scheda Unica}
+             {CE \textperiodcentered\ Operazioni \textperiodcentered\ Semplificazione}
 \schedaPiede{Schema di Matematica — I Radicali}
 
 \begin{document}
@@ -89,5 +97,42 @@
          =\radice[6]{\formaQuadrato}$}
 
 \end{schedaTabella}
+
+%% =====================================================================
+\schedaSezione{3}{Semplificazione: la Proprietà Invariantiva}
+%% =====================================================================
+
+\riquadro[La regola]{Moltiplicare o dividere per lo stesso numero (diverso
+da zero) l'indice della radice e l'esponente del radicando non cambia la
+radice: è la stessa radice scritta in un altro modo.}
+
+\vspace{6pt}
+
+\begin{schedaTabella}{Cosa si fa}{Schema visivo (stesso numero $n$)}{Esempio}
+
+  \riga{\voce{Semplificare l'indice}{(dividere per $k$)}}
+       {$\radice[n\cdot k]{\formaQuadrato^{k}}
+         \;\freccia\;\radice[n]{\formaQuadrato}$}
+       {$\radice[6]{\formaQuadrato^{2}}
+         =\radice[3]{\formaQuadrato}$}
+
+  \riga{\voce{Portar fuori}{(se il radicando è un prodotto)}}
+       {$\radice[n]{\formaQuadrato^{n}\cdot\formaTriangolo}
+         \;\freccia\;\formaQuadrato\cdot\radice[n]{\formaTriangolo}$}
+       {$\radice[3]{\formaQuadrato^{3}\cdot\formaTriangolo}
+         =\formaQuadrato\cdot\radice[3]{\formaTriangolo}$}
+
+  \riga{\voce{Portar dentro}{(il fattore davanti)}}
+       {$\formaQuadrato\cdot\radice[n]{\formaTriangolo}
+         \;\freccia\;\radice[n]{\formaQuadrato^{n}\cdot\formaTriangolo}$}
+       {$\formaCerchio\cdot\radice[2]{\formaTriangolo}
+         =\radice[2]{\formaCerchio^{2}\cdot\formaTriangolo}$}
+
+\end{schedaTabella}
+
+{\footnotesize\color{schedeGrigio}Le tre mosse si leggono al contrario
+l'una dell'altra: portare fuori e portare dentro sono la stessa uguaglianza,
+e semplificare l'indice è la proprietà invariantiva letta da sinistra a
+destra.\par}
 
 \end{document}

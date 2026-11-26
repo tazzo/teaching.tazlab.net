@@ -11,11 +11,9 @@ schede/
 ├── schede.json           ← QUALI schede sono pubblicate sul sito (l'elenco della pagina)
 ├── versions.json         ← scritto a ogni build: data, commit e sha256 (non si committa)
 ├── radicali/
-│   ├── Makefile          ← make radicali-1.pdf
-│   ├── radicali-1.tex    ← «I Radicali: Schema Visivo» (la scheda del modello)
-│   ├── radicali-1.pdf    ← compilata, pubblicata su /schede/radicali/radicali-1.pdf
-│   ├── radicali-2.tex    ← «I Radicali: Semplificazione» (riusa la libreria)
-│   └── radicali-2.pdf    ← compilata, NON ancora pubblicata
+│   ├── Makefile          ← make radicali.pdf
+│   ├── radicali.tex      ← «I Radicali: la Scheda Unica» (le tre sezioni in una pagina)
+│   └── radicali.pdf      ← compilata, pubblicata su /schede/radicali/radicali.pdf
 ├── prova-palette.sh      ← la prova che il blu si cambia in un punto solo
 └── README.md             ← questo file
 ```
@@ -24,12 +22,14 @@ schede/
 
 | file | che cos'è | pagine |
 |---|---|---|
-| `radicali/radicali-1.pdf` | **I Radicali: Schema Visivo** — campo di esistenza (indice pari, dispari, più radici pari) e operazioni (somma e sottrazione, prodotto, divisione, potenza di radice, radice di radice) | 1 |
-| `radicali/radicali-2.pdf` | **I Radicali: Semplificazione** — la proprietà invariantiva, portar fuori, portar dentro | 1 |
+| `radicali/radicali.pdf` | **I Radicali: la Scheda Unica** — campo di esistenza (indice pari, dispari, più radici pari), operazioni (somma e sottrazione, prodotto, divisione, potenza di radice, radice di radice) e semplificazione (la proprietà invariantiva, portar fuori, portar dentro) | 1 |
 
-Le due schede si assomigliano perché **non hanno grafica propria**: la prima
-è il modello rifatto in LaTeX, la seconda è la prova che la libreria si riusa
-(il suo preambolo sono due righe).
+**Una scheda sola** (ordine dell'operatore, 26/11/2026: «devono essere fuse in
+un'unica scheda; tutte le altre possono essere cancellate»). Prima erano due
+file, `radicali-1` e `radicali-2`: la seconda non c'è più, il suo contenuto è
+dentro `radicali.tex`. Le tre sezioni stanno in **una pagina A4** — il respiro
+lo toglie la libreria (`\schedaCompatta`), non le formule: nessuna è stata
+sacrificata per far stare la pagina.
 
 ## 2. Come si compila
 
@@ -44,7 +44,7 @@ Poi, dalla cartella della scheda:
 
 ```sh
 cd schede/radicali
-make radicali-1.pdf      # oppure: make   (tutte)
+make                     # oppure: make radicali.pdf
 ```
 
 Il `Makefile` lancia `pdflatex` **due volte** — la seconda passata serve al
@@ -60,7 +60,7 @@ Un file `.tex` in `schede/<argomento>/`, con questo preambolo e nient'altro:
 \usepackage{schede}                 % ← la libreria, trovata da TEXINPUTS
 
 \schedaTitolo{I Radicali: Semplificazione}{Proprietà invariantiva & portar fuori}
-\schedaPiede{Schema di Matematica — I Radicali (2)}
+\schedaPiede{Schema di Matematica — I Radicali}
 
 \begin{document}
 \schedaSezione{1}{La proprietà invariantiva}
@@ -75,7 +75,7 @@ Un file `.tex` in `schede/<argomento>/`, con questo preambolo e nient'altro:
 \end{document}
 ```
 
-Poi si aggiunge il nome del PDF a `SCHEDE` nel `Makefile` (`radicali-2.pdf`)
+Poi si aggiunge il nome del PDF a `SCHEDE` nel `Makefile` (`radicali.pdf`)
 e si compila. **Se ti serve un comando che non c'è, si aggiunge in
 `schede.sty`** — mai copiando il preambolo in una scheda: è la regola che
 tiene in piedi tutto il resto.
@@ -111,7 +111,7 @@ Le forme che non sono una delle tre — il rombo, le frecce — sono **grigie**.
 I quattro colori sono definiti **una volta sola**, in cima a `schede.sty`
 (sezione 1, «LA PALETTE»): cambiare il blu è una riga, e cambia in tutte le
 schede insieme. La prova è `./prova-palette.sh`: cambia quella riga,
-ricompila le due schede, misura i pixel blu prima e dopo, e rimette tutto
+ricompila la scheda, misura i pixel blu prima e dopo, e rimette tutto
 com'era.
 
 ```sh
@@ -125,7 +125,7 @@ Le schede pubblicate si leggono e si scaricano da **`teaching.tazlab.net`**, sez
 **Schede** del menu. Tre regole, e sono quelle che rendono il link affidabile:
 
 1. **Il nome del PDF è stabile.** Il link è sempre
-   `/schede/radicali/radicali-1.pdf`: chi lo salva nei preferiti ci torna e trova
+   `/schede/radicali/radicali.pdf`: chi lo salva nei preferiti ci torna e trova
    **l'ultima versione**, perché una ricompilazione sostituisce i byte dietro lo stesso
    indirizzo. Mai mettere la data nel nome del file: il link si romperebbe.
 2. **Si pubblica solo ciò che è dichiarato in `schede/schede.json`.** Un PDF compilato e
@@ -133,8 +133,8 @@ Le schede pubblicate si leggono e si scaricano da **`teaching.tazlab.net`**, sez
    collaterale del copiare un file. Per pubblicare una scheda nuova si aggiunge una voce:
 
    ```json
-   {"file": "radicali/radicali-1.pdf", "title": "I Radicali: Schema Visivo",
-    "subtitle": "Campo di esistenza e operazioni", "order": 10}
+   {"file": "radicali/radicali.pdf", "title": "I Radicali: la Scheda Unica",
+    "subtitle": "Campo di esistenza, operazioni e semplificazione", "order": 10}
    ```
 
    La pagina le elenca tutte in ordine di `order`; le prossime compaiono da sole.
@@ -148,8 +148,8 @@ Le schede pubblicate si leggono e si scaricano da **`teaching.tazlab.net`**, sez
 Quindi, per aggiornare una scheda già pubblicata:
 
 ```sh
-cd schede/radicali && make radicali-1.pdf      # ricompila: il link resta lo stesso
-git add radicali-1.pdf && git commit && git push   # su master: il sito si aggiorna da solo
+cd schede/radicali && make                     # ricompila: il link resta lo stesso
+git add radicali.pdf && git commit && git push # su master: il sito si aggiorna da solo
 ```
 
 La data e il commit in pagina si aggiornano da soli alla build successiva, perché sono

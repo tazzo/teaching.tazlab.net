@@ -4,12 +4,12 @@
 #
 #  Regola della casa (operatore, 26/11/2026): quadrato = blu, triangolo =
 #  rosso, cerchio = verde, e i colori si definiscono UNA volta sola. Qui si
-#  cambia il blu in quel punto (una riga di schede.sty), si ricompilano le
-#  schede e si misura: il blu vecchio deve sparire e quello nuovo comparire
+#  cambia il blu in quel punto (una riga di schede.sty), si ricompila la
+#  scheda e si misura: il blu vecchio deve sparire e quello nuovo comparire
 #  in TUTTE le schede. Poi la riga torna com'era e si ricompila.
 #
 #  Uso:  cd schede && ./prova-palette.sh
-#  Esce 1 se una scheda non cambia colore. Serve pdflatex, pdftoppm, python3.
+#  Esce 1 se la scheda non cambia colore. Serve pdflatex, pdftoppm, python3.
 # ---------------------------------------------------------------------------
 set -u
 
@@ -18,7 +18,7 @@ STY="$QUI/schede.sty"
 PRIMA="2563EB"            # il blu della casa
 DOPO="7C3AED"             # un altro colore, solo per la prova
 CARTELLA="$QUI/radicali"
-SCHEDE="radicali-1 radicali-2"
+SCHEDE="radicali"
 DPI=60                    # bassa risoluzione: bastano i pixel pieni
 
 copia=$(mktemp)
@@ -55,7 +55,7 @@ PY
 
 compila() { ( cd "$CARTELLA" && make >/dev/null 2>&1 ) || { echo "ERRORE: make in $CARTELLA"; exit 1; }; }
 
-echo "== 1. le schede com'è adesso (blu $PRIMA) =="
+echo "== 1. la scheda com'è adesso (blu $PRIMA) =="
 compila
 for s in $SCHEDE; do printf '  %-12s blu=%s\n' "$s" "$(conta "$CARTELLA/$s.pdf" "$PRIMA")"; done
 
@@ -82,7 +82,7 @@ trap - EXIT INT TERM
 for s in $SCHEDE; do printf '  %-12s blu=%s\n' "$s" "$(conta "$CARTELLA/$s.pdf" "$PRIMA")"; done
 
 if [ "$esito" -eq 0 ]; then
-  echo "VERDE: il blu si cambia in una riga e tutte le schede lo seguono."
+  echo "VERDE: il blu si cambia in una riga e la scheda lo segue."
 else
   echo "ROSSO: la palette non è in un punto solo."
 fi
