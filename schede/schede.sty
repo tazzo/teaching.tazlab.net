@@ -202,6 +202,19 @@
 %%      \schedaPiede{la riga in fondo a sinistra}
 %%  Il numero di pagina è «Pagina n di N» e si compila da sé.
 %% ---------------------------------------------------------------------
+
+%%  \schedaMarginiSicuri — testata e piede dentro la zona stampabile.
+%%  Di norma il piede sta a 5,4 mm dal bordo inferiore della carta (misurato
+%%  con `pdftotext -bbox` su radicali-1 del 26/11): molte stampanti non
+%%  stampano sotto i 6-10 mm, e allora quel filo di carta finisce su un
+%%  SECONDO foglio. Questo comando sposta testata e piede dentro un margine
+%%  di 12 mm da ogni bordo, senza toccare il testo: si chiama nel preambolo
+%%  della scheda che deve essere stampata «una pagina, tutto assieme».
+\newcommand{\schedaMarginiSicuri}{%
+  \geometry{top=2.1cm,bottom=2.35cm,left=1.5cm,right=1.5cm,
+            headsep=6pt,footskip=0.85cm}%
+  \setlength{\headheight}{18pt}}
+
 \newcommand{\schedaTitolo}[2]{%
   \gdef\schede@titolo{#1}\gdef\schede@occhiello{#2}}
 \newcommand{\schedaPiede}[1]{\gdef\schede@piede{#1}}
@@ -225,16 +238,38 @@
 \AtEndDocument{\label{schede@ultima}}
 
 %% =====================================================================
+%%  7bis. LA SPAZIATURA — il respiro fra le righe, in un punto solo
+%% =====================================================================
+%%  Sono i valori di norma di tutte le schede. Una scheda che deve stare in
+%%  UNA pagina chiama \schedaCompatta nel preambolo: si toglie respiro agli
+%%  spazi (righe più basse, margini delle celle più stretti, meno bianco fra
+%%  le sezioni) e NON al testo, che resta alla sua dimensione. Se una scheda
+%%  ha bisogno di altri numeri, si cambiano QUI, mai copiando il preambolo.
+%% ---------------------------------------------------------------------
+\newlength{\schede@vocegap}\setlength{\schede@vocegap}{2.5pt}
+\newlength{\schede@sezprima}\setlength{\schede@sezprima}{13pt}
+\newlength{\schede@sezdopo}\setlength{\schede@sezdopo}{5pt}
+\newlength{\schede@tabgap}\setlength{\schede@tabgap}{6pt}
+\def\schede@stretch{1.5}
+
+\newcommand{\schedaCompatta}{%
+  \def\schede@stretch{1.38}%
+  \setlength{\schede@vocegap}{1.6pt}%
+  \setlength{\schede@sezprima}{10pt}%
+  \setlength{\schede@sezdopo}{3.5pt}%
+  \setlength{\schede@tabgap}{4.5pt}}
+
+%% =====================================================================
 %%  8. LA SEZIONE — la barretta blu e il titolo numerato
 %% =====================================================================
 %%  \schedaSezione{1}{Campo di Esistenza (CE)}
 %% ---------------------------------------------------------------------
 \newcommand{\schedaSezione}[2]{%
-  \par\addvspace{13pt}%
+  \par\addvspace{\schede@sezprima}%
   \noindent\textcolor{schedeTitolo}{\rule[-1.5pt]{2.8pt}{13.5pt}}%
   \hspace{6pt}{\large\bfseries\textcolor{schedeTitolo}{#1.\ #2}}\par
-  \vspace{2.5pt}\noindent{\color{schedeBlu!35}\rule{\linewidth}{0.7pt}}\par
-  \vspace{5pt}}
+  \vspace{\schede@vocegap}\noindent{\color{schedeBlu!35}\rule{\linewidth}{0.7pt}}\par
+  \vspace{\schede@sezdopo}}
 
 %% =====================================================================
 %%  9. LA TABELLA — intestazione a fascia, righe con un filo sottile
@@ -252,14 +287,15 @@
   \gdef\schede@colA{#1}\gdef\schede@colB{#2}\gdef\schede@colC{#3}}
 \schedaColonne{0.225}{0.40}{0.375}
 
-\newcommand{\voce}[2]{{\bfseries #1}\par\vspace{2.5pt}{\footnotesize\color{schedeGrigio}#2}}
+\newcommand{\voce}[2]{{\bfseries #1}\par\vspace{\schede@vocegap}{\footnotesize\color{schedeGrigio}#2}}
 
 \newlength{\schede@lineW}
 \newenvironment{schedaTabella}[3]{%
   \par\noindent
+  \setlength{\tabcolsep}{\schede@tabgap}%
   \setlength{\schede@lineW}{\dimexpr\linewidth-4\tabcolsep\relax}%
   \arrayrulecolor{schedeRegola}%
-  \renewcommand{\arraystretch}{1.5}%\n  \setlength{\extrarowheight}{2.5pt}%
+  \renewcommand{\arraystretch}{\schede@stretch}%
   \begin{tabular}{@{}%
       >{\raggedright\arraybackslash}p{\dimexpr\schede@colA\schede@lineW\relax}%
       >{\raggedright\arraybackslash}p{\dimexpr\schede@colB\schede@lineW\relax}%
