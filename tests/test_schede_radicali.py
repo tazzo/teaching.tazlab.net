@@ -234,10 +234,21 @@ def test_la_scheda_sta_in_una_pagina(scheda: Path) -> None:
     assert pagine(scheda) == 1, "la scheda è tornata su più fogli"
 
 
+# Il 26/11/2026 la formula «Potenza di radice» è stata ridisegnata come quella
+# dell'esempio dell'operatore: le parentesi sono a corpo testo, non più
+# `\left( \right)` — che nel PDF diventavano due delimitatori alti quanto la
+# radice, con l'esponente staccato in cima e due glifi privati (U+0012, U+0013)
+# e due «!» nel testo estratto. La differenza è tutta qui, ed è dichiarata:
+# tre coppie di tonde in più, quei quattro caratteri in meno. Tutto il resto
+# deve restare identico all'originale: se cambia, il test lo dice.
+DELTA_VOLUTO = collections.Counter({"(": 3, ")": 3})
+DELTA_TOLTO = collections.Counter({"\x12": 1, "\x13": 1, "!": 2})
+
+
 def test_il_testo_e_quello_dell_originale(scheda: Path, originale: collections.Counter[str]) -> None:
     """Zero caratteri mancanti e zero in più rispetto alla versione originale."""
     nuovo = caratteri(estrai_testo(scheda))
-    assert nuovo == originale, (
+    assert nuovo + DELTA_TOLTO == originale + DELTA_VOLUTO, (
         "il contenuto della scheda è cambiato rispetto all'originale (140290 B, commit 7702236):\n"
         + differenza(originale, nuovo)
         + "\nSe il cambio è voluto: SCHEDE_UPDATE_GOLDEN=1 pytest tests/test_schede_radicali.py"
@@ -353,4 +364,174 @@ def test_il_golden_si_aggiorna_solo_apposta(tmp_path: Path) -> None:
         json.dumps({**json.loads(ORIGINALE_JSON.read_text(encoding="utf-8")), **atteso},
                    ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
+    )
+
+
+# ------------------------------------------- l'inchiostro, CELLA per CELLA
+#
+# Il 26/11 il difetto è passato due volte di fila, e la seconda volta con un
+# test dell'inchiostro già verde: quel test misurava i pixel per COLONNA. Una
+# formula tolta dentro una cella sposta l'inchiostro di una colonna dell'1%, che
+# sta dentro ogni tolleranza ragionevole; e il testo non la vede mai, perché il
+# segno di radice e le frecce sono disegnati e non sono caratteri. Qui la misura
+# scende a una cella per volta: otto righe per due colonne di formula, sedici
+# riquadri, e ognuno deve avere il suo inchiostro.
+
+# Le righe che portano formule, nell'ordine in cui compaiono; la chiave è la
+# prima parola della cella «voce», che il testo estratto porta come parola.
+RIGHE_DI_FORMULA = (
+    "Indice pari",
+    "Indice dispari",
+    "Più radici pari",
+    "Somma",
+    "Prodotto",
+    "Divisione",
+    "Potenza",
+    "Radice di radice",
+)
+COLONNE_DI_FORMULA = (1, 2)  # «schema visivo» ed «esempio»: la colonna 0 è testo
+# Il minimo di pixel (a 100 dpi) sotto il quale un riquadro è vuoto: una cella
+# vera ne ha centinaia, una svuotata ne tiene solo i bordi della tabella.
+MINIMO_CELLA = 120
+
+
+def _parole_con_posizione(pdf: Path) -> list[tuple[str, float, float, float, float]]:
+    _serve("pdftotext")
+    esito = subprocess.run(["pdftotext", "-bbox", str(pdf), "-"], capture_output=True, text=True)
+    assert esito.returncode == 0, esito.stderr
+    return [
+        (m.group(5), float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4)))
+        for m in re.finditer(
+            r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>',
+            esito.stdout,
+        )
+    ]
+
+
+def inchiostro_per_cella(pdf: Path, cartella: Path) -> list[list[int]]:
+    """I pixel disegnati in ogni cella di formula, riga per riga, a 100 dpi.
+
+    Le righe si trovano DAL PDF (la posizione della parola che apre la cella
+    «voce»), non da un numero scritto a mano: se una riga si sposta, la misura
+    la segue.
+    """
+    _serve("pdftoppm")
+    cartella.mkdir(parents=True, exist_ok=True)
+    base = cartella / "celle"
+    esito = subprocess.run(
+        ["pdftoppm", "-r", "100", "-singlefile", "-gray", str(pdf), str(base)],
+        capture_output=True,
+        text=True,
+    )
+    assert esito.returncode == 0, esito.stderr
+    larghezza, altezza, pixel = _pgm(base.with_suffix(".pgm"))
+    per_punto = 100 / 72.0  # 100 dpi: un punto tipografico vale 1,39 pixel
+    per_mm = larghezza / 210.0
+
+    # Ogni riga comincia con una parola diversa; le righe si riconoscono dalla
+    # posizione di quella parola. «Indice» apre DUE righe, quindi si raccolgono
+    # tutte le posizioni e si tengono le otto righe distinte, in ordine.
+    prime = {etichetta.split()[0] for etichetta in RIGHE_DI_FORMULA}
+    righe_trovate: list[float] = []
+    for (testo, _x0, y, _x1, _y1) in _parole_con_posizione(pdf):
+        if testo in prime:
+            if not righe_trovate or all(abs(y - gia) > 3 for gia in righe_trovate):
+                righe_trovate.append(y)
+    righe_trovate.sort()
+    assert len(righe_trovate) == len(RIGHE_DI_FORMULA), (
+        f"il testo estratto porta {len(righe_trovate)} righe invece di {len(RIGHE_DI_FORMULA)}"
+    )
+    ordinate = [(etichetta, y * per_punto) for etichetta, y in zip(RIGHE_DI_FORMULA, righe_trovate)]
+
+    # Le righe di separazione della tabella sono nere da bordo a bordo: se non
+    # si tolgono, una cella vuota conta comunque i filetti e la misura non sa
+    # fallire (successo il 26/11: 942 pixel su una cella svuotata). Una riga di
+    # immagine è «filetto» quando più della metà della pagina è scura.
+    filetti = {
+        y
+        for y in range(altezza)
+        if sum(1 for i in range(larghezza) if pixel[y * larghezza + i] < 200) > larghezza // 2
+    }
+
+    def conta(x0: float, x1: float, y0: float, y1: float) -> int:
+        a, b = int(x0 * per_mm), int(x1 * per_mm)
+        c, d = int(y0), int(y1)
+        return sum(
+            1
+            for y in range(max(c, 0), min(d, altezza))
+            if y not in filetti
+            for i in range(a, b)
+            if pixel[y * larghezza + i] < 200
+        )
+
+    misure: list[list[int]] = []
+    for indice, (_etichetta, y) in enumerate(ordinate):
+        # il fondo della riga è la cima della successiva, meno qualche pixel
+        fine = ordinate[indice + 1][1] - 4 if indice + 1 < len(ordinate) else y + 90
+        misure.append([conta(*COLONNE_MM[c], y, fine) for c in COLONNE_DI_FORMULA])
+    return misure
+
+
+def test_ogni_cella_di_formula_ha_il_suo_inchiostro(scheda: Path, tmp_path: Path) -> None:
+    """Sedici riquadri, sedici misure: nessuna cella di formula può essere vuota.
+
+    È il controllo che mancava il 26/11: per colonna una formula tolta si perde
+    nell'1% di tolleranza, e il testo non la vede perché è disegnata.
+    """
+    misure = inchiostro_per_cella(scheda, tmp_path)
+    assert len(misure) == len(RIGHE_DI_FORMULA), (
+        f"misurate {len(misure)} righe invece di {len(RIGHE_DI_FORMULA)}"
+    )
+    vuote = [
+        f"riga {i + 1} «{RIGHE_DI_FORMULA[i]}», colonna {c + 1}: {valore} pixel"
+        for i, riga in enumerate(misure)
+        for c, valore in enumerate(riga)
+        if valore < MINIMO_CELLA
+    ]
+    assert not vuote, "celle di formula senza disegno (una formula non è stata disegnata):\n" + "\n".join(vuote)
+
+
+def test_la_misura_per_cella_sa_fallire(tmp_path: Path) -> None:
+    """Tolta UNA formula dentro una riga, la misura per cella la vede.
+
+    Si toglie solo la formula della colonna «esempio» della riga «Prodotto»: la
+    ``\\riga`` resta, il numero di righe resta, il testo estratto cambia di
+    pochissimo (le forme sono disegnate) — e la cella resta vuota. Se questa
+    prova passasse, la misura non varrebbe niente.
+    """
+    sorgente = SORGENTE.read_text(encoding="utf-8")
+    inizio = sorgente.index("\\riga{\\voce{Prodotto}")
+    fine = sorgente.index("\\riga{\\voce{Divisione}", inizio)
+    riga = sorgente[inizio:fine]
+    # la TERZA graffa della \\riga è l'esempio: si svuota quella, non la riga.
+    # (Si cerca a graffe contate: dentro ci sono altre graffe, quelle degli
+    # argomenti di \\voce e di \\radice, e un `rindex` prenderebbe l'ultima —
+    # cioè il posto sbagliato, e il LaTeX morirebbe dentro la matematica.)
+    gruppi: list[tuple[int, int]] = []
+    posizione = 0
+    while len(gruppi) < 3:
+        inizio_gruppo = riga.index("{", posizione)
+        livello, dove = 0, inizio_gruppo
+        while True:
+            if riga[dove] == "{":
+                livello += 1
+            elif riga[dove] == "}":
+                livello -= 1
+                if livello == 0:
+                    break
+            dove += 1
+        gruppi.append((inizio_gruppo, dove + 1))
+        posizione = dove + 1
+    inizio_argomento, fine_argomento = gruppi[2]
+    mutilata = riga[:inizio_argomento] + "{$\\;\\,$}" + riga[fine_argomento:]
+    mutilato = sorgente[:inizio] + mutilata + sorgente[fine:]
+    pdf = costruisci(tmp_path / "cella_vuota", mutilato)
+    assert pagine(pdf) == 1
+
+    misure = inchiostro_per_cella(pdf, tmp_path / "cella_vuota")
+    indice = RIGHE_DI_FORMULA.index("Prodotto")
+    esempio = misure[indice][COLONNE_DI_FORMULA.index(2)]
+    assert esempio < MINIMO_CELLA, (
+        f"svuotata la cella «esempio» della riga «Prodotto» la misura conta ancora "
+        f"{esempio} pixel: la misura per cella non sa fallire"
     )
