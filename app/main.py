@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import VERSION, router
+from app.api.schede import router as schede_router
 from app.logging_setup import configure_logging, get_request_id, set_request_id, startup_banner
 
 configure_logging()
@@ -137,6 +138,7 @@ async def http_error_handler(request: Request, exc: HTTPException):
 
 
 app.include_router(router)
+app.include_router(schede_router)   # /api/schede and /schede/<file>.pdf
 
 if os.path.isdir(WEB_DIST):
     app.mount("/", StaticFiles(directory=WEB_DIST, html=True), name="web")

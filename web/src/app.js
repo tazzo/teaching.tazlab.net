@@ -1,7 +1,7 @@
 // SPA: macro -> sub-topic -> page. Everything is driven by GET /api/pages, so the
 import { renderConfigurator } from "./config.js";
 // navigation tree lives on the server and the client only renders it.
-import { renderItemForKind, el } from "./pages.js";
+import { renderItemForKind, renderSchedeList, el } from "./pages.js";
 
 const state = { strings: {}, nav: null };
 let strings = {};
@@ -258,6 +258,36 @@ function renderPage(macro, sub, page) {
   const status = el("p", "status");
   const results = el("main", "results");
 
+  // The sheets are not generated: the list is the server's (`/api/schede`, built from
+  // schede/schede.json), so a new sheet appears here by being published and not by
+  // touching this file. No controls, no seed, nothing to answer.
+  if (page.kind === "schede_list") {
+    view.append(status);
+    view.append(results);
+    view.append(el("p", "scheda-hint", t("ui.schede_next")));
+    const load = async () => {
+      status.textContent = t("ui.schede_loading", "Caricamento…");
+      status.classList.remove("bad");
+      try {
+        const body = await (await fetch("/api/schede")).json();
+        results.replaceChildren();
+        status.textContent = "";
+        const schede = body.schede ?? [];
+        if (!schede.length) {
+          status.textContent = t("ui.schede_empty");
+          return;
+        }
+        results.append(renderSchedeList(schede, { strings }));
+      } catch (error) {
+        console.error("schede failed", error);
+        status.textContent = `${t("ui.error")}: ${error?.message ?? error}`;
+        status.classList.add("bad");
+      }
+    };
+    load();
+    return view;
+  }
+
   // For multiple_choice grammar worksheets, show all questions immediately without
   // needing random seed, count picker or clicking "Genera". The kind that asks the student
   // to name the sentence type first loads the same way: the lock is on each card.
@@ -341,7 +371,16 @@ function render() {
   const host = document.getElementById("view");
   let content;
   if (!route.macro) content = renderHome();
-  else if (!route.sub) content = renderMacro(route.macro);
+  else if (!route.sub) {
+    // A section that holds exactly one page opens it directly: the sheets are one page,
+    // and a topic level saying "1 pagine" between the menu and it would be a click that
+    // exists only for the shape of the data. Every other section keeps its index.
+    const subsOfMacro = state.nav?.subs?.[route.macro] ?? [];
+    const pagesOfMacro = (state.nav?.pages ?? []).filter((page) => page.macro === route.macro);
+    content = (subsOfMacro.length === 1 && pagesOfMacro.length === 1)
+      ? renderPage(route.macro, pagesOfMacro[0].sub, pagesOfMacro[0])
+      : renderMacro(route.macro);
+  }
   else if (!route.pageId) content = renderSub(route.macro, route.sub);
   else {
     const page = findPage(route.pageId);

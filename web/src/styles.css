@@ -1,6 +1,7 @@
 /* =============================================================================
    TazLab Didattica — single stylesheet for every page.
    Structure: 1) design tokens  2) base  3) shell  4) navigation lists
+              4b) the sheets
               5) controls and configurator  6) exercise cards  7) graphs
               8) responsive  9) print.
    Re-skinning the site means editing section 1 only: no page carries its own colour,
@@ -228,6 +229,62 @@ a { color: var(--accent); text-underline-offset: 2px; }
 }
 .link-list a:hover::after,
 .page-list a:hover::after { color: var(--accent); }
+
+/* --- 4b. the sheets ------------------------------------------------------- */
+/* A sheet is a row, not a card among exercises: one title, one version line, one link.
+ * The version and the sha256 are what the operator reads to know which PDF the link is
+ * giving him today, so they sit under the title and not in a tooltip. */
+.schede-list {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.scheda {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.scheda-title { margin: 0; font-size: var(--size-md); }
+.scheda-subtitle { margin: var(--space-1) 0 0; color: var(--muted); font-size: var(--size-sm); }
+.scheda-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+  font-size: var(--size-sm);
+  font-variant-numeric: tabular-nums;
+}
+.scheda-version { color: var(--ink); font-weight: 500; }
+.scheda-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
+}
+.scheda-hash {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+  color: var(--muted);
+  font-size: var(--size-xs);
+}
+.scheda-hash-label { font-weight: 600; letter-spacing: 0.02em; }
+.scheda-hash code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--size-xs);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.scheda-hint { margin: var(--space-3) 0 0; color: var(--muted); font-size: var(--size-xs); }
 
 /* --- 5. controls and configurator ---------------------------------------- */
 .controls {

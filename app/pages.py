@@ -12,6 +12,8 @@
                 completion_choice  a sentence with a gap: the missing word is typed in, or
                                    chosen among four — the card itself says which, so one
                                    page can hold both and the reason comes after the answer
+                schede_list    not an exercise at all: the sheets to read and print, each
+                               behind a stable address, with the version it is
 
 A page binds a kind to a topic (and optionally a difficulty), because the same
 generator can be presented in different ways: reading a graph and completing one use
@@ -41,8 +43,13 @@ CLASSIFICATION_CHOICE = "classification_choice"
 # control under it, and the reason once the answer is given — and because a girl of ten
 # should not meet a different page for every way a word can be asked.
 COMPLETION_CHOICE = "completion_choice"
+# The one page that is not generated: it lists the sheets (`app/schede.py`) and offers
+# the PDFs. It is a page and not a separate mini-site because the operator reaches it from
+# the same menu as everything else, and because a page whose content is a folder must be
+# rebuilt on every push like the rest.
+SCHEDE_LIST = "schede_list"
 KINDS = (PROBLEM, GRAPH_READING, GRAPH_FILLING, MULTIPLE_CHOICE, CLASSIFICATION_CHOICE,
-         COMPLETION_CHOICE)
+         COMPLETION_CHOICE, SCHEDE_LIST)
 
 
 @dataclass(frozen=True)
@@ -168,9 +175,22 @@ PAGES: tuple[Page, ...] = (
     Page("tedesco-zahlen", "tedesco", "zahlen", COMPLETION_CHOICE,
          "german.zahlen", "easy", "page.tedesco.zahlen", 50, count=18,
          intro_key="intro.tedesco.zahlen"),
+    # --- Schede ---------------------------------------------------------------
+    # The sheets to read and print, in a section of their own: the operator asked for one
+    # place where the latest version of every sheet is always behind the same link, so the
+    # link he saved never rots. `topic` is empty because there is no generator behind it —
+    # the page reads `schede/schede.json`, and `/api/pages` lets a topic-less page through
+    # only for this kind.
+    Page("schede-matematica", "schede", "matematica", SCHEDE_LIST,
+         "", None, "page.schede.matematica", 10, intro_key="intro.schede"),
 )
 
-MACROS: tuple[str, ...] = ("matematica", "fisica", "english", "tedesco")
+MACROS: tuple[str, ...] = ("matematica", "fisica", "english", "tedesco", "schede")
+
+
+def is_available(page: Page, topics) -> bool:
+    """A page reaches the menu when its generator exists — or when it needs none."""
+    return page.kind == SCHEDE_LIST or page.topic in topics
 
 
 def subs(macro: str) -> list[str]:

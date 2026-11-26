@@ -20,6 +20,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          # full history: the version of a sheet is the commit that last touched its PDF
+          fetch-depth: 0
 
       - name: Install the libraries the rendering path needs
         # Pango/cairo/gdk-pixbuf are WeasyPrint's dependencies (the PDF renderer);
@@ -33,6 +36,14 @@ jobs:
           # Debian ships the binary as `nodejs`; the renderer looks for `node` on PATH
           command -v node >/dev/null || ln -s "$(command -v nodejs)" /usr/local/bin/node
           node --version
+
+      - name: Name the version of every sheet
+        # The same step the image job runs, here for the opposite reason: the suite asserts
+        # that the page's date and commit really are the ones of the last commit touching
+        # each PDF, and a shallow clone would find nothing to compare with. Running it
+        # before the tests means a version that cannot be named is a red pipeline, not a
+        # page that quietly loses its commit.
+        run: python scripts/schede_versions.py
 
       - name: Install the Python dependencies
         # Read from pyproject so the workflow and the image cannot drift apart.
@@ -65,6 +76,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          # The whole history: the version of a sheet is the commit that last changed its
+          # PDF, and that commit is usually not HEAD. On a shallow clone the step below
+          # would find nothing and the page would publish a sheet with no version.
+          fetch-depth: 0
+
+      - name: Name the version of every sheet
+        # Writes schede/versions.json (date + commit + sha256 per PDF) into the build
+        # context, where the Dockerfile copies it into the image: the running service has
+        # no .git, so this is the only place the answer can be found.
+        run: python3 scripts/schede_versions.py
 
       - name: Login to Docker Hub
         uses: docker/login-action@v4

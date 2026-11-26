@@ -8,12 +8,14 @@ copia-incolla di preambolo.
 ```
 schede/
 ├── schede.sty            ← LA LIBRERIA: palette, forme, radice, tabelle, testata
+├── schede.json           ← QUALI schede sono pubblicate sul sito (l'elenco della pagina)
+├── versions.json         ← scritto a ogni build: data, commit e sha256 (non si committa)
 ├── radicali/
 │   ├── Makefile          ← make radicali-1.pdf
 │   ├── radicali-1.tex    ← «I Radicali: Schema Visivo» (la scheda del modello)
-│   ├── radicali-1.pdf    ← compilata, pronta da guardare
+│   ├── radicali-1.pdf    ← compilata, pubblicata su /schede/radicali/radicali-1.pdf
 │   ├── radicali-2.tex    ← «I Radicali: Semplificazione» (riusa la libreria)
-│   └── radicali-2.pdf
+│   └── radicali-2.pdf    ← compilata, NON ancora pubblicata
 ├── prova-palette.sh      ← la prova che il blu si cambia in un punto solo
 └── README.md             ← questo file
 ```
@@ -117,8 +119,44 @@ cd schede
 ./prova-palette.sh
 ```
 
-## 6. Cosa NON è pubblicato
+## 6. Cosa finisce sul sito (`teaching.tazlab.net/schede/…`)
 
-Niente di questa cartella va su `teaching.tazlab.net`: nessun deploy, nessuna
-immagine Docker, nessun push su `master` da qui. I PDF si guardano in locale
-(e si scaricano dal repository) finché l'operatore non chiede il contrario.
+Le schede pubblicate si leggono e si scaricano da **`teaching.tazlab.net`**, sezione
+**Schede** del menu. Tre regole, e sono quelle che rendono il link affidabile:
+
+1. **Il nome del PDF è stabile.** Il link è sempre
+   `/schede/radicali/radicali-1.pdf`: chi lo salva nei preferiti ci torna e trova
+   **l'ultima versione**, perché una ricompilazione sostituisce i byte dietro lo stesso
+   indirizzo. Mai mettere la data nel nome del file: il link si romperebbe.
+2. **Si pubblica solo ciò che è dichiarato in `schede/schede.json`.** Un PDF compilato e
+   lasciato nella cartella non è pubblicato: pubblicare è una decisione, non un effetto
+   collaterale del copiare un file. Per pubblicare una scheda nuova si aggiunge una voce:
+
+   ```json
+   {"file": "radicali/radicali-1.pdf", "title": "I Radicali: Schema Visivo",
+    "subtitle": "Campo di esistenza e operazioni", "order": 10}
+   ```
+
+   La pagina le elenca tutte in ordine di `order`; le prossime compaiono da sole.
+3. **La pagina dice quale versione è**, perché il nome non può dirlo: `aggiornata al
+   2026-11-26, da c72747d` (data e commit dell'ultima modifica al PDF) e lo **sha256**
+   del file. Il numero viene da `schede/versions.json`, scritto a ogni build da
+   `scripts/schede_versions.py` con la storia git completa: l'immagine non ha `.git`, e
+   senza quel file la pagina potrebbe dire solo *compilata il …*.
+   `versions.json` **non si committa** (è nella `.gitignore`): è un prodotto della build.
+
+Quindi, per aggiornare una scheda già pubblicata:
+
+```sh
+cd schede/radicali && make radicali-1.pdf      # ricompila: il link resta lo stesso
+git add radicali-1.pdf && git commit && git push   # su master: il sito si aggiorna da solo
+```
+
+La data e il commit in pagina si aggiornano da soli alla build successiva, perché sono
+quelli dell'ultimo commit che ha toccato il PDF. Il sha256 è calcolato **sui byte
+serviti**: non può dichiarare un file diverso da quello che scarichi.
+
+I test che difendono tutto questo sono `tests/test_schede_page.py` (lato server: link
+stabile, sha256 servito uguale a quello dichiarato, PDF non dichiarati non serviti, data e
+commit uguali a quelli di git) e `web/test/schede.test.js` (lato pagina: menu, link,
+versione, sha256).

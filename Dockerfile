@@ -57,6 +57,11 @@ COPY app/ ./app/
 RUN pip install --no-cache-dir --no-deps .
 COPY --from=web /web/dist ./web/dist
 
+# The sheets the site publishes (app/schede.py). The PDFs keep their stable names: a
+# recompile replaces the bytes behind them, and `versions.json` — written in the workflow
+# before this build, because the image has no .git — says which version they are.
+COPY schede/ ./schede/
+
 # git sha of the image build, surfaced in the startup banner
 ARG GIT_SHA=unknown
 ENV TEACHING_GIT_SHA=${GIT_SHA}

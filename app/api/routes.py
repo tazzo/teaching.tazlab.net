@@ -30,7 +30,7 @@ from app.core.rng import make_rng
 from app.core.strings import load_strings
 from app.generators.base import Answer, Item, Step, wire_params
 from app.generators.registry import TOPICS
-from app.pages import MACROS, PAGES, pages_for, subs
+from app.pages import MACROS, PAGES, is_available, pages_for, subs
 
 router = APIRouter(prefix="/api")
 logger = logging.getLogger("teaching.api")
@@ -150,9 +150,10 @@ async def pages() -> PagesResponse:
 
     Pages whose topic is not in the registry are dropped silently: a page declaration
     can ship before its topic implementation lands, and an unfinished page does not
-    reach the menu.
+    reach the menu. A page that needs no generator (the sheets) is available by kind,
+    which is what keeps its missing topic from hiding it.
     """
-    available = [p for p in PAGES if p.topic in TOPICS]
+    available = [p for p in PAGES if is_available(p, TOPICS)]
     return PagesResponse(
         macros=[m for m in MACROS if any(p.macro == m for p in available)],
         subs={m: [s for s in subs(m) if pages_for(m, s)] for m in MACROS},

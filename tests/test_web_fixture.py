@@ -24,6 +24,7 @@ client = TestClient(app)
 FIXTURES = Path(__file__).resolve().parent.parent / "web" / "test" / "fixtures"
 PAGES = FIXTURES / "pages.json"
 ITEMS = FIXTURES / "items.json"
+SHEETS = FIXTURES / "schede.json"
 SEGMENTS = "physics.kinematics.segments"
 BASE = f"/api/generate?topic={SEGMENTS}&difficulty=medium&seed=20260924&count=1"
 REGENERATE = "python web/test/refresh_fixtures.py"
@@ -64,6 +65,18 @@ def test_the_items_the_frontend_suite_renders_are_the_ones_the_server_sends() ->
             f"web/test/fixtures/items.json[{name!r}] has drifted from {fixture['url']}. "
             f"Regenerate it with:\n  {REGENERATE}"
         )
+
+
+def test_the_sheets_the_frontend_suite_renders_are_the_ones_published() -> None:
+    """The sheets page is drawn from /api/schede: a stale fixture would certify a version
+    of a PDF the site no longer serves (the sha256 moves with the bytes)."""
+    assert SHEETS.exists(), f"missing frontend fixture; create it with:\n  {REGENERATE}"
+    fixture = json.loads(SHEETS.read_text(encoding="utf-8"))
+    assert fixture == client.get("/api/schede").json(), (
+        "web/test/fixtures/schede.json has drifted from /api/schede — a sheet was "
+        f"recompiled or republished. Regenerate it with:\n  {REGENERATE}"
+    )
+    assert fixture["schede"], "the fixture holds no sheet: the frontend suite would be vacuous"
 
 
 def test_the_values_the_browser_sends_are_ones_the_generator_accepts() -> None:

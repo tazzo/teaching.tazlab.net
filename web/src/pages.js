@@ -753,6 +753,60 @@ export function renderCompletionChoicePage(item, index, context) {
   return card;
 }
 
+/**
+ * kind: schede_list — the sheets, each behind its stable address.
+ *
+ * Not an exercise: nothing is generated and nothing is answered. One row per sheet with
+ * its link, and, under it, the version that link is serving today — the date, the commit
+ * and the sha256 of the bytes. The address never changes, so the version has to be said:
+ * without that line a saved link would be a promise nobody can check. `updated` with no
+ * `commit` is a real state (the PDF knows when it was compiled, git does not travel into
+ * the image) and it is said as "compilata il", never dressed up as a commit.
+ */
+export function renderSchedeList(schede, context) {
+  const t = translate(context?.strings);
+  const fill = (text, values) => text.replace(/\{(\w+)\}/g, (match, key) =>
+    (values[key] === undefined ? match : String(values[key])));
+
+  const list = el("ul", "schede-list");
+  schede.forEach((scheda) => {
+    const item = el("li", "scheda");
+    item.dataset.scheda = scheda.id;
+
+    item.append(el("h3", "scheda-title", scheda.title));
+    if (scheda.subtitle) item.append(el("p", "scheda-subtitle", scheda.subtitle));
+
+    // the version: the line that tells today's sheet from yesterday's
+    const meta = el("p", "scheda-meta");
+    const version = scheda.updated
+      ? (scheda.commit
+        ? fill(t("ui.schede_updated"), { date: scheda.updated, commit: scheda.commit })
+        : fill(t("ui.schede_compiled"), { date: scheda.updated }))
+      : t("ui.schede_undeclared");
+    meta.append(el("span", "scheda-version", version));
+    meta.append(el("span", "scheda-size",
+      fill(t("ui.schede_size"), { kb: Math.max(1, Math.round(scheda.bytes / 1024)) })));
+    item.append(meta);
+
+    // the link: the stable address, and it is a plain href on purpose — a PDF is not a
+    // route of this app, and `download` gives the file a name a teacher recognises
+    const actions = el("p", "scheda-actions");
+    const link = el("a", "btn btn-primary", t("ui.schede_open"));
+    link.href = scheda.url;
+    link.setAttribute("download", scheda.file.split("/").pop());
+    actions.append(link);
+
+    const hash = el("span", "scheda-hash");
+    hash.append(el("span", "scheda-hash-label", t("ui.schede_sha")));
+    hash.append(el("code", null, scheda.sha256));
+    actions.append(hash);
+    item.append(actions, el("p", "scheda-hint", t("ui.schede_verify")));
+
+    list.append(item);
+  });
+  return list;
+}
+
 const RENDERERS = {
   problem: renderProblemPage,
   graph_reading: renderGraphReadingPage,

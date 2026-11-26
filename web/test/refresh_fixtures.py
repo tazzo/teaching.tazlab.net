@@ -44,6 +44,10 @@ def write(name: str, payload: object) -> Path:
 def main() -> None:
     client = TestClient(app)
     write("pages.json", client.get("/api/pages").json())
+    # the sheets page's own list. It is a fixture like the others because the suite renders
+    # it: a recompiled sheet moves the sha256 and the version, and the pin in
+    # tests/test_web_fixture.py makes that show up instead of the page quietly changing.
+    write("schede.json", client.get("/api/schede").json())
 
     # the three figure modes a page can ask for: `hidden` is what a graph_filling page asks
     # for first, `full` the model it reveals, and `bare` the drawing alone a mill page shows.

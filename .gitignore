@@ -7,3 +7,5 @@ web/dist/
 *.log
 .DS_Store
 *.egg-info/
+# build artefact: written by scripts/schede_versions.py at image build time
+schede/versions.json
