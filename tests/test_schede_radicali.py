@@ -1,49 +1,52 @@
-"""La scheda dei radicali: una pagina, e dentro TUTTO quello che c'era.
+"""La scheda dei radicali: UNA pagina, tre sezioni, e le formule di entrambe.
 
-Perchè questo file esiste (26/11/2026). La scheda è stata compattata per farla
-stare in una pagina A4 e l'operatore ha detto: «adesso il PDF è una pagina sola
-ma mancano le formule che erano scritte nella seconda pagina». Il controllo che
-allora ha lasciato passare il difetto era un CONTEGGIO — le ``\\riga`` del
-``.tex`` (8) e le righe di ``pdftotext`` (50 prima, 50 dopo) — e un conteggio è
-cieco proprio ai due guasti che contano:
+PERCHÉ QUESTO FILE ESISTE (26/11/2026, rifatto). La scheda dei radicali ha una
+storia di difetti che hanno tutti la stessa forma: una formula che c'era e non
+c'è più, e un controllo che non se ne accorgeva.
 
-* una formula tolta DENTRO una riga: le righe restano 8 e le righe di testo
-  restano 50;
-* una formula che nel sorgente c'è e non viene DISEGNATA (colonna troppo
-  stretta, pagina che trabocca): il conteggio del sorgente non la vede, e nel
-  testo estratto non c'era mai stata.
+* il primo controllo contava le righe del ``.tex`` e le righe di
+  ``pdftotext``: una formula tolta DENTRO una riga non cambia nessuno dei due;
+* il secondo confrontava il testo con una NOSTRA versione precedente: se la
+  formula era già sparita prima, il confronto era verde — e la giornata è
+  andata persa a rifare la scheda sul PDF dell'operatore per scoprirlo;
+* il terzo misurava l'inchiostro per colonna: una formula tolta sposta i pixel
+  dell'1%, che sta dentro ogni tolleranza.
 
-Qui il confronto è sul CONTENUTO, in due strati, perchè questa scheda è metà
-testo e metà disegno:
+Qui il confronto è col **PDF originale dell'operatore** — il Chromium «Schema
+sui Radicali: Campo di Esistenza e Operazioni», 124364 byte, che sta in
+``tests/golden/schede/radicali-operatore.pdf`` e il cui sha256 è scritto qui
+sotto: se qualcuno lo scambia con una nostra compilazione, il test lo dice — e
+la misura è il **contenuto**, formula per formula:
 
-1. **il testo**: le lettere, le cifre e i simboli che ``pdftotext`` legge dal
-   PDF costruito devono essere ESATTAMENTE quelli della versione originale
-   (``tests/golden/schede/radicali-1-originale.txt``, presa dal PDF da 140290
-   byte del commit 7702236). Confronto come multinsieme di caratteri: uno
-   spostamento di una formula dentro la cella non fa fallire il test, una
-   formula che sparisce sì. Zero mancanti, zero in più.
-2. **l'inchiostro**: il segno di radice, le frecce e le forme sono TikZ —
-   nel testo non ci sono e non ci saranno mai. Per quelle il test misura i
-   pixel disegnati, colonna per colonna, e li confronta con l'originale
-   (``tests/golden/schede/radicali-1-originale.json``, che dice anche come
-   sono state misurate). La tolleranza è stretta apposta: cambiare la
-   spaziatura costa lo 0,1%, togliere una riga il 7,4%.
+1. **L'ELENCO DELLE FORMULE** (``FORMULE``): undici righe, ognuna con le due
+   celle di formula (schema ed esempio) e gli atomi di testo che quella
+   formula DEVE portare. Si controlla cella per cella, sulla scheda compilata
+   dal sorgente: un atomo mancante dice QUALE formula è monca.
+2. **IL DISEGNO**: le forme, il segno di radice e le frecce sono TikZ e nel
+   testo non ci sono. Per ognuna delle ventidue celle di formula si contano i
+   pixel disegnati a **200 dpi**: una cella piena ne ha centinaia, una cella
+   svuotata (o una formula che non viene disegnata perché non c'è spazio) ne
+   ha zero.
+3. **IL SUO PDF**: per le otto righe che vengono dalla sua scheda (campo di
+   esistenza e operazioni) le stesse misure si fanno sul PDF dell'operatore, e
+   si confrontano: le sue righe ci sono tutte, nello stesso ordine, gli atomi
+   che l'elenco dichiara ci sono anche nel suo, e l'inchiostro della nostra
+   cella sta dentro una banda dichiarata rispetto al suo. È il confronto che
+   mancava: col PDF SUO, non con una nostra versione.
 
-Il test costruisce la scheda DAL SORGENTE, non guarda il PDF committato: un
+Le ultime due prove sono le più importanti: **il controllo sa fallire**. Si
+toglie una riga dal sorgente e si svuota una cella, e si verifica che ENTRAMBI
+gli strati se ne accorgano. Un test che non può fallire non è una prova.
+
+Il test costruisce la scheda DAL SORGENTE e non guarda il PDF committato: un
 artefatto vecchio in repository non deve poter far passare un sorgente rotto —
-e c'è un test apposta che il PDF committato sia quello che il sorgente
-produce.
-
-Il terzo test è il più importante e si chiama "il controllo sa fallire": prende
-il ``.tex``, cancella la riga «Radice di radice» e verifica che il confronto
-del contenuto la veda. Un test che non può fallire non è una prova.
+e c'è un test apposta che il PDF committato sia quello che il sorgente produce.
 """
 
 from __future__ import annotations
 
 import collections
-import json
-import os
+import hashlib
 import re
 import shutil
 import subprocess
@@ -53,49 +56,145 @@ import pytest
 
 RADICE = Path(__file__).resolve().parents[1]
 SCHEDE = RADICE / "schede"
-SORGENTE = SCHEDE / "radicali" / "radicali-1.tex"
-COMMITTATO = SCHEDE / "radicali" / "radicali-1.pdf"
-ORIGINALE_TXT = RADICE / "tests" / "golden" / "schede" / "radicali-1-originale.txt"
-ORIGINALE_JSON = RADICE / "tests" / "golden" / "schede" / "radicali-1-originale.json"
+SORGENTE = SCHEDE / "radicali" / "radicali.tex"
+COMMITTATO = SCHEDE / "radicali" / "radicali.pdf"
 
-TOT_TESTO = 0.02      # 2% sul totale: una riga tolta pesa il 7,4%
-TOT_COLONNA = 0.04    # 4% per colonna: la colonna stretta pesa il 5,8%
+# IL PDF DELL'OPERATORE. Non è una nostra compilazione e non si tocca: è il
+# documento che la scheda deve riprodurre (campo di esistenza e operazioni).
+# 124364 byte, Chromium/Skia, «Schema sui Radicali: Campo di Esistenza e
+# Operazioni», caricato il 26/11/2026. Lo sha256 è qui perché un golden che
+# nessuno identifica è un golden che può diventare una copia di noi stessi.
+SUO_PDF = RADICE / "tests" / "golden" / "schede" / "radicali-operatore.pdf"
+SUO_SHA256 = "1f8c5cdf76061f82fc6831f9cca965868de577919a5bc6a6aac1c8b6874fe544"
 
-# Le colonne della tabella, in millimetri, come le fissa schede.sty
-# (\\schedaColonne{0.225}{0.40}{0.375} su una giustezza di 180 mm da 15 a 195).
-COLONNE_MM = ((15.0, 55.5), (55.5, 127.5), (127.5, 195.0))
+# Il numero di pagine: la richiesta dell'operatore, e il vincolo della scheda.
+PAGINE = 1
 
-# L'inventario, per NOME: se una riga sparisce, il test dice quale. I frammenti
-# sono quelli che il testo estratto contiene davvero (le forme e le frecce sono
-# disegnate, e le vede l'altro test).
-RIGHE = (
-    "Indice pari",
-    "Indice dispari",
-    "Più radici pari",
-    "Somma e sottrazione",
-    "Prodotto",
-    "Divisione",
-    "Potenza di radice",
-    "Radice di radice",
-)
+# Le tre sezioni, nell'ordine in cui si studiano.
 SEZIONI = (
     "1. Campo di Esistenza (CE)",
     "2. Operazioni con i Radicali (Casi Semplici)",
+    "3. Semplificazione: la Proprietà Invariantiva",
 )
-INTESTAZIONI = (
-    "Tipo di radice",
-    "Schema visivo",
-    "Esempio",
-    "Operazione",
-    "Schema visivo (stesso indice n)",
+
+# ---------------------------------------------------------------------------
+# L'ELENCO DELLE FORMULE, una per una.
+#
+# Per ogni riga: il titolo della cella «voce» (il testo che si legge a
+# sinistra), la sezione, e — per le due celle di formula — gli atomi che il
+# testo estratto DEVE portare. Gli atomi sono quelli che nel PDF sono CARATTERI:
+# le forme, il segno di radice e le frecce sono disegnati (li misura il test
+# dell'inchiostro), quindi non si possono pretendere nel testo.
+#
+# `dal_suo`: la formula viene dal PDF dell'operatore (sezioni 1 e 2) e va
+# confrontata con lui. Senza il segno, viene dalla seconda scheda (la
+# semplificazione), che l'operatore ci ha chiesto di fondere qui.
+# ---------------------------------------------------------------------------
+FORMULE = (
+    # --- 1. Campo di esistenza ---------------------------------------------
+    {
+        "voce": "Indice pari",
+        "sezione": 1,
+        "dal_suo": True,
+        "schema": ("≥", "0"),
+        "esempio": ("≥", "0", "4"),
+        "perche": "radice di indice pari: il radicando deve essere ≥ 0",
+    },
+    {
+        "voce": "Indice dispari",
+        "sezione": 1,
+        "dal_suo": True,
+        "schema": ("∀", "∈", "x"),
+        "esempio": ("∀", "∈", "x", "5"),
+        "perche": "indice dispari: nessuna condizione, vale per ogni x",
+    },
+    {
+        "voce": "Più radici pari",
+        "sezione": 1,
+        "dal_suo": True,
+        "schema": ("≥", "0"),
+        "esempio": ("≥", "0", "4"),
+        "perche": "due radici pari: un sistema di condizioni, una per radice",
+    },
+    # --- 2. Operazioni ------------------------------------------------------
+    {
+        "voce": "Somma e sottrazione",
+        "sezione": 2,
+        "dal_suo": True,
+        "schema": ("±", "(", ")", "a", "b", "n"),
+        "esempio": ("+", "=", "−", "3", "5", "8"),
+        "perche": "radicali simili: i coefficienti si sommano",
+    },
+    {
+        "voce": "Prodotto",
+        "sezione": 2,
+        "dal_suo": True,
+        "schema": ("n",),
+        "esempio": ("=", "3"),
+        "perche": "prodotto di radici con lo stesso indice",
+    },
+    {
+        "voce": "Divisione",
+        "sezione": 2,
+        "dal_suo": True,
+        "schema": ("n", ":", "0", "≠"),
+        "esempio": (":", "=", "4"),
+        "perche": "quoziente di radici, con la condizione ▲ ≠ 0",
+    },
+    {
+        "voce": "Potenza di radice",
+        "sezione": 2,
+        "dal_suo": True,
+        "schema": ("(", ")", "k", "n"),
+        "esempio": ("(", ")", "=", "2", "4"),
+        "perche": "potenza di una radice e potenza del coefficiente",
+    },
+    {
+        "voce": "Radice di radice",
+        "sezione": 2,
+        "dal_suo": True,
+        "schema": ("m", "n"),
+        "esempio": ("=", "3", "2", "6"),
+        "perche": "radice di radice: gli indici si moltiplicano",
+    },
+    # --- 3. Semplificazione -------------------------------------------------
+    {
+        "voce": "Semplificare l'indice",
+        "sezione": 3,
+        "dal_suo": False,
+        "schema": ("n", "k"),
+        "esempio": ("=", "6", "3", "2"),
+        "perche": "proprietà invariantiva: indice ed esponente divisi per k",
+    },
+    {
+        "voce": "Portar fuori",
+        "sezione": 3,
+        "dal_suo": False,
+        "schema": ("n",),
+        "esempio": ("=", "3"),
+        "perche": "il fattore che ha esponente uguale all'indice esce",
+    },
+    {
+        "voce": "Portar dentro",
+        "sezione": 3,
+        "dal_suo": False,
+        "schema": ("n",),
+        "esempio": ("=", "2"),
+        "perche": "il fattore davanti rientra elevato all'indice",
+    },
 )
-# Gli atomi di formula che il testo estratto porta: le disuguaglianze e i
-# quantificatori di OGNI riga. Contati, non solo cercati: due «∀x ∈ R» sono
-# l'indice dispari e il suo esempio, e se ne resta uno il test lo dice.
-ATOMI = {"≥": 6, "∀": 2, "∈": 2}
-# Il «≠» della divisione non è un carattere: nel PDF è U+0338 (la barra
-# sovrapposta) accanto a «=», e nel testo estratto è una barra da sola.
-SBARRATO = "\u0338"
+
+# Il minimo di pixel disegnati (a 200 dpi) sotto il quale una cella di formula
+# è VUOTA: una formula vera ne ha centinaia (la più magra, il «Prodotto», ne ha
+# 2900), una cella svuotata ne tiene zero — i filetti della tabella stanno
+# fuori dalla banda della riga, e non contano.
+MINIMO_CELLA = 600
+
+# Quanto può valere l'inchiostro della nostra cella rispetto a quella del suo
+# PDF: la nostra scheda è un RIFACIMENTO (font, spaziature, indici disegnati a
+# mano) e non sarà mai identica. Una formula che sparisce scende a zero, che è
+# sotto la banda; una che cambia forma resta dentro.
+RAPPORTO_MIN, RAPPORTO_MAX = 0.25, 4.0
 
 
 # ------------------------------------------------------------------ strumenti
@@ -112,11 +211,11 @@ def costruisci(destinazione: Path, testo: str | None = None) -> Path:
     _serve("pdflatex")
     destinazione.mkdir(parents=True, exist_ok=True)
     sorgente = testo if testo is not None else SORGENTE.read_text(encoding="utf-8")
-    (destinazione / "radicali-1.tex").write_text(sorgente, encoding="utf-8")
-    ambiente = {**os.environ, "TEXINPUTS": f".:{SCHEDE}:"}
-    for _ in range(2):  # due passate: la seconda serve al «Pagina n di N»
+    (destinazione / "radicali.tex").write_text(sorgente, encoding="utf-8")
+    ambiente = {**os_environ(), "TEXINPUTS": f".:{SCHEDE}:"}
+    for _ in range(2):  # due passate: la seconda serve al «Pagina n di N» del piede
         esito = subprocess.run(
-            ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "radicali-1.tex"],
+            ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "radicali.tex"],
             cwd=destinazione,
             env=ambiente,
             capture_output=True,
@@ -125,7 +224,13 @@ def costruisci(destinazione: Path, testo: str | None = None) -> Path:
         if esito.returncode != 0:
             coda = "\n".join(esito.stdout.splitlines()[-15:])
             pytest.fail(f"pdflatex è uscito {esito.returncode}:\n{coda}")
-    return destinazione / "radicali-1.pdf"
+    return destinazione / "radicali.pdf"
+
+
+def os_environ() -> dict[str, str]:
+    import os
+
+    return dict(os.environ)
 
 
 def estrai_testo(pdf: Path) -> str:
@@ -136,12 +241,7 @@ def estrai_testo(pdf: Path) -> str:
 
 
 def caratteri(contenuto: str) -> collections.Counter[str]:
-    """Il contenuto come multinsieme di caratteri: gli spazi (e gli a-capo) fuori.
-
-    Il riempimento delle celle, l'interruzione di una formula su due righe e il
-    margine spostato cambiano gli spazi e non il contenuto: devono passare. Una
-    formula tolta cambia questo conteggio, sempre.
-    """
+    """Il contenuto come multinsieme di caratteri: gli spazi (e gli a-capo) fuori."""
     return collections.Counter(c for c in contenuto.replace("\u00a0", " ") if not c.isspace())
 
 
@@ -153,10 +253,37 @@ def pagine(pdf: Path) -> int:
     return int(trovato.group(1))
 
 
-def _pgm(percorso: Path) -> tuple[int, int, bytes]:
-    """Legge un PGM grezzo (P5): larghezza, altezza, i pixel, uno per byte."""
-    dati = percorso.read_bytes()
-    assert dati[:2] == b"P5", f"pdftoppm ha scritto {dati[:2]!r}, non un PGM grezzo (P5)"
+def pagine_e_parole(pdf: Path) -> tuple[float, float, list[tuple[str, float, float, float, float]]]:
+    """Il lato della pagina e le parole con la loro posizione (pdftotext -bbox)."""
+    _serve("pdftotext")
+    esito = subprocess.run(["pdftotext", "-bbox", str(pdf), "-"], capture_output=True, text=True)
+    assert esito.returncode == 0, esito.stderr
+    pagina = re.search(r'<page width="([\d.]+)" height="([\d.]+)">', esito.stdout)
+    assert pagina, "pdftotext -bbox non ha dichiarato la pagina"
+    larghezza, altezza = float(pagina.group(1)), float(pagina.group(2))
+    parole = [
+        (m.group(5), float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4)))
+        for m in re.finditer(
+            r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>',
+            esito.stdout,
+        )
+    ]
+    return larghezza, altezza, parole
+
+
+def _ppm(pdf: Path, cartella: Path, dpi: int) -> tuple[int, int, bytes]:
+    """La pagina resa in un PPM grezzo (P6): larghezza, altezza e i pixel RGB."""
+    _serve("pdftoppm")
+    cartella.mkdir(parents=True, exist_ok=True)
+    base = cartella / f"scheda-{dpi}"
+    esito = subprocess.run(
+        ["pdftoppm", "-r", str(dpi), "-singlefile", str(pdf), str(base)],
+        capture_output=True,
+        text=True,
+    )
+    assert esito.returncode == 0, esito.stderr
+    dati = base.with_suffix(".ppm").read_bytes()
+    assert dati[:2] == b"P6", f"pdftoppm ha scritto {dati[:2]!r}, non un PPM grezzo (P6)"
     campi: list[int] = []
     posizione = 2
     while len(campi) < 3:
@@ -172,48 +299,116 @@ def _pgm(percorso: Path) -> tuple[int, int, bytes]:
         campi.append(int(dati[inizio:posizione]))
     posizione += 1  # un solo spazio dopo il massimo
     larghezza, altezza, massimo = campi
-    assert massimo < 256, f"PGM a {massimo} livelli: atteso 8 bit per pixel"
-    pixel = dati[posizione : posizione + larghezza * altezza]
-    assert len(pixel) == larghezza * altezza, "PGM troncato: i pixel non tornano"
+    assert massimo < 256, f"PPM a {massimo} livelli: atteso 8 bit per canale"
+    pixel = dati[posizione : posizione + larghezza * altezza * 3]
+    assert len(pixel) == larghezza * altezza * 3, "PPM troncato: i pixel non tornano"
     return larghezza, altezza, pixel
 
 
-def inchiostro(pdf: Path, cartella: Path) -> dict[str, object]:
-    """I pixel disegnati, per colonna della tabella (grigio, 60 dpi)."""
-    _serve("pdftoppm")
-    cartella.mkdir(parents=True, exist_ok=True)
-    base = cartella / "scheda"
-    esito = subprocess.run(
-        ["pdftoppm", "-r", "60", "-singlefile", "-gray", str(pdf), str(base)],
-        capture_output=True,
-        text=True,
-    )
-    assert esito.returncode == 0, esito.stderr
-    larghezza, altezza, pixel = _pgm(base.with_suffix(".pgm"))
-    per_mm = larghezza / 210.0  # A4 in orizzontale: 210 mm
+def _filetti(pixel: bytes, larghezza: int, altezza: int, x0: int, x1: int) -> list[tuple[int, int]]:
+    """Le righe di separazione della tabella: scure da bordo a bordo, non testo.
 
-    def conta(x0: float, x1: float) -> int:
-        a, b = int(x0 * per_mm), int(x1 * per_mm)
-        return sum(
-            1
-            for y in range(altezza)
-            for i in range(a, b)
-            if pixel[y * larghezza + i] < 200
+    Servono a due cose, e tutte e due contano: delimitano le RIGHE (una banda per
+    riga, trovata dal disegno e non da un numero scritto a mano) e non vanno
+    contate come inchiostro di una formula.
+    """
+    soglia = 0.93 * (x1 - x0)
+    marche = [
+        y
+        for y in range(altezza)
+        if sum(1 for k in range(x0 * 3, x1 * 3, 3) if pixel[y * larghezza * 3 + k] < 250) > soglia
+    ]
+    gruppi: list[list[int]] = []
+    for y in marche:
+        if gruppi and y - gruppi[-1][-1] <= 3:
+            gruppi[-1].append(y)
+        else:
+            gruppi.append([y])
+    return [(gruppo[0], gruppo[-1]) for gruppo in gruppi]
+
+
+def _misura(
+    pdf: Path,
+    cartella: Path,
+    formule: tuple[dict[str, object], ...] = FORMULE,
+    dpi: int = 200,
+    tollera_mancanti: bool = False,
+) -> dict[str, dict[str, object]]:
+    """Per ogni riga dell'elenco: il testo delle tre celle e l'inchiostro delle due formule.
+
+    La riga si trova DAL PDF — la posizione della parola che apre la cella
+    «voce» — dentro la banda delimitata dai filetti della tabella: se una riga
+    si sposta o si allunga, la misura la segue invece di misurare il vuoto o la
+    riga di sotto. Le colonne si trovano dalle intestazioni («Schema…» ed
+    «Esempio»), così la stessa misura vale per il nostro PDF e per quello
+    dell'operatore, che hanno margini diversi.
+    """
+    larghezza_pt, _altezza_pt, parole = pagine_e_parole(pdf)
+    larghezza, altezza, pixel = _ppm(pdf, cartella, dpi)
+    per_pt = larghezza / larghezza_pt  # pixel per punto tipografico
+
+    # Il bordo della tabella: le colonne che hanno inchiostro per almeno il 2%
+    # dell'altezza. Fuori da lì c'è il margine della pagina.
+    colonne = [
+        sum(1 for y in range(altezza) if pixel[(y * larghezza + x) * 3] < 200)
+        for x in range(larghezza)
+    ]
+    x0 = min(x for x, quante in enumerate(colonne) if quante > altezza * 0.02)
+    x1 = max(x for x, quante in enumerate(colonne) if quante > altezza * 0.02)
+    filetti = _filetti(pixel, larghezza, altezza, x0, x1)
+    bande = [(filetti[i][1], filetti[i + 1][0]) for i in range(len(filetti) - 1)]
+
+    def intestazione(parola: str) -> float:
+        for testo, x, _y0, _x1, _y1 in parole:
+            if testo.lower().startswith(parola):
+                return x * per_pt
+        raise AssertionError(f"manca l'intestazione «{parola}»: le colonne non si possono misurare")
+
+    c1, c2 = intestazione("schema"), intestazione("esempio")
+    limiti = (x0, c1, c2, x1)
+
+    precedente = -1.0
+    misure: dict[str, dict[str, object]] = {}
+    for formula in formule:
+        prima = str(formula["voce"]).split()[0]
+        candidate = sorted(
+            y for testo, _x, y, _x1, _y1 in parole if testo == prima and y > precedente
         )
+        if not candidate:
+            assert tollera_mancanti, f"manca la riga «{formula['voce']}» nel testo estratto"
+            continue
+        y = candidate[0]
+        precedente = y
+        banda = [(a, b) for a, b in bande if a < y * per_pt < b]
+        assert banda, f"la riga «{formula['voce']}» non sta in nessuna banda della tabella"
+        a, b = banda[0]
 
-    colonne = [conta(*colonna) for colonna in COLONNE_MM]
-    return {"colonne": colonne, "totale": sum(colonne), "righe": altezza, "larghezza": larghezza}
+        def testo_cella(xa: float, xb: float) -> str:
+            # «≠» nel PDF è «=» con la barra sovrapposta (U+0338), e il testo
+            # estratto porta la barra da sola: qui le due grafie diventano una,
+            # così la stessa dichiarazione vale per il nostro PDF e per il suo.
+            return " ".join(
+                testo
+                for testo, px0, py0, px1, py1 in parole
+                if xa <= (px0 + px1) / 2 * per_pt < xb and a < (py0 + py1) / 2 * per_pt < b
+            ).replace("\u0338", "≠")
 
+        def inchiostro(xa: float, xb: float) -> int:
+            return sum(
+                1
+                for riga in range(a + 1, b)
+                for k in range(int(xa) * 3, int(xb) * 3, 3)
+                if pixel[riga * larghezza * 3 + k] < 200
+            )
 
-def differenza(originale: collections.Counter[str], nuovo: collections.Counter[str]) -> str:
-    mancanti = {c: n for c, n in (originale - nuovo).items()}
-    in_piu = {c: n for c, n in (nuovo - originale).items()}
-    righe = []
-    if mancanti:
-        righe.append(f"NON c'è più (carattere × quante volte manca): {mancanti}")
-    if in_piu:
-        righe.append(f"c'è in più: {in_piu}")
-    return "\n".join(righe)
+        misure[formula["voce"]] = {
+            "celle": tuple(testo_cella(limiti[i], limiti[i + 1]) for i in range(3)),
+            "inchiostro": tuple(inchiostro(limiti[i], limiti[i + 1]) for i in (1, 2)),
+            "caratteri": tuple(
+                caratteri(testo_cella(limiti[i], limiti[i + 1])) for i in (1, 2)
+            ),
+        }
+    return misure
 
 
 @pytest.fixture(scope="module")
@@ -222,291 +417,170 @@ def scheda(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture(scope="module")
-def originale() -> collections.Counter[str]:
-    return caratteri(ORIGINALE_TXT.read_text(encoding="utf-8"))
+def nostro(scheda: Path, tmp_path_factory: pytest.TempPathFactory) -> dict[str, dict[str, object]]:
+    return _misura(scheda, tmp_path_factory.mktemp("misura"))
+
+
+@pytest.fixture(scope="module")
+def suo(tmp_path_factory: pytest.TempPathFactory) -> dict[str, dict[str, object]]:
+    """Le stesse misure sul PDF dell'operatore: è il termine di confronto."""
+    return _misura(
+        SUO_PDF, tmp_path_factory.mktemp("suo"), tuple(f for f in FORMULE if f["dal_suo"])
+    )
 
 
 # --------------------------------------------------------------------- le prove
 
 
+def test_il_golden_e_il_pdf_dell_operatore() -> None:
+    """Il termine di confronto è SUO, e si sa quale: 124364 byte, Chromium."""
+    assert SUO_PDF.exists(), "manca il PDF dell'operatore in tests/golden/schede/"
+    byte = SUO_PDF.read_bytes()
+    assert len(byte) == 124364, f"il PDF dell'operatore sono {len(byte)} byte, non 124364"
+    assert hashlib.sha256(byte).hexdigest() == SUO_SHA256, (
+        "questo non è il PDF dell'operatore: è stato sostituito (con una nostra "
+        "compilazione?). Il confronto deve essere col suo, non con una versione nostra"
+    )
+    assert b"/Skia" in byte or b"Chromium" in byte, "il PDF dell'operatore è uscito da Chromium"
+
+
 def test_la_scheda_sta_in_una_pagina(scheda: Path) -> None:
     """Una pagina A4: è la richiesta dell'operatore, e il vincolo della scheda."""
-    assert pagine(scheda) == 1, "la scheda è tornata su più fogli"
+    assert pagine(scheda) == PAGINE, "la scheda non sta in una pagina"
 
 
-# Il 26/11/2026 la formula «Potenza di radice» è stata ridisegnata come quella
-# dell'esempio dell'operatore: le parentesi sono a corpo testo, non più
-# `\left( \right)` — che nel PDF diventavano due delimitatori alti quanto la
-# radice, con l'esponente staccato in cima e due glifi privati (U+0012, U+0013)
-# e due «!» nel testo estratto. La differenza è tutta qui, ed è dichiarata:
-# tre coppie di tonde in più, quei quattro caratteri in meno. Tutto il resto
-# deve restare identico all'originale: se cambia, il test lo dice.
-DELTA_VOLUTO = collections.Counter({"(": 3, ")": 3})
-DELTA_TOLTO = collections.Counter({"\x12": 1, "\x13": 1, "!": 2})
-
-
-def test_il_testo_e_quello_dell_originale(scheda: Path, originale: collections.Counter[str]) -> None:
-    """Zero caratteri mancanti e zero in più rispetto alla versione originale."""
-    nuovo = caratteri(estrai_testo(scheda))
-    assert nuovo + DELTA_TOLTO == originale + DELTA_VOLUTO, (
-        "il contenuto della scheda è cambiato rispetto all'originale (140290 B, commit 7702236):\n"
-        + differenza(originale, nuovo)
-        + "\nSe il cambio è voluto: SCHEDE_UPDATE_GOLDEN=1 pytest tests/test_schede_radicali.py"
-    )
-
-
-def test_ogni_riga_e_ogni_formula_ha_il_suo_nome(scheda: Path) -> None:
-    """Le due sezioni, le otto righe, le intestazioni e gli atomi di formula.
-
-    Un errore qui dice QUALE riga o QUALE formula manca, invece di far leggere
-    un diff di caratteri.
-    """
+def test_le_tre_sezioni_ci_sono_e_in_ordine(scheda: Path) -> None:
+    """Campo di esistenza, operazioni, semplificazione: le tre, nell'ordine."""
     contenuto = estrai_testo(scheda)
+    posizioni = []
     for sezione in SEZIONI:
         assert sezione in contenuto, f"manca la sezione «{sezione}»"
-    for intestazione in INTESTAZIONI:
-        assert intestazione in contenuto, f"manca l'intestazione «{intestazione}»"
-    for riga in RIGHE:
-        assert riga in contenuto, f"manca la riga «{riga}»"
-    for atomo, quante in ATOMI.items():
-        assert contenuto.count(atomo) == quante, (
-            f"«{atomo}» compare {contenuto.count(atomo)} volte invece di {quante}: "
-            "una formula che lo conteneva non c'è più"
-        )
-    assert contenuto.count(SBARRATO) == 1, (
-        "manca la condizione della divisione «▲ ≠ 0»: la barra sovrapposta non c'è "
-        f"({contenuto.count(SBARRATO)} volte invece di 1)"
-    )
+        posizioni.append(contenuto.index(sezione))
+    assert posizioni == sorted(posizioni), "le tre sezioni non sono nell'ordine in cui si studiano"
 
 
-def test_la_scheda_disegna_quanto_l_originale(scheda: Path, tmp_path: Path) -> None:
-    """Le formule disegnate (radice, frecce, forme) non sono testo: si contano i pixel."""
-    atteso = json.loads(ORIGINALE_JSON.read_text(encoding="utf-8"))
-    misurato = inchiostro(scheda, tmp_path)
-    assert misurato["righe"] == atteso["righe"] and misurato["larghezza"] == atteso["larghezza"], (
-        "la pagina non è più A4 a 60 dpi come quando è stato misurato l'originale: "
-        f"{misurato['larghezza']}x{misurato['righe']} invece di "
-        f"{atteso['larghezza']}x{atteso['righe']}"
-    )
-    for numero, (avuto, voluto) in enumerate(zip(misurato["colonne"], atteso["colonne"]), start=1):
-        scarto = abs(avuto - voluto) / voluto
-        assert scarto <= TOT_COLONNA, (
-            f"colonna {numero}: {avuto} pixel disegnati invece di {voluto} "
-            f"({scarto:.1%} di scarto, il tetto è {TOT_COLONNA:.0%}) — una formula disegnata non c'è più"
-        )
-    scarto = abs(misurato["totale"] - atteso["totale"]) / atteso["totale"]
-    assert scarto <= TOT_TESTO, (
-        f"inchiostro totale {misurato['totale']} invece di {atteso['totale']} ({scarto:.1%})"
-    )
+def test_ogni_formula_porta_i_suoi_atomi(nostro: dict[str, dict[str, object]]) -> None:
+    """L'elenco, formula per formula: ogni cella porta gli atomi che quella formula è.
+
+    Un errore qui dice QUALE formula è monca e che cosa le manca, invece di far
+    leggere un diff di caratteri.
+    """
+    guasti = []
+    for formula in FORMULE:
+        misura = nostro[formula["voce"]]
+        celle = misura["celle"]
+        for indice, chiave in ((1, "schema"), (2, "esempio")):
+            for atomo in formula[chiave]:
+                if atomo not in celle[indice]:
+                    guasti.append(
+                        f"riga «{formula['voce']}» ({formula['perche']}), cella «{chiave}»: "
+                        f"manca «{atomo}» — la cella dice {celle[indice]!r}"
+                    )
+    assert not guasti, "formule monche:\n" + "\n".join(guasti)
+
+
+def test_ogni_formula_e_disegnata(nostro: dict[str, dict[str, object]]) -> None:
+    """Le ventidue celle di formula hanno il loro disegno, a 200 dpi.
+
+    È lo strato che il testo non può vedere: il segno di radice, le frecce e le
+    forme sono TikZ. Una formula che c'è nel sorgente ma non viene disegnata
+    (colonna troppo stretta, pagina che trabocca) qui si vede.
+    """
+    vuote = [
+        f"riga «{formula['voce']}», cella {'schema' if i == 1 else 'esempio'}: "
+        f"{nostro[formula['voce']]['inchiostro'][i - 1]} pixel disegnati"
+        for formula in FORMULE
+        for i in (1, 2)
+        if nostro[formula["voce"]]["inchiostro"][i - 1] < MINIMO_CELLA
+    ]
+    assert not vuote, "celle di formula senza disegno (una formula non è stata disegnata):\n" + "\n".join(vuote)
+
+
+def test_le_formule_del_suo_pdf_ci_sono_tutte(
+    nostro: dict[str, dict[str, object]], suo: dict[str, dict[str, object]]
+) -> None:
+    """Confronto col PDF DELL'OPERATORE, riga per riga: le sue otto righe, e i suoi atomi.
+
+    Non è un confronto con una nostra versione precedente — è il difetto che ha
+    fatto perdere la giornata del 26/11. Ogni riga della sua scheda deve esserci,
+    portare gli stessi atomi di testo, e avere inchiostro nella stessa banda:
+    una formula che nella fusione si è persa si vede qui, con il suo nome.
+    """
+    sue = [f for f in FORMULE if f["dal_suo"]]
+    assert len(sue) == 8, f"le righe che vengono dal suo PDF dovrebbero essere 8, sono {len(sue)}"
+    guasti = []
+    for formula in sue:
+        nome = formula["voce"]
+        assert nome in suo, f"la riga «{nome}» non si trova nel PDF dell'operatore"
+        suo_testo = " ".join(suo[nome]["celle"])
+        for indice, chiave in ((1, "schema"), (2, "esempio")):
+            for atomo in formula[chiave]:
+                if atomo not in suo_testo:
+                    guasti.append(
+                        f"l'elenco dichiara «{atomo}» per «{nome}»/{chiave}, "
+                        "ma nel PDF dell'operatore non c'è: l'elenco non descrive il suo documento"
+                    )
+            suo_inchiostro = suo[nome]["inchiostro"][indice - 1]
+            nostro_inchiostro = nostro[nome]["inchiostro"][indice - 1]
+            if suo_inchiostro <= 0:
+                continue
+            rapporto = nostro_inchiostro / suo_inchiostro
+            if not RAPPORTO_MIN <= rapporto <= RAPPORTO_MAX:
+                guasti.append(
+                    f"riga «{nome}»/{chiave}: la nostra cella disegna {nostro_inchiostro} pixel "
+                    f"contro i {suo_inchiostro} del suo PDF (rapporto {rapporto:.2f}, "
+                    f"la banda è {RAPPORTO_MIN}–{RAPPORTO_MAX})"
+                )
+    assert not guasti, "il confronto col PDF dell'operatore non torna:\n" + "\n".join(guasti)
 
 
 def test_il_pdf_committato_e_quello_che_il_sorgente_produce(scheda: Path) -> None:
-    """Il PDF in repository non deve essere un artefatto vecchio.
-
-    Il difetto del 26/11 è passato anche perché si guardava un PDF che non era
-    quello del sorgente: qui i due contenuti devono coincidere.
-    """
-    assert COMMITTATO.exists(), "manca schede/radicali/radicali-1.pdf (make in schede/radicali)"
+    """Il PDF in repository non deve essere un artefatto vecchio."""
+    assert COMMITTATO.exists(), "manca schede/radicali/radicali.pdf (make in schede/radicali)"
     committato = caratteri(estrai_testo(COMMITTATO))
     dal_sorgente = caratteri(estrai_testo(scheda))
     assert committato == dal_sorgente, (
         "il PDF committato non è quello che il .tex produce — ricompila con "
-        "`make -C schede/radicali`:\n" + differenza(dal_sorgente, committato)
+        "`make -C schede/radicali`"
     )
 
 
-def test_il_controllo_sa_fallire(tmp_path: Path) -> None:
-    """Il controllo che ha lasciato passare il difetto non sapeva fallire: questo sì.
+def test_il_confronto_col_suo_pdf_sa_fallire(
+    tmp_path: Path, suo: dict[str, dict[str, object]]
+) -> None:
+    """Tolta una riga dal sorgente, il confronto col suo PDF la nomina.
 
-    Si toglie una riga intera («Radice di radice», la formula più annidata) dal
-    sorgente, si ricompila, e si verifica che ENTRAMBI gli strati la vedano: il
-    testo e l'inchiostro. Se questo test passasse, il confronto sarebbe cieco.
+    Si toglie «Radice di radice» — la formula più annidata — e si ricompila: la
+    misura deve perdere la riga (il confronto riga per riga non la trova più).
+    Se questo test passasse, il confronto sarebbe cieco.
     """
     sorgente = SORGENTE.read_text(encoding="utf-8")
     inizio = sorgente.index("\\riga{\\voce{Radice di radice}")
     fine = sorgente.index("\\end{schedaTabella}", inizio)
     mutilato = sorgente[:inizio] + sorgente[fine:]
-    assert "Radice di radice" not in mutilato  # la riga è davvero andata
+    assert "Radice di radice" not in mutilato, "la riga non è stata tolta dal sorgente"
 
     pdf = costruisci(tmp_path / "mutilato", mutilato)
-    assert pagine(pdf) == 1, "togliendo una riga la scheda deve stare in una pagina comunque"
-
-    originale = caratteri(ORIGINALE_TXT.read_text(encoding="utf-8"))
-    nuovo = caratteri(estrai_testo(pdf))
-    assert nuovo != originale, (
-        "tolta la riga «Radice di radice» il confronto del testo non se n'è accorto: "
-        "è lo stesso controllo cieco del 26/11 (contava le righe, non il contenuto)"
-    )
-
-    atteso = json.loads(ORIGINALE_JSON.read_text(encoding="utf-8"))
-    misurato = inchiostro(pdf, tmp_path / "mutilato")
-    scarto = (atteso["totale"] - misurato["totale"]) / atteso["totale"]
-    assert scarto > TOT_TESTO, (
-        f"tolta la riga «Radice di radice» l'inchiostro è calato solo del {scarto:.1%}: "
-        "la misura dei pixel non se ne accorgerebbe"
+    assert pagine(pdf) == 1, "tolta una riga la scheda deve stare in una pagina comunque"
+    misure = _misura(pdf, tmp_path / "misura-mutilata", tollera_mancanti=True)
+    assert "Radice di radice" not in misure, (
+        "tolta la riga «Radice di radice» la misura l'ha ancora trovata: "
+        "è lo stesso controllo cieco del 26/11"
     )
 
 
-def test_il_golden_si_aggiorna_solo_apposta(tmp_path: Path) -> None:
-    """Il golden si riscrive con SCHEDE_UPDATE_GOLDEN=1, e lo dice.
-
-    Serve a chi cambia la scheda apposta: senza questo, «rifai il golden» è un
-    comando che nessuno sa.
-    """
-    if os.environ.get("SCHEDE_UPDATE_GOLDEN") != "1":
-        pytest.skip("si aggiorna solo con SCHEDE_UPDATE_GOLDEN=1")
-    pdf = costruisci(tmp_path)
-    ORIGINALE_TXT.write_text(estrai_testo(pdf), encoding="utf-8")
-    misurato = inchiostro(pdf, tmp_path / "inchiostro")
-    atteso = {"colonne": misurato["colonne"], "totale": misurato["totale"],
-              "righe": misurato["righe"], "larghezza": misurato["larghezza"]}
-    ORIGINALE_JSON.write_text(
-        json.dumps({**json.loads(ORIGINALE_JSON.read_text(encoding="utf-8")), **atteso},
-                   ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-
-
-# ------------------------------------------- l'inchiostro, CELLA per CELLA
-#
-# Il 26/11 il difetto è passato due volte di fila, e la seconda volta con un
-# test dell'inchiostro già verde: quel test misurava i pixel per COLONNA. Una
-# formula tolta dentro una cella sposta l'inchiostro di una colonna dell'1%, che
-# sta dentro ogni tolleranza ragionevole; e il testo non la vede mai, perché il
-# segno di radice e le frecce sono disegnati e non sono caratteri. Qui la misura
-# scende a una cella per volta: otto righe per due colonne di formula, sedici
-# riquadri, e ognuno deve avere il suo inchiostro.
-
-# Le righe che portano formule, nell'ordine in cui compaiono; la chiave è la
-# prima parola della cella «voce», che il testo estratto porta come parola.
-RIGHE_DI_FORMULA = (
-    "Indice pari",
-    "Indice dispari",
-    "Più radici pari",
-    "Somma",
-    "Prodotto",
-    "Divisione",
-    "Potenza",
-    "Radice di radice",
-)
-COLONNE_DI_FORMULA = (1, 2)  # «schema visivo» ed «esempio»: la colonna 0 è testo
-# Il minimo di pixel (a 100 dpi) sotto il quale un riquadro è vuoto: una cella
-# vera ne ha centinaia, una svuotata ne tiene solo i bordi della tabella.
-MINIMO_CELLA = 120
-
-
-def _parole_con_posizione(pdf: Path) -> list[tuple[str, float, float, float, float]]:
-    _serve("pdftotext")
-    esito = subprocess.run(["pdftotext", "-bbox", str(pdf), "-"], capture_output=True, text=True)
-    assert esito.returncode == 0, esito.stderr
-    return [
-        (m.group(5), float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4)))
-        for m in re.finditer(
-            r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>',
-            esito.stdout,
-        )
-    ]
-
-
-def inchiostro_per_cella(pdf: Path, cartella: Path) -> list[list[int]]:
-    """I pixel disegnati in ogni cella di formula, riga per riga, a 100 dpi.
-
-    Le righe si trovano DAL PDF (la posizione della parola che apre la cella
-    «voce»), non da un numero scritto a mano: se una riga si sposta, la misura
-    la segue.
-    """
-    _serve("pdftoppm")
-    cartella.mkdir(parents=True, exist_ok=True)
-    base = cartella / "celle"
-    esito = subprocess.run(
-        ["pdftoppm", "-r", "100", "-singlefile", "-gray", str(pdf), str(base)],
-        capture_output=True,
-        text=True,
-    )
-    assert esito.returncode == 0, esito.stderr
-    larghezza, altezza, pixel = _pgm(base.with_suffix(".pgm"))
-    per_punto = 100 / 72.0  # 100 dpi: un punto tipografico vale 1,39 pixel
-    per_mm = larghezza / 210.0
-
-    # Ogni riga comincia con una parola diversa; le righe si riconoscono dalla
-    # posizione di quella parola. «Indice» apre DUE righe, quindi si raccolgono
-    # tutte le posizioni e si tengono le otto righe distinte, in ordine.
-    prime = {etichetta.split()[0] for etichetta in RIGHE_DI_FORMULA}
-    righe_trovate: list[float] = []
-    for (testo, _x0, y, _x1, _y1) in _parole_con_posizione(pdf):
-        if testo in prime:
-            if not righe_trovate or all(abs(y - gia) > 3 for gia in righe_trovate):
-                righe_trovate.append(y)
-    righe_trovate.sort()
-    assert len(righe_trovate) == len(RIGHE_DI_FORMULA), (
-        f"il testo estratto porta {len(righe_trovate)} righe invece di {len(RIGHE_DI_FORMULA)}"
-    )
-    ordinate = [(etichetta, y * per_punto) for etichetta, y in zip(RIGHE_DI_FORMULA, righe_trovate)]
-
-    # Le righe di separazione della tabella sono nere da bordo a bordo: se non
-    # si tolgono, una cella vuota conta comunque i filetti e la misura non sa
-    # fallire (successo il 26/11: 942 pixel su una cella svuotata). Una riga di
-    # immagine è «filetto» quando più della metà della pagina è scura.
-    filetti = {
-        y
-        for y in range(altezza)
-        if sum(1 for i in range(larghezza) if pixel[y * larghezza + i] < 200) > larghezza // 2
-    }
-
-    def conta(x0: float, x1: float, y0: float, y1: float) -> int:
-        a, b = int(x0 * per_mm), int(x1 * per_mm)
-        c, d = int(y0), int(y1)
-        return sum(
-            1
-            for y in range(max(c, 0), min(d, altezza))
-            if y not in filetti
-            for i in range(a, b)
-            if pixel[y * larghezza + i] < 200
-        )
-
-    misure: list[list[int]] = []
-    for indice, (_etichetta, y) in enumerate(ordinate):
-        # il fondo della riga è la cima della successiva, meno qualche pixel
-        fine = ordinate[indice + 1][1] - 4 if indice + 1 < len(ordinate) else y + 90
-        misure.append([conta(*COLONNE_MM[c], y, fine) for c in COLONNE_DI_FORMULA])
-    return misure
-
-
-def test_ogni_cella_di_formula_ha_il_suo_inchiostro(scheda: Path, tmp_path: Path) -> None:
-    """Sedici riquadri, sedici misure: nessuna cella di formula può essere vuota.
-
-    È il controllo che mancava il 26/11: per colonna una formula tolta si perde
-    nell'1% di tolleranza, e il testo non la vede perché è disegnata.
-    """
-    misure = inchiostro_per_cella(scheda, tmp_path)
-    assert len(misure) == len(RIGHE_DI_FORMULA), (
-        f"misurate {len(misure)} righe invece di {len(RIGHE_DI_FORMULA)}"
-    )
-    vuote = [
-        f"riga {i + 1} «{RIGHE_DI_FORMULA[i]}», colonna {c + 1}: {valore} pixel"
-        for i, riga in enumerate(misure)
-        for c, valore in enumerate(riga)
-        if valore < MINIMO_CELLA
-    ]
-    assert not vuote, "celle di formula senza disegno (una formula non è stata disegnata):\n" + "\n".join(vuote)
-
-
-def test_la_misura_per_cella_sa_fallire(tmp_path: Path) -> None:
-    """Tolta UNA formula dentro una riga, la misura per cella la vede.
+def test_la_misura_del_disegno_sa_fallire(tmp_path: Path) -> None:
+    """Svuotata UNA cella di formula, la misura del disegno la vede.
 
     Si toglie solo la formula della colonna «esempio» della riga «Prodotto»: la
-    ``\\riga`` resta, il numero di righe resta, il testo estratto cambia di
-    pochissimo (le forme sono disegnate) — e la cella resta vuota. Se questa
-    prova passasse, la misura non varrebbe niente.
+    ``\\riga`` resta, le righe restano, il testo estratto cambia di pochissimo (le
+    forme e le radici sono disegnate) — e la cella resta vuota.
     """
     sorgente = SORGENTE.read_text(encoding="utf-8")
     inizio = sorgente.index("\\riga{\\voce{Prodotto}")
     fine = sorgente.index("\\riga{\\voce{Divisione}", inizio)
     riga = sorgente[inizio:fine]
-    # la TERZA graffa della \\riga è l'esempio: si svuota quella, non la riga.
-    # (Si cerca a graffe contate: dentro ci sono altre graffe, quelle degli
-    # argomenti di \\voce e di \\radice, e un `rindex` prenderebbe l'ultima —
-    # cioè il posto sbagliato, e il LaTeX morirebbe dentro la matematica.)
+    # la TERZA graffa della \riga è l'esempio: si svuota quella, non la riga.
     gruppi: list[tuple[int, int]] = []
     posizione = 0
     while len(gruppi) < 3:
@@ -525,13 +599,12 @@ def test_la_misura_per_cella_sa_fallire(tmp_path: Path) -> None:
     inizio_argomento, fine_argomento = gruppi[2]
     mutilata = riga[:inizio_argomento] + "{$\\;\\,$}" + riga[fine_argomento:]
     mutilato = sorgente[:inizio] + mutilata + sorgente[fine:]
+
     pdf = costruisci(tmp_path / "cella_vuota", mutilato)
     assert pagine(pdf) == 1
-
-    misure = inchiostro_per_cella(pdf, tmp_path / "cella_vuota")
-    indice = RIGHE_DI_FORMULA.index("Prodotto")
-    esempio = misure[indice][COLONNE_DI_FORMULA.index(2)]
+    misure = _misura(pdf, tmp_path / "misura-vuota")
+    esempio = misure["Prodotto"]["inchiostro"][1]
     assert esempio < MINIMO_CELLA, (
         f"svuotata la cella «esempio» della riga «Prodotto» la misura conta ancora "
-        f"{esempio} pixel: la misura per cella non sa fallire"
+        f"{esempio} pixel: la misura del disegno non sa fallire"
     )
