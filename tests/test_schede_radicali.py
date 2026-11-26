@@ -80,7 +80,7 @@ RIGHE = (
 )
 SEZIONI = (
     "1. Campo di Esistenza (CE)",
-    "2. Operazioni con i Radicali (casi semplici)",
+    "2. Operazioni con i Radicali (Casi Semplici)",
 )
 INTESTAZIONI = (
     "Tipo di radice",

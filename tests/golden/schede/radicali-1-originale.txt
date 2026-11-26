@@ -61,7 +61,7 @@ Più radici pari
 
 (sistema di condizioni)
 
-2. Operazioni con i Radicali (casi semplici)
+2. Operazioni con i Radicali (Casi Semplici)
 Operazione
 
 Schema visivo (stesso indice n)
@@ -145,9 +145,9 @@ n
 
 :
 
-con
+(con
 
-̸= 0
+̸= 0)
 
 n
 
