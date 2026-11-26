@@ -120,7 +120,7 @@
 %%  \freccia[testo]     la stessa, con «testo» sopra
 %% ---------------------------------------------------------------------
 \newcommand{\freccia}[1][]{%
-  \tikz[baseline=-0.35ex]{%
+  \tikz[baseline=-0.24em]{%
     \draw[-{Stealth[length=2.8pt,width=2.4pt]},line width=0.75pt,schedeGrigio]
       (0,0) -- (0.62cm,0);%
     \if\relax\detokenize{#1}\relax\else
@@ -137,21 +137,31 @@
 %%                            scrive fra le quadre, e può essere n, m, k
 %%  Sta in matematica: $\radice[4]{\formaQuadrato}$.
 %% ---------------------------------------------------------------------
+\newsavebox{\schede@radbox}
 \newcommand{\radice}[2][\relax]{%
+  \begingroup
+  \sbox{\schede@radbox}{$#2$}%
+  %% il segno cresce con quello che deve contenere: una forma, una formula,
+  %% o un'altra radice (indice sopra indice, come sul libro)
+  \pgfmathsetlengthmacro{\schede@H}{\ht\schede@radbox+\dp\schede@radbox}%
+  \pgfmathsetlengthmacro{\schede@dip}{max(4.4pt,0.55*\schede@H)}%
+  \pgfmathsetlengthmacro{\schede@ris}{max(2.4pt,0.26*\schede@H)}%
+  \pgfmathsetlengthmacro{\schede@tet}{max(1.1pt,0.10*\schede@H)}%
   \begin{tikzpicture}[baseline=(schede@rad.base),line join=round,line cap=round]
-    \node[inner sep=0.6pt,outer sep=0pt,anchor=base] (schede@rad) {$#2$};
-    %% il segno: entrata in alto a sinistra, punta in basso, salita, tetto
+    \node[inner sep=0.6pt,outer sep=0pt,anchor=base] (schede@rad)
+      {\usebox{\schede@radbox}};
     \draw[schedeInchiostro,line width=0.9pt]
-      ([xshift=-7.0pt,yshift=-0.4pt]schede@rad.north west)
-      -- ([xshift=-4.6pt,yshift=-1.0pt]schede@rad.south west)
-      -- ([xshift=-0.9pt,yshift=1.3pt]schede@rad.north west)
-      -- ([xshift=1.5pt,yshift=1.3pt]schede@rad.north east);
+      ([xshift=-\schede@dip,yshift=-0.3pt]schede@rad.north west)
+      -- ([xshift=-\schede@ris,yshift=-0.9pt]schede@rad.south west)
+      -- ([xshift=-0.9pt,yshift=\schede@tet]schede@rad.north west)
+      -- ([xshift=1.5pt,yshift=\schede@tet]schede@rad.north east);
     \ifx\relax#1\relax\else
       \node[anchor=south east,inner sep=0.4pt,font=\scriptsize,
             text=schedeInchiostro]
-        at ([xshift=-4.4pt,yshift=2.2pt]schede@rad.north west) {$#1$};
+        at ([xshift=-\schede@ris,yshift=1.1pt+\schede@tet]schede@rad.north west) {$#1$};
     \fi
-  \end{tikzpicture}}
+  \end{tikzpicture}%
+  \endgroup}
 
 %% =====================================================================
 %%  5. IL CAMPO DI ESISTENZA — la regola in un comando solo
@@ -179,7 +189,7 @@
   \begin{tikzpicture}
     \node[draw=schedeBordo,fill=schedeBlu!4,rounded corners=3pt,
           line width=0.7pt,inner sep=7pt,align=left,
-          text width={\dimexpr\linewidth-2*7pt-2*0.7pt\relax}]
+          text width={\dimexpr\linewidth-15.4pt\relax}]
       {\if\relax\detokenize{#1}\relax\else
          {\bfseries\textcolor{schedeTitolo}{#1}}\\[2pt]\fi #2};
   \end{tikzpicture}\par}
@@ -235,12 +245,12 @@
 %%
 %%  Dentro una cella, \voce{titolo}{nota} scrive il titolo in grassetto e
 %%  la nota piccola e grigia sotto. Le larghezze si cambiano con
-%%  \schedaColonne{0.24}{0.44}{0.32} (frazioni di riga; la colonna di
+%%  \schedaColonne{0.225}{0.40}{0.375} (frazioni di riga; la colonna di
 %%  mezzo è quella che si adatta).
 %% ---------------------------------------------------------------------
 \newcommand{\schedaColonne}[3]{%
   \gdef\schede@colA{#1}\gdef\schede@colB{#2}\gdef\schede@colC{#3}}
-\schedaColonne{0.235}{0.435}{0.33}
+\schedaColonne{0.225}{0.40}{0.375}
 
 \newcommand{\voce}[2]{{\bfseries #1}\par\vspace{2.5pt}{\footnotesize\color{schedeGrigio}#2}}
 
@@ -249,7 +259,7 @@
   \par\noindent
   \setlength{\schede@lineW}{\dimexpr\linewidth-4\tabcolsep\relax}%
   \arrayrulecolor{schedeRegola}%
-  \renewcommand{\arraystretch}{1.45}%
+  \renewcommand{\arraystretch}{1.5}%\n  \setlength{\extrarowheight}{2.5pt}%
   \begin{tabular}{@{}%
       >{\raggedright\arraybackslash}p{\dimexpr\schede@colA\schede@lineW\relax}%
       >{\raggedright\arraybackslash}p{\dimexpr\schede@colB\schede@lineW\relax}%
