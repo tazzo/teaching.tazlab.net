@@ -1,0 +1,271 @@
+%% =====================================================================
+%%  schede.sty — la libreria delle schede didattiche
+%%  teaching.tazlab.net · uso locale (niente pubblicazione online)
+%% =====================================================================
+%%
+%%  Una scheda è un .tex di poche righe: la grafica sta TUTTA qui.
+%%  Chi scrive una scheda non sceglie un colore, non disegna una forma,
+%%  non imposta un margine: chiama un comando. Se una scheda ha bisogno
+%%  di un preambolo suo, la libreria non è pronta — si aggiunge qui il
+%%  comando che manca, non si copia il preambolo.
+%%
+%%  UNA SCHEDA, IN BREVE
+%%
+%%      \documentclass[10pt]{article}
+%%      \usepackage{schede}
+%%      \schedaTitolo{I Radicali: Schema Visivo}{Campo di esistenza \& operazioni base}
+%%      \schedaPiede{Schema di Matematica — I Radicali}
+%%      \begin{document}
+%%        \schedaSezione{1}{Campo di Esistenza (CE)}
+%%        \begin{schedaTabella}{Tipo di radice}{Schema visivo}{Esempio}
+%%          \riga{\voce{Indice pari}{(es. $\sqrt{\ }$, $\sqrt[4]{\ }$)}}
+%%               {$\cePari{\formaQuadrato}$}
+%%               {$\cePari[4]{\formaQuadrato}$}
+%%        \end{schedaTabella}
+%%      \end{document}
+%%
+%%  VEDI ANCHE: schede/README.md (l'indice delle schede e come si compilano).
+%% =====================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{schede}[2026/11/26 v0.1 Libreria delle schede didattiche]
+
+%% ---------------------------------------------------------------------
+%%  Pacchetti: la scheda non ne carica nessuno
+%% ---------------------------------------------------------------------
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[italian]{babel}
+\RequirePackage{lmodern}
+\RequirePackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\RequirePackage[a4paper,top=1.45cm,bottom=1.6cm,left=1.5cm,right=1.5cm,
+                headsep=7pt,footskip=1.0cm]{geometry}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\usetikzlibrary{calc,arrows.meta}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{array,colortbl}
+\RequirePackage{fancyhdr}
+
+%% =====================================================================
+%%  1. LA PALETTE — l'unico punto da toccare
+%% =====================================================================
+%%  Regola della casa (operatore, 26/11/2026): la forma porta il colore.
+%%      quadrato = blu        triangolo = rosso      cerchio = verde
+%%  Nelle schede il codice di colori non cambia mai, per non confondere:
+%%  si cambiano questi valori e cambiano TUTTE le schede insieme.
+%%
+%%  Le forme che non sono una delle tre (rombo, freccia) sono GRIGIE —
+%%  il grigio della casa è schedeGrigio, e non si aggiunge un colore
+%%  nuovo senza una regola.
+%% ---------------------------------------------------------------------
+\definecolor{schedeBlu}{HTML}{2563EB}    % QUADRATO
+\definecolor{schedeRosso}{HTML}{DC2626}  % TRIANGOLO
+\definecolor{schedeVerde}{HTML}{16A34A}  % CERCHIO
+\definecolor{schedeGrigio}{HTML}{475569} % rombo, frecce, note e testi secondari
+
+%%  Colori di servizio, DERIVATI dai quattro sopra: non si toccano.
+%%  (Cambiando schedeBlu cambiano anche i titoli e le fasce: è voluto.)
+\definecolor{schedeInchiostro}{HTML}{0F172A}
+\colorlet{schedeTitolo}{schedeBlu!70!black}   % titoli e numeri di sezione
+\colorlet{schedeFascia}{schedeInchiostro!6}   % fondo delle intestazioni
+\colorlet{schedeRegola}{schedeInchiostro!18}  % fili delle tabelle
+\colorlet{schedeBordo}{schedeBlu!35}          % bordi dei riquadri
+
+%% =====================================================================
+%%  2. LE FORME — ognuna porta il suo colore con sé
+%% =====================================================================
+%%  Il primo argomento, opzionale, è la scala: \formaQuadrato[0.8].
+%%  La forma è centrata sull'asse della formula (0.24em sopra la base),
+%%  così sta dentro una radice e in una riga di testo senza aggiustamenti.
+%% ---------------------------------------------------------------------
+
+% quadrato = BLU
+\newcommand{\formaQuadrato}[1][1]{%
+  \tikz[baseline=0pt]{%
+    \pgfmathsetlengthmacro{\schede@lato}{1.05em*#1}%
+    \fill[schedeBlu,rounded corners=0.6pt]
+      (0,{0.24em-0.5*\schede@lato}) rectangle (\schede@lato,{0.24em+0.5*\schede@lato});}}
+
+% triangolo = ROSSO
+\newcommand{\formaTriangolo}[1][1]{%
+  \tikz[baseline=0pt]{%
+    \pgfmathsetlengthmacro{\schede@lato}{1.15em*#1}%
+    \fill[schedeRosso]
+      ({0.5*\schede@lato},{0.24em+0.46*\schede@lato})
+      -- (\schede@lato,{0.24em-0.46*\schede@lato})
+      -- (0,{0.24em-0.46*\schede@lato}) -- cycle;}}
+
+% cerchio = VERDE
+\newcommand{\formaCerchio}[1][1]{%
+  \tikz[baseline=0pt]{%
+    \pgfmathsetlengthmacro{\schede@diam}{1.0em*#1}%
+    \fill[schedeVerde] ({0.5*\schede@diam},0.24em) circle ({0.5*\schede@diam});}}
+
+% rombo = GRIGIO della casa (non è una delle tre forme)
+\newcommand{\formaRombo}[1][1]{%
+  \tikz[baseline=0pt]{%
+    \pgfmathsetlengthmacro{\schede@lato}{1.05em*#1}%
+    \fill[schedeGrigio]
+      ({0.5*\schede@lato},{0.24em+0.62*\schede@lato})
+      -- (\schede@lato,0.24em)
+      -- ({0.5*\schede@lato},{0.24em-0.62*\schede@lato})
+      -- (0,0.24em) -- cycle;}}
+
+%% =====================================================================
+%%  3. LE FRECCE — grigie, con un'etichetta opzionale sopra
+%% =====================================================================
+%%  \freccia            una freccia
+%%  \freccia[testo]     la stessa, con «testo» sopra
+%% ---------------------------------------------------------------------
+\newcommand{\freccia}[1][]{%
+  \tikz[baseline=-0.35ex]{%
+    \draw[-{Stealth[length=2.8pt,width=2.4pt]},line width=0.75pt,schedeGrigio]
+      (0,0) -- (0.62cm,0);%
+    \if\relax\detokenize{#1}\relax\else
+      \node[above=1.2pt of {0,0},anchor=south west,inner sep=1pt,
+           font=\scriptsize,text=schedeGrigio] at (0.02cm,0.06cm) {#1};%
+    \fi}}
+
+%% =====================================================================
+%%  4. LA RADICE — il segno con l'indice, disegnato attorno a ciò che
+%%     gli si dà (una forma, un numero, una lettera, una formula)
+%% =====================================================================
+%%  \radice{contenuto}        radice quadrata
+%%  \radice[3]{contenuto}     radice cubica — l'indice è quello che si
+%%                            scrive fra le quadre, e può essere n, m, k
+%%  Sta in matematica: $\radice[4]{\formaQuadrato}$.
+%% ---------------------------------------------------------------------
+\newcommand{\radice}[2][\relax]{%
+  \begin{tikzpicture}[baseline=(schede@rad.base),line join=round,line cap=round]
+    \node[inner sep=0.6pt,outer sep=0pt,anchor=base] (schede@rad) {$#2$};
+    %% il segno: entrata in alto a sinistra, punta in basso, salita, tetto
+    \draw[schedeInchiostro,line width=0.9pt]
+      ([xshift=-7.0pt,yshift=-0.4pt]schede@rad.north west)
+      -- ([xshift=-4.6pt,yshift=-1.0pt]schede@rad.south west)
+      -- ([xshift=-0.9pt,yshift=1.3pt]schede@rad.north west)
+      -- ([xshift=1.5pt,yshift=1.3pt]schede@rad.north east);
+    \ifx\relax#1\relax\else
+      \node[anchor=south east,inner sep=0.4pt,font=\scriptsize,
+            text=schedeInchiostro]
+        at ([xshift=-4.4pt,yshift=2.2pt]schede@rad.north west) {$#1$};
+    \fi
+  \end{tikzpicture}}
+
+%% =====================================================================
+%%  5. IL CAMPO DI ESISTENZA — la regola in un comando solo
+%% =====================================================================
+%%  \cePari{forma}        radice di indice pari: il radicando deve essere ≥ 0
+%%  \cePari[4]{forma}     con l'indice che si vuole
+%%  \ceDispari{forma}     indice dispari: nessuna condizione, vale per ogni x
+%%  \sistema{riga1\\riga2} il graffa con le condizioni, una per riga
+%% ---------------------------------------------------------------------
+\newcommand{\cePari}[2][\relax]{%
+  \ensuremath{\radice[#1]{#2}\;\freccia\;#2\ge 0}}
+\newcommand{\ceDispari}[2][\relax]{%
+  \ensuremath{\radice[#1]{#2}\;\freccia\;\forall x\in\mathbb{R}}}
+\newcommand{\sistema}[1]{%
+  \ensuremath{\left\{\begin{array}{@{}l@{}}#1\end{array}\right.}}
+
+%% =====================================================================
+%%  6. I RIQUADRI — una regola in evidenza, un titolo opzionale
+%% =====================================================================
+%%  \riquadro{testo}                riquadro con il testo
+%%  \riquadro[Regola]{testo}        riquadro con il titolo in blu
+%% ---------------------------------------------------------------------
+\newcommand{\riquadro}[2][]{%
+  \par\noindent
+  \begin{tikzpicture}
+    \node[draw=schedeBordo,fill=schedeBlu!4,rounded corners=3pt,
+          line width=0.7pt,inner sep=7pt,align=left,
+          text width={\dimexpr\linewidth-2*7pt-2*0.7pt\relax}]
+      {\if\relax\detokenize{#1}\relax\else
+         {\bfseries\textcolor{schedeTitolo}{#1}}\\[2pt]\fi #2};
+  \end{tikzpicture}\par}
+
+%% =====================================================================
+%%  7. LA TESTATA E IL PIEDE
+%% =====================================================================
+%%  Si dichiarano nel preambolo, una volta:
+%%      \schedaTitolo{titolo grande}{occhiello a destra}
+%%      \schedaPiede{la riga in fondo a sinistra}
+%%  Il numero di pagina è «Pagina n di N» e si compila da sé.
+%% ---------------------------------------------------------------------
+\newcommand{\schedaTitolo}[2]{%
+  \gdef\schede@titolo{#1}\gdef\schede@occhiello{#2}}
+\newcommand{\schedaPiede}[1]{\gdef\schede@piede{#1}}
+\gdef\schede@titolo{}
+\gdef\schede@occhiello{}
+\gdef\schede@piede{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\parbox[b]{0.60\headwidth}{\raggedright
+  \LARGE\bfseries\color{schedeInchiostro}\schede@titolo}}
+\fancyhead[R]{\parbox[b]{0.38\headwidth}{\raggedleft
+  \footnotesize\bfseries\color{schedeTitolo}\MakeUppercase{\schede@occhiello}}}
+\fancyfoot[L]{\footnotesize\color{schedeGrigio}\schede@piede}
+\fancyfoot[R]{\footnotesize\color{schedeGrigio}Pagina \thepage\ di \pageref{schede@ultima}}
+\renewcommand{\headrulewidth}{0.8pt}
+\renewcommand{\headrule}{{\color{schedeBlu}\hrule height 0.8pt width\headwidth}}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{{\color{schedeRegola}\vskip-\footrulewidth
+  \hrule height\footrulewidth width\headwidth}}
+\AtEndDocument{\label{schede@ultima}}
+
+%% =====================================================================
+%%  8. LA SEZIONE — la barretta blu e il titolo numerato
+%% =====================================================================
+%%  \schedaSezione{1}{Campo di Esistenza (CE)}
+%% ---------------------------------------------------------------------
+\newcommand{\schedaSezione}[2]{%
+  \par\addvspace{13pt}%
+  \noindent\textcolor{schedeTitolo}{\rule[-1.5pt]{2.8pt}{13.5pt}}%
+  \hspace{6pt}{\large\bfseries\textcolor{schedeTitolo}{#1.\ #2}}\par
+  \vspace{2.5pt}\noindent{\color{schedeBlu!35}\rule{\linewidth}{0.7pt}}\par
+  \vspace{5pt}}
+
+%% =====================================================================
+%%  9. LA TABELLA — intestazione a fascia, righe con un filo sottile
+%% =====================================================================
+%%  \begin{schedaTabella}{prima colonna}{seconda}{terza}
+%%      \riga{voce}{schema}{esempio}
+%%  \end{schedaTabella}
+%%
+%%  Dentro una cella, \voce{titolo}{nota} scrive il titolo in grassetto e
+%%  la nota piccola e grigia sotto. Le larghezze si cambiano con
+%%  \schedaColonne{0.24}{0.44}{0.32} (frazioni di riga; la colonna di
+%%  mezzo è quella che si adatta).
+%% ---------------------------------------------------------------------
+\newcommand{\schedaColonne}[3]{%
+  \gdef\schede@colA{#1}\gdef\schede@colB{#2}\gdef\schede@colC{#3}}
+\schedaColonne{0.235}{0.435}{0.33}
+
+\newcommand{\voce}[2]{{\bfseries #1}\par\vspace{2.5pt}{\footnotesize\color{schedeGrigio}#2}}
+
+\newlength{\schede@lineW}
+\newenvironment{schedaTabella}[3]{%
+  \par\noindent
+  \setlength{\schede@lineW}{\dimexpr\linewidth-4\tabcolsep\relax}%
+  \arrayrulecolor{schedeRegola}%
+  \renewcommand{\arraystretch}{1.45}%
+  \begin{tabular}{@{}%
+      >{\raggedright\arraybackslash}p{\dimexpr\schede@colA\schede@lineW\relax}%
+      >{\raggedright\arraybackslash}p{\dimexpr\schede@colB\schede@lineW\relax}%
+      >{\raggedright\arraybackslash}p{\dimexpr\schede@colC\schede@lineW\relax}@{}}
+  \hline
+  \rowcolor{schedeFascia}%
+  {\footnotesize\bfseries #1} & {\footnotesize\bfseries #2} &
+  {\footnotesize\bfseries #3} \\ \hline
+}{\end{tabular}\par\vspace{4pt}}
+
+\newcommand{\riga}[3]{#1 & #2 & #3 \\ \hline}
+
+%% =====================================================================
+%%  10. IL CORPO — la dimensione del testo delle schede
+%% =====================================================================
+\AtBeginDocument{\fontsize{10}{13}\selectfont}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\emergencystretch=1.5em

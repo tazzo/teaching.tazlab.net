@@ -1,0 +1,83 @@
+%% ---------------------------------------------------------------------
+%%  I Radicali: Schema Visivo — la scheda del modello
+%%
+%%  Riproduce la scheda mandata dall'operatore il 25/11/2026: due sezioni
+%%  (campo di esistenza, operazioni), le forme al posto dei numeri.
+%%  Qui non c'è grafica: tutto sta in ../schede.sty.
+%% ---------------------------------------------------------------------
+\documentclass[10pt]{article}
+\usepackage{schede}
+
+\schedaTitolo{I Radicali: Schema Visivo}{Campo di esistenza \& operazioni base}
+\schedaPiede{Schema di Matematica — I Radicali}
+
+\begin{document}
+
+%% =====================================================================
+\schedaSezione{1}{Campo di Esistenza (CE)}
+%% =====================================================================
+\begin{schedaTabella}{Tipo di radice}{Schema visivo}{Esempio}
+
+  \riga{\voce{Indice pari}{(es. $\sqrt{\ }$, $\sqrt[4]{\ }$, $\sqrt[6]{\ }$)}}
+       {\cePari{\formaQuadrato}}
+       {\cePari[4]{\formaQuadrato}}
+
+  \riga{\voce{Indice dispari}{(es. $\sqrt[3]{\ }$, $\sqrt[5]{\ }$, $\sqrt[7]{\ }$)}}
+       {\ceDispari[3]{\formaQuadrato}}
+       {\ceDispari[5]{\formaQuadrato}}
+
+  \riga{\voce{Più radici pari}{(sistema di condizioni)}}
+       {$\radice{\formaQuadrato}+\radice{\formaTriangolo}\;\freccia\;
+         \sistema{\formaQuadrato\ge 0\\ \formaTriangolo\ge 0}$}
+       {$\radice{\formaQuadrato}+\radice[4]{\formaTriangolo}\;\freccia\;
+         \sistema{\formaQuadrato\ge 0\\ \formaTriangolo\ge 0}$}
+
+\end{schedaTabella}
+
+%% =====================================================================
+\schedaSezione{2}{Operazioni con i Radicali (casi semplici)}
+%% =====================================================================
+\begin{schedaTabella}{Operazione}{Schema visivo (stesso indice $n$)}{Esempio}
+
+  \riga{\voce{Somma e sottrazione}{(solo radicali simili)}}
+       {$a\,\radice[n]{\formaQuadrato}\;\pm\;b\,\radice[n]{\formaQuadrato}
+         \;\freccia\;(a\pm b)\,\radice[n]{\formaQuadrato}$\par\vspace{3pt}
+        {\footnotesize\color{schedeGrigio}Con radici diverse:
+         $a\radice{\formaQuadrato}+b\radice{\formaTriangolo}$ resta così}}
+       {$3\radice{\formaQuadrato}+5\radice{\formaQuadrato}
+         =8\radice{\formaQuadrato}$\par\vspace{3pt}
+        $4\radice{\formaQuadrato}+2\radice{\formaTriangolo}
+         -\radice{\formaQuadrato}
+         =3\radice{\formaQuadrato}+2\radice{\formaTriangolo}$}
+
+  \riga{\voce{Prodotto}{(moltiplicazione)}}
+       {$\radice[n]{\formaQuadrato}\cdot\radice[n]{\formaTriangolo}
+         \;\freccia\;\radice[n]{\formaQuadrato\cdot\formaTriangolo}$}
+       {$\radice[3]{\formaQuadrato}\cdot\radice[3]{\formaTriangolo}
+         =\radice[3]{\formaQuadrato\cdot\formaTriangolo}$}
+
+  \riga{\voce{Divisione}{(quoziente)}}
+       {$\radice[n]{\formaQuadrato}:\radice[n]{\formaTriangolo}
+         \;\freccia\;\radice[n]{\formaQuadrato:\formaTriangolo}$\par\vspace{3pt}
+        {\footnotesize\color{schedeGrigio}con $\formaTriangolo\neq 0$}}
+       {$\radice[4]{\formaQuadrato}:\radice[4]{\formaTriangolo}
+         =\radice[4]{\formaQuadrato:\formaTriangolo}$}
+
+  \riga{\voce{Potenza di radice}{}}
+       {$\left(\radice[n]{\formaQuadrato}\right)^{k}
+         \;\freccia\;\radice[n]{\formaQuadrato^{k}}$}
+       {$\left(\radice[3]{\formaQuadrato}\right)^{2}
+         =\radice[3]{\formaQuadrato^{2}}$\par\vspace{3pt}
+        $\left(2\radice[3]{\formaQuadrato}\right)^{2}
+         =4\radice[3]{\formaQuadrato^{2}}$}
+
+  \riga{\voce{Radice di radice}{}}
+       {$\radice[m]{\radice[n]{\formaQuadrato}}
+         \;\freccia\;\radice[m\cdot n]{\formaQuadrato}$}
+       {$\radice[3]{\radice[2]{\formaQuadrato}}
+         =\radice[3\cdot 2]{\formaQuadrato}
+         =\radice[6]{\formaQuadrato}$}
+
+\end{schedaTabella}
+
+\end{document}
