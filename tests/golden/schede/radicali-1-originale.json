@@ -1,0 +1,10 @@
+{
+  "_cosa": "L'inchiostro disegnato dalla scheda dei radicali nella versione ORIGINALE (140290 B), la prima che l'operatore ha ricevuto: la misura che il test confronta, perche' le formule della scheda (il segno di radice, le frecce, le forme) sono DISEGNATE con TikZ e non esistono nel testo estratto.",
+  "_provenienza": "git show 7702236:schede/radicali/radicali-1.pdf (sha256 d3244ecadd4375ab367998850d8b602d731c6b1bce7e60b2d9013c824c147390, 140290 byte) -- la versione pre-compattazione, la stessa catalogata come doc-20261126-105004-289558",
+  "_come_si_misura": "pdftoppm -r 60 -singlefile -gray; un pixel e' inchiostro se la sua luminanza e' < 200; le tre colonne sono quelle della tabella (15-55.5 mm, 55.5-127.5 mm, 127.5-195 mm)",
+  "_perche_la_tolleranza": "misurato il 26/11/2026: la ricompilazione con e senza \\schedaCompatta cambia l'inchiostro di +0.1%; togliere UNA riga (Radice di radice) lo cambia di -7.4% (14658 -> 13568). La tolleranza del 2% sul totale e del 4% per colonna sta in mezzo: un cambio di spaziatura passa, una formula che sparisce no.",
+  "righe": 702,
+  "larghezza": 497,
+  "colonne": [4016, 5359, 5268],
+  "totale": 14643
+}

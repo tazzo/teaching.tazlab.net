@@ -1,0 +1,213 @@
+I Radicali: Schema Visivo
+
+CAMPO DI ESISTENZA & OPERAZIONI BASE
+
+1. Campo di Esistenza (CE)
+Tipo di radice
+
+Schema visivo
+
+Esempio
+4
+
+≥0
+
+Indice pari
+(es.
+
+≥0
+
+√
+√ √
+, 4 , 6 )
+3
+
+5
+
+∀x ∈ R
+
+Indice dispari
+
+∀x ∈ R
+
+√ √ √
+(es. 3 , 5 , 7 )
+
+Più radici pari
+
++
+
+
+
+
+≥0
+
+
+
+≥0
+
+4
+
++
+
+
+
+
+≥0
+
+
+
+≥0
+
+(sistema di condizioni)
+
+2. Operazioni con i Radicali (casi semplici)
+Operazione
+
+Schema visivo (stesso indice n)
+n
+
+Esempio
+
+n
+
+n
+
+± b
+
+(a ± b)
+
+Somma e sottrazione
+
+a
+
+(solo radicali simili)
+
+Con radici diverse: a
+
++b
+
+resta così
+
+3
+
++5
+
+=8
+
+4
+
++2
+
+−
+
+=3
+n
+
+n
+
+n
+
+·
+
+Prodotto
+
++2
+3
+
+3
+
+·
+
+3
+
+·
+
+·
+
+=
+
+(moltiplicazione)
+n
+
+n
+
+Divisione
+(quoziente)
+
+n
+
+4
+
+4
+
+:
+
+:
+
+con
+
+̸= 0
+
+n
+
+k
+
+n
+
+=
+!2
+
+3
+
+k
+
+Potenza di radice
+
+4
+
+:
+
+3
+
+!2
+
+2
+
+3
+
+=4
+
+2
+
+3
+
+m
+n
+
+Schema di Matematica — I Radicali
+
+2
+
+=
+3
+
+Radice di radice
+
+:
+
+m·n
+
+3·2
+
+2
+
+=
+
+6
+
+=
+
+Pagina 1 di 1
+
+
