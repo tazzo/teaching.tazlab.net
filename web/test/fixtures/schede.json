@@ -1,16 +1,16 @@
 {
   "schede": [
     {
-      "id": "radicali/radicali-1",
-      "file": "radicali/radicali-1.pdf",
-      "url": "/schede/radicali/radicali-1.pdf",
-      "title": "I Radicali: Schema Visivo",
-      "subtitle": "Campo di esistenza e operazioni, con lo schema visivo e l'esempio",
+      "id": "radicali/radicali",
+      "file": "radicali/radicali.pdf",
+      "url": "/schede/radicali/radicali.pdf",
+      "title": "I Radicali: la Scheda Unica",
+      "subtitle": "Campo di esistenza, operazioni e semplificazione — una pagina",
       "order": 10,
-      "sha256": "3c35cee5be67f509d490f0771ddda99d82a758bdfc6db1cff135e36c0d26c52e",
-      "bytes": 161113,
+      "sha256": "ecb38b3bed4fcba052434ccd09577eebc6a873323abe801df05c31aa40ab34e6",
+      "bytes": 165157,
       "updated": "2026-11-26",
-      "commit": "c72747d",
+      "commit": "104a38b",
       "versionSource": "versions"
     }
   ]
