@@ -1,0 +1,56 @@
+%% ---------------------------------------------------------------------
+%%  I Radicali: Semplificazione — la seconda scheda, per provare che la
+%%  libreria si riusa.
+%%
+%%  Guarda il preambolo: due righe e la testata. Nessuna grafica copiata,
+%%  nessun colore scelto, nessuna forma disegnata: se qui servisse
+%%  ricopiare qualcosa, la libreria non sarebbe pronta.
+%% ---------------------------------------------------------------------
+\documentclass[10pt]{article}
+\usepackage{schede}
+
+\schedaTitolo{I Radicali: Semplificazione}
+             {Proprietà invariantiva \& portar fuori}
+\schedaPiede{Schema di Matematica — I Radicali (2)}
+
+\begin{document}
+
+%% =====================================================================
+\schedaSezione{1}{La proprietà invariantiva}
+%% =====================================================================
+
+\riquadro[La regola]{Moltiplicare o dividere per lo stesso numero (diverso
+da zero) l'indice della radice e l'esponente del radicando non cambia la
+radice: è la stessa radice scritta in un altro modo.}
+
+\vspace{6pt}
+
+\begin{schedaTabella}{Cosa si fa}{Schema visivo (stesso numero $n$)}{Esempio}
+
+  \riga{\voce{Semplificare l'indice}{(dividere per $k$)}}
+       {$\radice[n\cdot k]{\formaQuadrato^{k}}
+         \;\freccia\;\radice[n]{\formaQuadrato}$}
+       {$\radice[6]{\formaQuadrato^{2}}
+         =\radice[3]{\formaQuadrato}$}
+
+  \riga{\voce{Portar fuori}{(se il radicando è un prodotto)}}
+       {$\radice[n]{\formaQuadrato^{n}\cdot\formaTriangolo}
+         \;\freccia\;\formaQuadrato\cdot\radice[n]{\formaTriangolo}$}
+       {$\radice[3]{\formaQuadrato^{3}\cdot\formaTriangolo}
+         =\formaQuadrato\cdot\radice[3]{\formaTriangolo}$}
+
+  \riga{\voce{Portar dentro}{(il fattore davanti)}}
+       {$\formaQuadrato\cdot\radice[n]{\formaTriangolo}
+         \;\freccia\;\radice[n]{\formaQuadrato^{n}\cdot\formaTriangolo}$}
+       {$\formaCerchio\cdot\radice[2]{\formaTriangolo}
+         =\radice[2]{\formaCerchio^{2}\cdot\formaTriangolo}$}
+
+\end{schedaTabella}
+
+\vspace{4pt}
+
+\riquadro{Le tre mosse si leggono al contrario l'una dell'altra: portare
+fuori e portare dentro sono la stessa uguaglianza, e semplificare l'indice è
+la proprietà invariantiva letta da sinistra a destra.}
+
+\end{document}
