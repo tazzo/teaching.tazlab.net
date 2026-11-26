@@ -49,11 +49,22 @@ def sha256(path: Path) -> str:
 
 def last_commit(path: Path) -> tuple[str, str] | None:
     """(committer date, short sha) of the last commit that touched ``path``."""
-    done = subprocess.run(
-        ["git", "-C", str(ROOT), "log", "-1", "--format=%cs%x09%h", "--", str(path)],
-        capture_output=True, text=True,
-    )
+    try:
+        done = subprocess.run(
+            ["git", "-C", str(ROOT), "log", "-1", "--format=%cs%x09%h", "--", str(path)],
+            capture_output=True, text=True, timeout=30,
+        )
+    except FileNotFoundError:
+        # the container image may ship no git (python:3.14-slim does not): say it, so the
+        # job that needs the version can install it instead of reading a bare traceback
+        print("ERROR schede: git not found on PATH — the version cannot be named here",
+              file=sys.stderr)
+        return None
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f"ERROR schede: git failed ({exc})", file=sys.stderr)
+        return None
     if done.returncode != 0:
+        print(f"ERROR schede: git log refused {path}: {done.stderr.strip()}", file=sys.stderr)
         return None
     parts = done.stdout.strip().split("\t")
     if len(parts) != 2 or not parts[0] or not parts[1]:

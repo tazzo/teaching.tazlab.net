@@ -31,7 +31,7 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends \
             libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 shared-mime-info \
-            nodejs npm
+            nodejs npm git
           rm -rf /var/lib/apt/lists/*
           # Debian ships the binary as `nodejs`; the renderer looks for `node` on PATH
           command -v node >/dev/null || ln -s "$(command -v nodejs)" /usr/local/bin/node
@@ -43,7 +43,7 @@ jobs:
         # each PDF, and a shallow clone would find nothing to compare with. Running it
         # before the tests means a version that cannot be named is a red pipeline, not a
         # page that quietly loses its commit.
-        run: python scripts/schede_versions.py
+        run: python3 scripts/schede_versions.py
 
       - name: Install the Python dependencies
         # Read from pyproject so the workflow and the image cannot drift apart.
