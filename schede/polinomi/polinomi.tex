@@ -1,0 +1,144 @@
+%% ---------------------------------------------------------------------
+%%  I Polinomi: Schema Visivo — operazioni con i polinomi e prodotti
+%%  notevoli in UNA pagina A4.
+%%
+%%  Ordine dell'operatore (27/11/2026, 17:40): «altro PDF da replicare e
+%%  mettere nella stessa sezione delle schede di quello di prima: anche qui
+%%  è uno schema visuale, e c'è da mantenere la coerenza di forme e colori,
+%%  e riprodurre questo schema anche con quelle frecce curve che si vedono,
+%%  che sono utili per far capire l'operazione».
+%%
+%%  Il metro è il SUO PDF: «Operazioni con i Polinomi — Schema Visivo»,
+%%  115964 byte, Chromium, una pagina, che sta in
+%%  tests/golden/schede/polinomi-operatore.pdf. Le otto righe sono le sue
+%%  otto; le regole in parole sono le sue, parola per parola.
+%%
+%%  Le forme: il suo foglio usa CINQUE forme (quadrato blu, triangolo
+%%  arancio-rosso, cerchio verde, rombo viola, quadrato rosa arrotondato),
+%%  la casa ne ha tre più il grigio. La mappatura è scritta in
+%%  tests/test_schede_polinomi.py e nel README, e non aggiunge un colore.
+%%
+%%  Qui non c'è grafica: tutto sta in ../schede.sty.
+%% ---------------------------------------------------------------------
+\documentclass[10pt]{article}
+\usepackage{schede}
+
+%% Testata e piede dentro la zona che ogni stampante sa stampare.
+\schedaMarginiSicuri
+%% Due sezioni e otto righe in una pagina: si toglie respiro agli SPAZI,
+%% non al testo.
+\schedaCompatta
+
+\schedaTitolo{I Polinomi: Schema Visivo}
+             {Operazioni \textperiodcentered\ Prodotti Notevoli}
+\schedaPiede{Schema di Matematica — I Polinomi}
+
+%% La colonna dello schema è larga: le formule sono lunghe (il prodotto di
+%% due trinomi ha sei prodotti) e la regola in parole sta accanto, non sotto.
+\schedaColonne{0.145}{0.525}{0.33}
+
+\begin{document}
+
+%% =====================================================================
+\schedaSezione{1}{Operazioni con i Polinomi}
+%% =====================================================================
+\begin{schedaTabella}{Operazione}{Schema visivo}{Regola a parole}
+
+  \riga{\voce{Somma di polinomi}{}}
+       {$(\formaQuadrato+\formaTriangolo)+(\formaCerchio+\formaRombo)
+         =\formaQuadrato+\formaTriangolo+\formaCerchio+\formaRombo$}
+       {Con il $+$ davanti alla parentesi si tolgono parentesi e $+$ e si
+        copiano i monomi con lo \textbf{stesso segno}.}
+
+  \riga{\voce{Sottrazione di polinomi}{}}
+       {$(\formaQuadrato+\formaTriangolo)-(\formaCerchio-\formaRombo+\formaRombo[0.7])
+         =\formaQuadrato+\formaTriangolo-\formaCerchio+\formaRombo-\formaRombo[0.7]$}
+       {Con il $-$ davanti alla parentesi si tolgono parentesi e $-$ e si
+        copiano i monomi \textbf{cambiando segno}.}
+
+  %% Le due righe che seguono portano le FRECCE CURVE: il termine a
+  %% sinistra e ogni termine fra parentesi sono pezzi con un nome, e gli
+  %% archi partono e arrivano per nome (\frecciaCurva, libreria).
+  \riga{\voce{Monomio per polinomio}{}}
+       {\begin{schedaFrecce}
+          \termine{q}{$\formaQuadrato$}
+          \termine[2pt]{lp}{$($}
+          \termine{t}{$\formaTriangolo$}
+          \termine[4.4pt]{piu}{$+$}
+          \termine[4.4pt]{c}{$\formaCerchio$}
+          \termine{rp}{$)$}
+          \termine[9pt]{coda}{$=(\formaQuadrato)(\formaTriangolo)
+                              +(\formaQuadrato)(\formaCerchio)$}
+          \frecciaCurva[colore=schedeBlu,giro=1]{q}{t}
+          \frecciaCurva[colore=schedeBlu,giro=2]{q}{c}
+        \end{schedaFrecce}}
+       {Si moltiplicano i numeri e si sommano gli esponenti delle lettere
+        uguali; le lettere sole si copiano.}
+
+  \riga{\voce{Polinomio per polinomio}{}}
+       {\begin{schedaFrecce}
+          \termine{lp}{$($}
+          \termine{q}{$\formaQuadrato$}
+          \termine[4.4pt]{piu}{$+$}
+          \termine[4.4pt]{t}{$\formaTriangolo$}
+          \termine{rp}{$)$}
+          \termine[2pt]{lp2}{$($}
+          \termine{c}{$\formaCerchio$}
+          \termine[4.4pt]{piu2}{$+$}
+          \termine[4.4pt]{d}{$\formaRombo$}
+          \termine[4.4pt]{piu3}{$+$}
+          \termine[4.4pt]{e}{$\formaRombo[0.7]$}
+          \termine{rp2}{$)$}
+          \frecciaCurva[colore=schedeBlu,giro=1]{q}{c}
+          \frecciaCurva[colore=schedeBlu,giro=2]{q}{d}
+          \frecciaCurva[colore=schedeBlu,giro=3]{q}{e}
+          \frecciaCurva[sotto,colore=schedeRosso,giro=1]{t}{c}
+          \frecciaCurva[sotto,colore=schedeRosso,giro=2]{t}{d}
+          \frecciaCurva[sotto,colore=schedeRosso,giro=3]{t}{e}
+        \end{schedaFrecce}\par\vspace{3pt}
+        $=(\formaQuadrato)(\formaCerchio)+(\formaQuadrato)(\formaRombo)
+          +(\formaQuadrato)(\formaRombo[0.7])$\par\vspace{2pt}
+        $\phantom{{}={}}+(\formaTriangolo)(\formaCerchio)
+          +(\formaTriangolo)(\formaRombo)+(\formaTriangolo)(\formaRombo[0.7])$}
+       {Ogni termine del 1° polinomio moltiplica \textbf{tutti} i termini
+        del 2° (sommando gli esponenti delle lettere uguali).}
+
+\end{schedaTabella}
+
+%% =====================================================================
+\schedaSezione{2}{Prodotti Notevoli}
+%% =====================================================================
+\begin{schedaTabella}{Prodotto notevole}{Schema visivo}{Sviluppo a parole}
+
+  \riga{\voce{Quadrato di binomio}{}}
+       {$(\formaQuadrato+\formaTriangolo)^{2}
+         =(\formaQuadrato)^{2}+2(\formaQuadrato)(\formaTriangolo)
+          +(\formaTriangolo)^{2}$}
+       {Quadrato del 1°, \textbf{doppio prodotto} del 1° per il 2°,
+        quadrato del 2°.}
+
+  \riga{\voce{Differenza di quadrati}{(somma per differenza)}}
+       {$(\formaQuadrato+\formaTriangolo)(\formaQuadrato-\formaTriangolo)
+         =(\formaQuadrato)^{2}-(\formaTriangolo)^{2}$}
+       {Quadrato del termine che non cambia segno \textbf{meno} quadrato
+        del termine che cambia segno.}
+
+  \riga{\voce{Cubo di binomio}{}}
+       {$(\formaQuadrato+\formaTriangolo)^{3}
+         =(\formaQuadrato)^{3}+3(\formaQuadrato)^{2}(\formaTriangolo)
+          +3(\formaQuadrato)(\formaTriangolo)^{2}+(\formaTriangolo)^{3}$}
+       {Cubo del 1°, \textbf{triplo prodotto} del quadrato del 1° per il 2°,
+        triplo prodotto del 1° per il quadrato del 2°, cubo del 2°.}
+
+  \riga{\voce{Quadrato di trinomio}{}}
+       {$(\formaQuadrato+\formaTriangolo+\formaCerchio)^{2}
+         =(\formaQuadrato)^{2}+(\formaTriangolo)^{2}+(\formaCerchio)^{2}
+          +2(\formaQuadrato)(\formaTriangolo)$\par\vspace{2pt}
+        $\phantom{{}={}}+2(\formaQuadrato)(\formaCerchio)
+          +2(\formaTriangolo)(\formaCerchio)$}
+       {Somma dei \textbf{tre quadrati} più i \textbf{tre doppi prodotti}
+        delle possibili coppie.}
+
+\end{schedaTabella}
+
+\end{document}

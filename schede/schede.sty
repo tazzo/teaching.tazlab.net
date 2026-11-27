@@ -129,6 +129,108 @@
     \fi}}
 
 %% =====================================================================
+%%  3bis. LE FRECCE CURVE — quale termine moltiplica quale
+%% =====================================================================
+%%  In una formula fatta di FORME una freccia dritta non dice niente: per
+%%  far vedere che il primo termine moltiplica TUTTI i termini del secondo
+%%  serve l'arco che parte da un termine e scende sull'altro. È la cosa che
+%%  l'operatore ha chiesto il 27/11/2026: «riprodurre questo schema anche
+%%  con quelle frecce curve che si vedono, che sono utili per far capire
+%%  l'operazione». Sta qui perché la prossima scheda le riusa senza
+%%  ridisegnarle.
+%%
+%%  Uso — la formula si scrive a PEZZI dentro l'ambiente, così ogni pezzo ha
+%%  un nome e le frecce partono e arrivano per nome:
+%%
+%%      \begin{schedaFrecce}
+%%        \termine{q}{$\formaQuadrato$}      % il primo termine
+%%        \termine[1pt]{lp}{$($}             % lo spazio prima, in pt
+%%        \termine[2pt]{t}{$\formaTriangolo$}
+%%        ...
+%%        \termine[6pt]{coda}{$=(\formaQuadrato)(\formaTriangolo)$}
+%%        \frecciaCurva[colore=schedeBlu]{q}{t}        % arco, punta su t
+%%        \frecciaCurva[colore=schedeBlu,giro=2]{q}{c}
+%%      \end{schedaFrecce}
+%%
+%%  Opzioni di \frecciaCurva:
+%%      sotto            l'arco passa SOTTO la riga (di norma passa sopra)
+%%      giro=<n>         quanto è alto (o profondo) l'arco: 1, 2, 3 …
+%%                       Serve a far stare più archi uno dentro l'altro
+%%                       senza sovrapporsi: allo stesso bersaglio, il più
+%%                       lontano prende il giro più alto.
+%%      colore=<colore>  il colore dell'arco e della punta. Di norma il
+%%                       grigio della casa (le frecce sono grigie, sezione
+%%                       1). Si dà un colore DELLA PALETTE quando l'arco
+%%                       deve dire DA QUALE TERMINE parte — blu per il
+%%                       quadrato, rosso per il triangolo: un colore nuovo
+%%                       non si inventa.
+%%
+%%  La punta è quella della casa (Stealth 2.8×2.4 pt), la stessa di
+%%  \freccia: cambia solo il percorso, che è un arco.
+%% ---------------------------------------------------------------------
+\newif\ifschede@arcoSotto
+\newcount\schede@arcoGiro
+\def\schede@arcoColore{schedeGrigio}
+\pgfkeys{/schede/freccia/.cd,
+  sotto/.is if=schede@arcoSotto,
+  giro/.code={\schede@arcoGiro=#1\relax},
+  colore/.code={\def\schede@arcoColore{#1}},
+}
+
+%%  \frecciaCurva[opzioni]{partenza}{arrivo} — l'arco fra due pezzi della
+%%  formula, con la punta sull'arrivo. Non prende una tikzpicture per sé:
+%%  disegna DENTRO quella dell'ambiente, dove i due nomi esistono.
+\newcommand{\frecciaCurva}[3][]{%
+  \begingroup
+  \schede@arcoSottofalse
+  \schede@arcoGiro=1
+  \def\schede@arcoColore{schedeGrigio}%
+  \pgfqkeys{/schede/freccia}{#1}%
+  %% la forma dell'arco: esce verticale dal termine, rientra verticale
+  %% sull'altro (la punta guarda in giù, come nel foglio dell'operatore).
+  %% L'altezza NON è relativa alla distanza fra i due termini (con ``looseness''
+  %% due termini vicini darebbero un arco piatto, che passa dentro la
+  %% parentesi): è un numero di punti per «giro», così l'arco più corto è
+  %% sempre abbastanza alto per scavalcare ciò che sta in mezzo.
+  \pgfmathsetlengthmacro{\schede@arcoA}{5pt+9pt*\schede@arcoGiro}%
+  \ifschede@arcoSotto
+    \def\schede@arcoAnc{south}%
+    \pgfmathsetlengthmacro{\schede@arcoA}{-\schede@arcoA}%
+  \else
+    \def\schede@arcoAnc{north}%
+  \fi
+  \draw[-{Stealth[length=2.8pt,width=2.4pt]},line width=0.9pt,
+        color=\schede@arcoColore]
+    (#2.\schede@arcoAnc)
+      .. controls ([yshift=\schede@arcoA]#2.\schede@arcoAnc)
+              and ([yshift=\schede@arcoA]#3.\schede@arcoAnc)
+      .. (#3.\schede@arcoAnc);
+  \endgroup}
+
+%%  \begin{schedaFrecce} … \end{schedaFrecce} — una riga di formula a
+%%  pezzi, con la sua base: ogni \termine sta sulla stessa linea di base e
+%%  accanto al precedente, esattamente come lo scriverebbe la matematica.
+%%  Gli archi allargano la riga in alto (o in basso) da soli: è la riga che
+%%  cresce, non un margine scritto a mano nella scheda.
+\newenvironment{schedaFrecce}{%
+  \par\noindent
+  \begin{tikzpicture}[baseline=(schede@f0.base),line cap=round,line join=round]
+    \node[inner sep=0pt,outer sep=0pt,minimum size=0pt,anchor=base west]
+      (schede@f0) at (0,0) {};
+    \gdef\schede@ultimo{schede@f0}%
+}{%
+  \end{tikzpicture}\par}
+
+%%  \termine[spazio prima]{nome}{contenuto} — un pezzo della formula. Lo
+%%  spazio (facoltativo) è quello che la matematica metterebbe: niente fra
+%%  «(» e la forma, \medmuskip attorno a un «+», un po' di più attorno a «=».
+\newcommand{\termine}[3][0pt]{%
+  \node[inner sep=0pt,outer sep=0pt,anchor=base west,xshift=#1]
+    (#2) at (\schede@ultimo.base east) {#3};%
+  \gdef\schede@ultimo{#2}%
+}
+
+%% =====================================================================
 %%  4. LA RADICE — il segno con l'indice, disegnato attorno a ciò che
 %%     gli si dà (una forma, un numero, una lettera, una formula)
 %% =====================================================================
