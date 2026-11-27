@@ -16,6 +16,17 @@
 %%      radice»: ³√(▲) = ⁶√(▲²), cioè l'indice si moltiplica, non si divide.
 %%  Le altre sezioni, la libreria e la palette non si toccano.
 %%
+%%  LE DUE CORREZIONI DELLA SERA (ordine dell'operatore, 27/11/2026, ore 19:15,
+%%  con screenshot) — sempre nella riga «Cambiare l'indice della radice»:
+%%  (3) il PASSO IN PIÙ: l'indice si costruisce sotto gli occhi, prima il
+%%      prodotto e poi il risultato — ³√(∎³·▲⁴) = ²·³√(…) = ⁶√(…), due
+%%      uguaglianze e non una. Il 6 non compare già calcolato.
+%%  (4) il RADICANDO con DUE fattori (∎³·▲⁴): l'esponente 2 si applica a
+%%      TUTTI i fattori, e in fondo si leggono i due esponenti ∎⁶·▲⁸.
+%%  Fra i due passi c'è «=» e non una freccia: le tre scritture sono la
+%%  STESSA radice (è la proprietà invariantiva), e l'operatore stesso ha
+%%  scritto la catena con gli uguali.
+%%
 %%  Qui non c'è grafica: tutto sta in ../schede.sty. Le formule sono quelle
 %%  della scheda dell'operatore (il PDF Chromium «Schema sui Radicali»,
 %%  124364 B, in tests/golden/schede/) e quelle della seconda scheda: nessuna
@@ -118,10 +129,12 @@ radice: è la stessa radice scritta in un altro modo.}
 \begin{schedaTabella}{Cosa si fa}{Schema visivo (stesso numero $n$)}{Esempio}
 
   \riga{\voce{Cambiare l'indice della radice}{(moltiplicare per $k$)}}
-       {$\radice[n]{\formaQuadrato}
-         \;\freccia\;\radice[n\cdot k]{\formaQuadrato^{k}}$}
-       {$\radice[3]{\formaQuadrato}
-         =\radice[6]{\formaQuadrato^{2}}$}
+       {$\radice[n]{\formaQuadrato\cdot\formaTriangolo}
+         \;\freccia\;\radice[n\cdot k]{(\formaQuadrato)^{k}\cdot(\formaTriangolo)^{k}}$}
+       {$\radice[3]{\formaQuadrato^{3}\cdot\formaTriangolo^{4}}
+         =\radice[2\cdot 3]{(\formaQuadrato^{3})^{2}\cdot(\formaTriangolo^{4})^{2}}$\par\vspace{3pt}
+        $\phantom{\radice[3]{\formaQuadrato^{3}\cdot\formaTriangolo^{4}}}
+         =\radice[6]{\formaQuadrato^{6}\cdot\formaTriangolo^{8}}$}
 
   \riga{\voce{Portar fuori}{(se il radicando è un prodotto)}}
        {$\radice[n]{\formaQuadrato^{n}\cdot\formaTriangolo}
