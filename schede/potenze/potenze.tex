@@ -1,0 +1,95 @@
+%% ---------------------------------------------------------------------
+%%  Le Potenze: Schema Visivo — le regole delle operazioni e i casi
+%%  particolari in UNA pagina A4.
+%%
+%%  Ordine dell'operatore, 27/11/2026: «stesso lavoro su questo PDF: le
+%%  proprietà delle potenze, stessa coerenza e stessa pubblicazione». Il PDF
+%%  è il suo («Le Potenze: Schema Visivo», 110034 B): le due sezioni e le
+%%  otto proprietà sono quelle sue, nessuna tolta per far stare la pagina —
+%%  il respiro lo toglie la libreria (\schedaCompatta, \schedaMarginiSicuri).
+%%
+%%  LA LEGENDA DEL SUO PDF, TRADOTTA NELLE FORME DELLA CASA:
+%%      base 1 «a»  ->  \formaQuadrato   (blu)
+%%      base 2 «b»  ->  \formaTriangolo  (rosso)
+%%      esponenti «n», «m»  ->  restano LETTERE: sono esponenti, non basi,
+%%      e una forma in apice non si legge (la mappatura è nel report).
+%%
+%%  Qui non c'è grafica: tutto sta in ../schede.sty.
+%% ---------------------------------------------------------------------
+\documentclass[10pt]{article}
+\usepackage{schede}
+
+%% Testata e piede dentro la zona che ogni stampante sa stampare.
+\schedaMarginiSicuri
+%% Due sezioni e otto righe in una pagina: si toglie respiro agli SPAZI,
+%% non al testo (la regola della libreria).
+\schedaCompatta
+
+\schedaTitolo{Le Potenze: Schema Visivo}
+             {Operazioni \textperiodcentered\ Esponenti \textperiodcentered\ Casi Particolari}
+\schedaPiede{Schema di Matematica — Le Potenze}
+
+\begin{document}
+
+%% ---------------------------------------------------------------------
+%%  LA LEGENDA — le forme al posto delle lettere, come nel suo PDF
+%% ---------------------------------------------------------------------
+{\raggedleft\footnotesize\color{schedeGrigio}%
+ Legenda:\quad \formaQuadrato{} base $a$ \quad \formaTriangolo{} base $b$
+ \quad $n$, $m$ esponenti\par}
+\vspace{2pt}
+
+%% =====================================================================
+\schedaSezione{1}{Operazioni con la Stessa Base}
+%% =====================================================================
+\schedaColonne{0.275}{0.365}{0.36}
+\begin{schedaTabella}{Proprietà}{Schema visivo}{Esempio numerico}
+
+  \riga{\voce{Prodotto stesse basi}{(si sommano gli esponenti)}}
+       {$\formaQuadrato^{n}\cdot\formaQuadrato^{m}
+         \;\freccia\;\formaQuadrato^{n+m}$}
+       {$3^{2}\cdot 3^{4}=3^{2+4}=3^{6}$}
+
+  \riga{\voce{Quoziente stesse basi}{(si sottraggono gli esponenti)}}
+       {$\formaQuadrato^{n}:\formaQuadrato^{m}
+         \;\freccia\;\formaQuadrato^{n-m}$}
+       {$5^{7}:5^{3}=5^{7-3}=5^{4}$}
+
+  \riga{\voce{Potenza di potenza}{(si moltiplicano gli esponenti)}}
+       {$(\formaQuadrato^{n})^{m}
+         \;\freccia\;\formaQuadrato^{n\cdot m}$}
+       {$(2^{3})^{2}=2^{3\cdot 2}=2^{6}$}
+
+\end{schedaTabella}
+
+%% =====================================================================
+\schedaSezione{2}{Stesso Esponente \& Casi Particolari}
+%% =====================================================================
+\schedaColonne{0.275}{0.365}{0.36}
+\begin{schedaTabella}{Proprietà}{Schema visivo}{Esempio numerico}
+
+  \riga{\voce{Prodotto stessi esponenti}{(si moltiplicano le basi)}}
+       {$\formaQuadrato^{n}\cdot\formaTriangolo^{n}
+         \;\freccia\;(\formaQuadrato\cdot\formaTriangolo)^{n}$}
+       {$4^{2}\cdot 3^{2}=(4\cdot 3)^{2}=12^{2}$}
+
+  \riga{\voce{Quoziente stessi esponenti}{(si dividono le basi)}}
+       {$\formaQuadrato^{n}:\formaTriangolo^{n}
+         \;\freccia\;(\formaQuadrato:\formaTriangolo)^{n}$}
+       {$10^{3}:5^{3}=(10:5)^{3}=2^{3}$}
+
+  \riga{\voce{Esponente zero}{(con base diversa da zero)}}
+       {$\formaQuadrato^{0}\;\freccia\;1$}
+       {$15^{0}=1$}
+
+  \riga{\voce{Esponente uno}{(la base resta invariata)}}
+       {$\formaQuadrato^{1}\;\freccia\;\formaQuadrato$}
+       {$8^{1}=8$}
+
+  \riga{\voce{Esponente negativo}{(si inverte la base)}}
+       {$\formaQuadrato^{-n}\;\freccia\;\dfrac{1}{\formaQuadrato^{n}}$}
+       {$2^{-3}=\dfrac{1}{2^{3}}=\dfrac{1}{8}$}
+
+\end{schedaTabella}
+
+\end{document}
