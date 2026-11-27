@@ -159,12 +159,12 @@ FORMULE = (
     },
     # --- 3. Semplificazione -------------------------------------------------
     {
-        "voce": "Semplificare l'indice",
+        "voce": "Cambiare l'indice della radice",
         "sezione": 3,
         "dal_suo": False,
         "schema": ("n", "k"),
-        "esempio": ("=", "6", "3", "2"),
-        "perche": "proprietà invariantiva: indice ed esponente divisi per k",
+        "esempio": ("=", "3", "6", "2"),
+        "perche": "proprietà invariantiva al contrario: indice ed esponente MOLTIPLICATI per k (3 → 6)",
     },
     {
         "voce": "Portar fuori",
@@ -195,6 +195,27 @@ MINIMO_CELLA = 600
 # mano) e non sarà mai identica. Una formula che sparisce scende a zero, che è
 # sotto la banda; una che cambia forma resta dentro.
 RAPPORTO_MIN, RAPPORTO_MAX = 0.25, 4.0
+
+# I QUATTRO COLORI DELLA PALETTE, come pixel RGB (schede.sty §1). Servono a una
+# cosa che il testo non può dire e l'inchiostro da solo non distingue: l'ORDINE
+# delle forme dentro una formula. Il quadrato è blu, il triangolo rosso, il
+# cerchio verde, e la freccia è grigia — quindi la posizione di ogni forma si
+# legge dai pixel, e l'ordine si misura invece di leggerlo nel sorgente.
+PALETTE = {
+    "blu": (0x25, 0x63, 0xEB),    # quadrato
+    "rosso": (0xDC, 0x26, 0x26),  # triangolo
+    "verde": (0x16, 0xA3, 0x4A),  # cerchio
+    "grigio": (0x47, 0x55, 0x69), # frecce, rombo, note
+}
+
+# Il minimo di pixel di un colore perché la sua posizione media voglia dire
+# qualcosa: una forma piena a 200 dpi ne ha centinaia di esatti (il cuore del
+# riempimento, fuori dall'antialiasing), una freccia ~40.
+MINIMO_COLORE = 20
+
+# Lo stesso elenco come numero RGB impacchettato: il confronto per pixel costa
+# un confronto solo invece di un ciclo sui quattro colori.
+ESATTO = {(r << 16) | (g << 8) | b: nome for nome, (r, g, b) in PALETTE.items()}
 
 
 # ------------------------------------------------------------------ strumenti
@@ -401,12 +422,80 @@ def _misura(
                 if pixel[riga * larghezza * 3 + k] < 200
             )
 
+        def posizioni_px(xa: float, xb: float) -> dict[str, tuple[int, float]]:
+            """Dove sta ogni colore della palette dentro la cella: (pixel, x medio in PIXEL).
+
+            È la misura che l'inchiostro da solo non sa fare: due formule con le
+            stesse forme in ordine diverso hanno lo stesso inchiostro e lo stesso
+            testo — cambia solo DOVE sta la forma. Con zero pixel del colore la
+            posizione è -1.
+            """
+            conta = {nome: [0, 0.0] for nome in PALETTE}
+            for riga in range(a + 1, b):
+                base = riga * larghezza * 3
+                for x in range(int(xa), int(xb)):
+                    rgb = (pixel[base + x * 3] << 16) | (pixel[base + x * 3 + 1] << 8) | pixel[base + x * 3 + 2]
+                    nome = ESATTO.get(rgb)
+                    if nome is not None:
+                        conta[nome][0] += 1
+                        conta[nome][1] += x
+            return {
+                nome: (quanti, (somma / quanti) if quanti else -1.0)
+                for nome, (quanti, somma) in conta.items()
+            }
+
+        def in_punti(posi: dict[str, tuple[int, float]]) -> dict[str, tuple[int, float]]:
+            return {
+                nome: (quanti, (x / per_pt) if quanti else -1.0)
+                for nome, (quanti, x) in posi.items()
+            }
+
+        def parole_cella(xa: float, xb: float) -> tuple[tuple[str, float], ...]:
+            """Le parole della cella in ordine di lettura, con il loro x medio (punti)."""
+            trovate = [
+                (testo, (px0 + px1) / 2 * per_pt)
+                for testo, px0, py0, px1, py1 in parole
+                if xa <= (px0 + px1) / 2 * per_pt < xb and a < (py0 + py1) / 2 * per_pt < b
+            ]
+            return tuple(sorted(trovate, key=lambda coppia: coppia[1]))
+
+        def firma(xa: float, xb: float) -> tuple[str, ...]:
+            """L'ORDINE delle forme lungo la riga: la sequenza dei colori, da sinistra.
+
+            È la misura che né il testo né l'inchiostro sanno fare: la stessa formula
+            scritta con le forme in ordine diverso ha gli stessi atomi e lo stesso
+            inchiostro — cambia solo in che ordine i colori si incontrano. Ogni colonna
+            di pixel appartiene al colore che vi ha più pixel (le colonne vuote non
+            contano), e le colonne uguali di fila diventano una voce sola: ne esce la
+            parola che la riga scrive, per esempio «blu, rosso, rosso, blu».
+            """
+            etichette: list[str] = []
+            for x in range(int(xa), int(xb)):
+                conta = {nome: 0 for nome in PALETTE}
+                for riga in range(a + 1, b):
+                    base = riga * larghezza * 3 + x * 3
+                    rgb = (pixel[base] << 16) | (pixel[base + 1] << 8) | pixel[base + 2]
+                    nome = ESATTO.get(rgb)
+                    if nome is not None:
+                        conta[nome] += 1
+                migliore = max(conta, key=lambda chiave: conta[chiave])
+                if conta[migliore] >= 2:  # una forma, non un pixel di antialiasing
+                    etichette.append(migliore)
+            ordine: list[str] = []
+            for nome in etichette:
+                if not ordine or ordine[-1] != nome:
+                    ordine.append(nome)
+            return tuple(ordine)
+
         misure[formula["voce"]] = {
             "celle": tuple(testo_cella(limiti[i], limiti[i + 1]) for i in range(3)),
             "inchiostro": tuple(inchiostro(limiti[i], limiti[i + 1]) for i in (1, 2)),
             "caratteri": tuple(
                 caratteri(testo_cella(limiti[i], limiti[i + 1])) for i in (1, 2)
             ),
+            "posizioni": tuple(in_punti(posizioni_px(limiti[i], limiti[i + 1])) for i in (1, 2)),
+            "parole": tuple(parole_cella(limiti[i], limiti[i + 1]) for i in (1, 2)),
+            "firma": tuple(firma(limiti[i], limiti[i + 1]) for i in (1, 2)),
         }
     return misure
 
@@ -494,6 +583,119 @@ def test_ogni_formula_e_disegnata(nostro: dict[str, dict[str, object]]) -> None:
         if nostro[formula["voce"]]["inchiostro"][i - 1] < MINIMO_CELLA
     ]
     assert not vuote, "celle di formula senza disegno (una formula non è stata disegnata):\n" + "\n".join(vuote)
+
+
+def test_portar_dentro_manda_il_fattore_a_destra(nostro: dict[str, dict[str, object]]) -> None:
+    """L'ORDINE, misurato sul disegno: il fattore che entra va DOPO ciò che era già dentro.
+
+    Ordine dell'operatore (27/11/2026, con due screenshot): «il fattore che si porta
+    dentro deve finire a DESTRA di quello che è già dentro» — ²√(▲ · ●²), non
+    ²√(●² · ▲). L'atomo non lo può dire (gli stessi atomi, in qualunque ordine), e
+    nemmeno l'inchiostro (le stesse forme). Lo dice la firma dei colori, che è la
+    sequenza delle forme lette da sinistra a destra:
+
+        schema   ∎ · ⁿ√(▲)  →  ⁿ√(▲ · ∎ⁿ)      blu, rosso, [freccia], rosso, blu
+        esempio  ● · ²√(▲)  =  ²√(▲ · ●²)      verde, rosso, verde
+
+    Il quadrato (blu) è il fattore che entra, il triangolo (rosso) è ciò che era già
+    sotto radice, il cerchio (verde) è il fattore dell'esempio. Prima della correzione
+    la firma era quella di «Portar fuori» — blu, rosso, [freccia], BLU, ROSSO: la
+    stessa uguaglianza letta nell'altro verso. Se il fattore rientra a sinistra, questo
+    test è rosso e dice in che ordine sono le forme.
+    """
+    firma = nostro["Portar dentro"]["firma"]
+    assert firma[0] == ("blu", "rosso", "grigio", "rosso", "blu"), (
+        "«Portar dentro», schema: le forme sono " + ", ".join(firma[0]) + " — il fattore "
+        "che entra (blu) deve stare a DESTRA di ciò che era già dentro (rosso): "
+        "atteso blu, rosso, [freccia], rosso, blu"
+    )
+    assert firma[1] == ("verde", "rosso", "verde"), (
+        "«Portar dentro», esempio: le forme sono " + ", ".join(firma[1]) + " — atteso "
+        "verde, rosso, verde (²√(▲ · ●²))"
+    )
+
+
+def test_cambiare_indice_va_dall_indice_piccolo_al_grande(
+    nostro: dict[str, dict[str, object]]
+) -> None:
+    """La semplificazione si legge al CONTRARIO: ³√(∎) = ⁶√(∎²), l'indice si moltiplica.
+
+    Ordine dell'operatore (27/11/2026): il titolo è «Cambiare l'indice della radice» e
+    la formula va da sinistra (indice 3) a destra (indice 6), non il contrario. Qui
+    l'ordine si legge dalle POSIZIONI delle parole estratte — il 3 dev'essere a
+    sinistra del 6, e l'esponente 2 attaccato al 6 — e nella colonna dello schema
+    l'ultima parola della riga dev'essere la «k» dell'esponente, non l'«n» dell'indice.
+    """
+    schema, esempio = nostro["Cambiare l'indice della radice"]["parole"]
+    assert schema[0][0] == "n" and schema[-1][0] == "k", (
+        "«Cambiare l'indice», schema: la riga comincia con "
+        + schema[0][0] + " e finisce con " + schema[-1][0] + " — deve cominciare con l'indice "
+        "«n» della radice di sinistra e finire con la «k» dell'esponente di destra "
+        "(ⁿ√(∎) → ⁿ·ᵏ√(∎ᵏ))"
+    )
+    x = {testo: posizione for testo, posizione in esempio}
+    for atomo in ("3", "6", "2", "="):
+        assert atomo in x, f"manca «{atomo}» nell'esempio di «Cambiare l'indice»: {esempio}"
+    assert x["3"] < x["6"], (
+        f"l'esempio ha il 6 a sinistra del 3 (3 a {x['3']:.1f} pt, 6 a {x['6']:.1f} pt): "
+        "è la lettura di prima — deve essere ³√(∎) = ⁶√(∎²)"
+    )
+    assert x["2"] > x["6"], (
+        f"l'esponente 2 non è attaccato al radicando di destra (6 a {x['6']:.1f} pt, "
+        f"2 a {x['2']:.1f} pt)"
+    )
+
+
+def test_l_ordine_delle_due_formule_sa_fallire(
+    tmp_path: Path, nostro: dict[str, dict[str, object]]
+) -> None:
+    """Rimesse le due formule nell'ordine di prima, la misura dell'ordine le nomina.
+
+    Una prova d'ordine che non può fallire non è una prova: si ricompila la scheda con
+    le due formule girate come erano fino al 26/11 (²√(●² · ▲) e ⁶√(∎²) = ³√(∎)) e si
+    verifica che la firma dei colori e la posizione delle parole cambino — cioè che i
+    due test qui sopra sarebbero rossi su quel sorgente.
+    """
+    sorgente = SORGENTE.read_text(encoding="utf-8")
+    girate = [
+        (
+            "{$\\radice[n]{\\formaQuadrato}\n         \\;\\freccia\\;\\radice[n\\cdot k]{\\formaQuadrato^{k}}$}",
+            "{$\\radice[n\\cdot k]{\\formaQuadrato^{k}}\n         \\;\\freccia\\;\\radice[n]{\\formaQuadrato}$}",
+        ),
+        (
+            "{$\\radice[3]{\\formaQuadrato}\n         =\\radice[6]{\\formaQuadrato^{2}}$}",
+            "{$\\radice[6]{\\formaQuadrato^{2}}\n         =\\radice[3]{\\formaQuadrato}$}",
+        ),
+        (
+            "\\radice[n]{\\formaTriangolo\\cdot\\formaQuadrato^{n}}",
+            "\\radice[n]{\\formaQuadrato^{n}\\cdot\\formaTriangolo}",
+        ),
+        (
+            "\\radice[2]{\\formaTriangolo\\cdot\\formaCerchio^{2}}",
+            "\\radice[2]{\\formaCerchio^{2}\\cdot\\formaTriangolo}",
+        ),
+    ]
+    mutato = sorgente
+    for nuovo, vecchio in girate:
+        assert nuovo in mutato, (
+            "il sorgente è cambiato di forma: la prova d'ordine non sa più girarlo — "
+            f"non trovo {nuovo!r}"
+        )
+        mutato = mutato.replace(nuovo, vecchio)
+
+    pdf = costruisci(tmp_path / "girato", mutato)
+    assert pagine(pdf) == 1
+    misure = _misura(pdf, tmp_path / "misura-girata")
+
+    assert misure["Portar dentro"]["firma"][0] == ("blu", "rosso", "grigio", "blu", "rosso"), (
+        "girate le formule, la firma di «Portar dentro» dovrebbe essere quella di "
+        "«Portar fuori»: la misura dell'ordine non si è accorta del giro"
+    )
+    esempio = {testo: posizione for testo, posizione in misure["Cambiare l'indice della radice"]["parole"][1]}
+    assert esempio["6"] < esempio["3"], (
+        "girata la formula, il 6 dovrebbe tornare a sinistra del 3: la misura "
+        "dell'ordine non se ne accorge"
+    )
 
 
 def test_le_formule_del_suo_pdf_ci_sono_tutte(
