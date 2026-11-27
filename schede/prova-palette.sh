@@ -17,8 +17,8 @@ QUI=$(cd "$(dirname "$0")" && pwd)
 STY="$QUI/schede.sty"
 PRIMA="2563EB"            # il blu della casa
 DOPO="7C3AED"             # un altro colore, solo per la prova
-CARTELLA="$QUI/radicali"
-SCHEDE="radicali"
+CARTELLE="$QUI/radicali $QUI/polinomi"
+SCHEDE="radicali polinomi"
 DPI=60                    # bassa risoluzione: bastano i pixel pieni
 
 copia=$(mktemp)
@@ -26,7 +26,7 @@ cp "$STY" "$copia"
 ripristina() {
   cp "$copia" "$STY"
   rm -f "$copia"
-  ( cd "$CARTELLA" && make >/dev/null 2>&1 )
+  for d in $CARTELLE; do ( cd "$d" && make >/dev/null 2>&1 ); done
 }
 trap ripristina EXIT INT TERM
 
@@ -53,11 +53,18 @@ PY
   rm -f "${ppm%.*}.ppm" "$ppm"
 }
 
-compila() { ( cd "$CARTELLA" && make >/dev/null 2>&1 ) || { echo "ERRORE: make in $CARTELLA"; exit 1; }; }
+compila() {
+  for d in $CARTELLE; do
+    ( cd "$d" && make >/dev/null 2>&1 ) || { echo "ERRORE: make in $d"; exit 1; }
+  done
+}
+
+# la cartella di una scheda: le schede stanno una per cartella col loro nome
+cartella() { echo "$QUI/$1"; }
 
 echo "== 1. la scheda com'è adesso (blu $PRIMA) =="
 compila
-for s in $SCHEDE; do printf '  %-12s blu=%s\n' "$s" "$(conta "$CARTELLA/$s.pdf" "$PRIMA")"; done
+for s in $SCHEDE; do printf '  %-12s blu=%s\n' "$s" "$(conta "$(cartella "$s")/$s.pdf" "$PRIMA")"; done
 
 echo "== 2. cambio il blu in un punto solo: $PRIMA -> $DOPO =="
 sed -i "s/^\\\\definecolor{schedeBlu}{HTML}{$PRIMA}/\\\\definecolor{schedeBlu}{HTML}{$DOPO}/" "$STY"
@@ -68,8 +75,8 @@ fi
 compila
 esito=0
 for s in $SCHEDE; do
-  vecchio=$(conta "$CARTELLA/$s.pdf" "$PRIMA")
-  nuovo=$(conta "$CARTELLA/$s.pdf" "$DOPO")
+  vecchio=$(conta "$(cartella "$s")/$s.pdf" "$PRIMA")
+  nuovo=$(conta "$(cartella "$s")/$s.pdf" "$DOPO")
   printf '  %-12s blu=%s  %s=%s\n' "$s" "$vecchio" "$DOPO" "$nuovo"
   if [ "$vecchio" != "0" ] || [ "$nuovo" -le 0 ]; then
     echo "  ROSSO: $s non ha seguito la palette"; esito=1
@@ -79,7 +86,7 @@ done
 echo "== 3. rimetto il blu della casa e ricompilo =="
 ripristina
 trap - EXIT INT TERM
-for s in $SCHEDE; do printf '  %-12s blu=%s\n' "$s" "$(conta "$CARTELLA/$s.pdf" "$PRIMA")"; done
+for s in $SCHEDE; do printf '  %-12s blu=%s\n' "$s" "$(conta "$(cartella "$s")/$s.pdf" "$PRIMA")"; done
 
 if [ "$esito" -eq 0 ]; then
   echo "VERDE: il blu si cambia in una riga e la scheda lo segue."
