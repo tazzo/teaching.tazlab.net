@@ -9,6 +9,13 @@
 %%  studiano — prima DOVE la radice esiste, poi come si opera, poi come si
 %%  semplifica.
 %%
+%%  DUE CORREZIONI ALLA SCHEDA (ordine dell'operatore, 27/11/2026):
+%%  (1) «portar dentro» mette il fattore a DESTRA di quello che era già
+%%      sotto radice — ²√(▲ · ●²), non ²√(●² · ▲);
+%%  (2) la semplificazione si legge al CONTRARIO — «cambiare l'indice della
+%%      radice»: ³√(▲) = ⁶√(▲²), cioè l'indice si moltiplica, non si divide.
+%%  Le altre sezioni, la libreria e la palette non si toccano.
+%%
 %%  Qui non c'è grafica: tutto sta in ../schede.sty. Le formule sono quelle
 %%  della scheda dell'operatore (il PDF Chromium «Schema sui Radicali»,
 %%  124364 B, in tests/golden/schede/) e quelle della seconda scheda: nessuna
@@ -110,11 +117,11 @@ radice: è la stessa radice scritta in un altro modo.}
 
 \begin{schedaTabella}{Cosa si fa}{Schema visivo (stesso numero $n$)}{Esempio}
 
-  \riga{\voce{Semplificare l'indice}{(dividere per $k$)}}
-       {$\radice[n\cdot k]{\formaQuadrato^{k}}
-         \;\freccia\;\radice[n]{\formaQuadrato}$}
-       {$\radice[6]{\formaQuadrato^{2}}
-         =\radice[3]{\formaQuadrato}$}
+  \riga{\voce{Cambiare l'indice della radice}{(moltiplicare per $k$)}}
+       {$\radice[n]{\formaQuadrato}
+         \;\freccia\;\radice[n\cdot k]{\formaQuadrato^{k}}$}
+       {$\radice[3]{\formaQuadrato}
+         =\radice[6]{\formaQuadrato^{2}}$}
 
   \riga{\voce{Portar fuori}{(se il radicando è un prodotto)}}
        {$\radice[n]{\formaQuadrato^{n}\cdot\formaTriangolo}
@@ -124,15 +131,14 @@ radice: è la stessa radice scritta in un altro modo.}
 
   \riga{\voce{Portar dentro}{(il fattore davanti)}}
        {$\formaQuadrato\cdot\radice[n]{\formaTriangolo}
-         \;\freccia\;\radice[n]{\formaQuadrato^{n}\cdot\formaTriangolo}$}
+         \;\freccia\;\radice[n]{\formaTriangolo\cdot\formaQuadrato^{n}}$}
        {$\formaCerchio\cdot\radice[2]{\formaTriangolo}
-         =\radice[2]{\formaCerchio^{2}\cdot\formaTriangolo}$}
+         =\radice[2]{\formaTriangolo\cdot\formaCerchio^{2}}$}
 
 \end{schedaTabella}
 
-{\footnotesize\color{schedeGrigio}Le tre mosse si leggono al contrario
-l'una dell'altra: portare fuori e portare dentro sono la stessa uguaglianza,
-e semplificare l'indice è la proprietà invariantiva letta da sinistra a
-destra.\par}
+{\footnotesize\color{schedeGrigio}Portare fuori e portare dentro sono la
+stessa uguaglianza; cambiare l'indice è la proprietà invariantiva letta
+dall'altro verso.\par}
 
 \end{document}
