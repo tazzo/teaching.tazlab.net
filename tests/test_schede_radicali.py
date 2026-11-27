@@ -162,9 +162,12 @@ FORMULE = (
         "voce": "Cambiare l'indice della radice",
         "sezione": 3,
         "dal_suo": False,
-        "schema": ("n", "k"),
-        "esempio": ("=", "3", "6", "2"),
-        "perche": "proprietà invariantiva al contrario: indice ed esponente MOLTIPLICATI per k (3 → 6)",
+        "schema": ("n", "k", "·", "(", ")"),
+        "esempio": ("=", "2", "·", "3", "6", "8"),
+        "perche": (
+            "proprietà invariantiva al contrario: indice ed esponente MOLTIPLICATI per k"
+            " — ³√(∎³·▲⁴) = ²·³√((∎³)²·(▲⁴)²) = ⁶√(∎⁶·▲⁸), l'esponente su TUTTI i fattori"
+        ),
     },
     {
         "voce": "Portar fuori",
@@ -615,55 +618,100 @@ def test_portar_dentro_manda_il_fattore_a_destra(nostro: dict[str, dict[str, obj
     )
 
 
-def test_cambiare_indice_va_dall_indice_piccolo_al_grande(
+def test_cambiare_indice_mostra_i_due_passi_e_tutti_i_fattori(
     nostro: dict[str, dict[str, object]]
 ) -> None:
-    """La semplificazione si legge al CONTRARIO: ³√(∎) = ⁶√(∎²), l'indice si moltiplica.
+    """L'indice si COSTRUISCE: ³√(∎³·▲⁴) = ²·³√((∎³)²·(▲⁴)²) = ⁶√(∎⁶·▲⁸).
 
-    Ordine dell'operatore (27/11/2026): il titolo è «Cambiare l'indice della radice» e
-    la formula va da sinistra (indice 3) a destra (indice 6), non il contrario. Qui
-    l'ordine si legge dalle POSIZIONI delle parole estratte — il 3 dev'essere a
-    sinistra del 6, e l'esponente 2 attaccato al 6 — e nella colonna dello schema
-    l'ultima parola della riga dev'essere la «k» dell'esponente, non l'«n» dell'indice.
+    Ordine dell'operatore (27/11/2026, sera, con screenshot): «vorrei un passaggio in
+    più dove si vede 2×3 e poi il passaggio dopo 6», e «il radicando potrebbe essere
+    più complesso: un quadrato alla 3 e un triangolo alla 4, per far vedere che
+    l'esponente va applicato a tutti». Le due cose si misurano sui CARATTERI della
+    cella — le forme, i segni di radice e le frecce sono disegnati, i numeri sono
+    caratteri:
+
+        esempio  ∎³·▲⁴ = (∎³)²·(▲⁴)² = ∎⁶·▲⁸
+                 «=» ×2      il passaggio intermedio c'è, non è saltato
+                 «6» ×2      l'indice ⁶ e l'esponente ⁶
+                 «8» ×1      l'ottavo: il 2 si è applicato anche alla ▲⁴
+                 «2» ×3      il 2 dell'indice ²·³ e i due esponenti al quadrato
+        schema   ⁿ√(∎·▲) → ⁿ·ᵏ√((∎)ᵏ·(▲)ᵏ)
+                 «k» ×3      quella dell'indice n·k e le DUE degli esponenti
+
+    Prima della correzione l'esempio aveva UN «=», nessun «8» e un solo fattore
+    (³√(∎) = ⁶√(∎²)): ognuno di questi conteggi era più basso, e lo dice il test che
+    rimette il sorgente di prima (``test_il_passo_in_piu_sa_fallire``).
     """
+    caratteri_schema, caratteri_esempio = nostro["Cambiare l'indice della radice"]["caratteri"]
     schema, esempio = nostro["Cambiare l'indice della radice"]["parole"]
+
+    assert esempio[0][0] == "3", (
+        "«Cambiare l'indice», esempio: la prima parola è «"
+        + esempio[0][0] + "» e non l'indice 3 della radice di partenza — la formula si "
+        "legge al contrario (³√(…), non ⁶√(…))"
+    )
+    assert caratteri_esempio["="] == 2, (
+        "«Cambiare l'indice», esempio: "
+        + str(caratteri_esempio["="]) + " uguaglianze invece di 2 — il passaggio «²·³» "
+        "non deve essere saltato per far stare l'esempio in una riga"
+    )
+    assert caratteri_esempio["2"] == 3, (
+        "«Cambiare l'indice», esempio: il «2» compare "
+        + str(caratteri_esempio["2"]) + " volte invece di 3 — attese l'indice ²·³ e i due "
+        "esponenti (∎³)²·(▲⁴)²"
+    )
+    assert caratteri_esempio["6"] == 2, (
+        "«Cambiare l'indice», esempio: il «6» compare "
+        + str(caratteri_esempio["6"]) + " volte invece di 2 — attesi l'indice ⁶ e l'esponente ⁶"
+    )
+    assert caratteri_esempio["8"] == 1, (
+        "«Cambiare l'indice», esempio: manca l'esponente «8» sulla ▲⁴ — l'esponente 2 "
+        "deve applicarsi a TUTTI i fattori del radicando, non solo al primo"
+    )
+    assert caratteri_schema["k"] == 3, (
+        "«Cambiare l'indice», schema: le «k» sono " + str(caratteri_schema["k"])
+        + " invece di 3 — attese quella dell'indice ⁿ·ᵏ e le DUE degli esponenti "
+        "((∎)ᵏ·(▲)ᵏ)"
+    )
     assert schema[0][0] == "n" and schema[-1][0] == "k", (
         "«Cambiare l'indice», schema: la riga comincia con "
         + schema[0][0] + " e finisce con " + schema[-1][0] + " — deve cominciare con l'indice "
-        "«n» della radice di sinistra e finire con la «k» dell'esponente di destra "
-        "(ⁿ√(∎) → ⁿ·ᵏ√(∎ᵏ))"
-    )
-    x = {testo: posizione for testo, posizione in esempio}
-    for atomo in ("3", "6", "2", "="):
-        assert atomo in x, f"manca «{atomo}» nell'esempio di «Cambiare l'indice»: {esempio}"
-    assert x["3"] < x["6"], (
-        f"l'esempio ha il 6 a sinistra del 3 (3 a {x['3']:.1f} pt, 6 a {x['6']:.1f} pt): "
-        "è la lettura di prima — deve essere ³√(∎) = ⁶√(∎²)"
-    )
-    assert x["2"] > x["6"], (
-        f"l'esponente 2 non è attaccato al radicando di destra (6 a {x['6']:.1f} pt, "
-        f"2 a {x['2']:.1f} pt)"
+        "«n» della radice di sinistra e finire con la «k» dell'esponente di destra"
     )
 
 
-def test_l_ordine_delle_due_formule_sa_fallire(
+def test_l_ordine_e_il_passo_in_piu_sanno_fallire(
     tmp_path: Path, nostro: dict[str, dict[str, object]]
 ) -> None:
-    """Rimesse le due formule nell'ordine di prima, la misura dell'ordine le nomina.
+    """Rimesse le formule di prima, le due misure nuove le nominano.
 
-    Una prova d'ordine che non può fallire non è una prova: si ricompila la scheda con
-    le due formule girate come erano fino al 26/11 (²√(●² · ▲) e ⁶√(∎²) = ³√(∎)) e si
-    verifica che la firma dei colori e la posizione delle parole cambino — cioè che i
-    due test qui sopra sarebbero rossi su quel sorgente.
+    Una prova che non può fallire non è una prova. Qui si ricompila la scheda con le
+    formule come erano prima delle due correzioni del 27/11 — il fattore che entra a
+    sinistra (²√(●² · ▲)), l'indice già calcolato e il radicando con un fattore solo
+    (³√(∎) = ⁶√(∎²)) — e si verifica che:
+
+    * la firma dei colori di «Portar dentro» torni quella di «Portar fuori»
+      (blu, rosso, [freccia], blu, rosso): la misura dell'ordine se ne accorge;
+    * l'esempio di «Cambiare l'indice» scenda a UNA uguaglianza e perda l'esponente
+      «8»: la misura del passo in più e del secondo fattore se ne accorge.
+
+    Se questo test passasse, i due test qui sopra sarebbero ciechi.
     """
     sorgente = SORGENTE.read_text(encoding="utf-8")
     girate = [
         (
-            "{$\\radice[n]{\\formaQuadrato}\n         \\;\\freccia\\;\\radice[n\\cdot k]{\\formaQuadrato^{k}}$}",
-            "{$\\radice[n\\cdot k]{\\formaQuadrato^{k}}\n         \\;\\freccia\\;\\radice[n]{\\formaQuadrato}$}",
+            # lo schema: dai due fattori con l'esponente su ognuno alla forma di prima
+            "{$\\radice[n]{\\formaQuadrato\\cdot\\formaTriangolo}\n"
+            "         \\;\\freccia\\;\\radice[n\\cdot k]{(\\formaQuadrato)^{k}\\cdot(\\formaTriangolo)^{k}}$}",
+            "{$\\radice[n\\cdot k]{\\formaQuadrato^{k}}\n"
+            "         \\;\\freccia\\;\\radice[n]{\\formaQuadrato}$}",
         ),
         (
-            "{$\\radice[3]{\\formaQuadrato}\n         =\\radice[6]{\\formaQuadrato^{2}}$}",
+            # l'esempio: dai due passi al passo solo, con l'indice già calcolato
+            "{$\\radice[3]{\\formaQuadrato^{3}\\cdot\\formaTriangolo^{4}}\n"
+            "         =\\radice[2\\cdot 3]{(\\formaQuadrato^{3})^{2}\\cdot(\\formaTriangolo^{4})^{2}}$\\par\\vspace{3pt}\n"
+            "        $\\phantom{\\radice[3]{\\formaQuadrato^{3}\\cdot\\formaTriangolo^{4}}}\n"
+            "         =\\radice[6]{\\formaQuadrato^{6}\\cdot\\formaTriangolo^{8}}$}",
             "{$\\radice[6]{\\formaQuadrato^{2}}\n         =\\radice[3]{\\formaQuadrato}$}",
         ),
         (
@@ -678,8 +726,8 @@ def test_l_ordine_delle_due_formule_sa_fallire(
     mutato = sorgente
     for nuovo, vecchio in girate:
         assert nuovo in mutato, (
-            "il sorgente è cambiato di forma: la prova d'ordine non sa più girarlo — "
-            f"non trovo {nuovo!r}"
+            "il sorgente è cambiato di forma: questa prova non sa più rimettere le "
+            f"formule di prima — non trovo {nuovo!r}"
         )
         mutato = mutato.replace(nuovo, vecchio)
 
@@ -691,10 +739,11 @@ def test_l_ordine_delle_due_formule_sa_fallire(
         "girate le formule, la firma di «Portar dentro» dovrebbe essere quella di "
         "«Portar fuori»: la misura dell'ordine non si è accorta del giro"
     )
-    esempio = {testo: posizione for testo, posizione in misure["Cambiare l'indice della radice"]["parole"][1]}
-    assert esempio["6"] < esempio["3"], (
-        "girata la formula, il 6 dovrebbe tornare a sinistra del 3: la misura "
-        "dell'ordine non se ne accorge"
+    caratteri_esempio = misure["Cambiare l'indice della radice"]["caratteri"][1]
+    assert caratteri_esempio["="] == 1 and "8" not in caratteri_esempio, (
+        "rimesso il passo solo (³√(∎) = ⁶√(∎²)) l'esempio conta ancora "
+        f"{caratteri_esempio['=']} uguaglianze e gli esponenti {sorted(caratteri_esempio)}: "
+        "la misura del passo in più e del secondo fattore non se ne accorge"
     )
 
 
