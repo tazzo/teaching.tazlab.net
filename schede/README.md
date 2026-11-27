@@ -18,6 +18,10 @@ schede/
 │   ├── Makefile          ← make potenze.pdf
 │   ├── potenze.tex       ← «Le Potenze: Schema Visivo» (le due sezioni in una pagina)
 │   └── potenze.pdf       ← compilata, pubblicata su /schede/potenze/potenze.pdf
+├── polinomi/
+│   ├── Makefile          ← make polinomi.pdf
+│   ├── polinomi.tex      ← «I Polinomi: Schema Visivo» (operazioni e prodotti notevoli)
+│   └── polinomi.pdf      ← compilata (non è in schede.json: non è pubblicata sul sito)
 ├── prova-palette.sh      ← la prova che il blu si cambia in un punto solo (tutte le schede)
 └── README.md             ← questo file
 ```
@@ -26,6 +30,7 @@ schede/
 
 | file | che cos'è | pagine |
 |---|---|---|
+| `polinomi/polinomi.pdf` | **I Polinomi: Schema Visivo** — le operazioni con i polinomi (somma, sottrazione, monomio per polinomio, polinomio per polinomio) e i prodotti notevoli (quadrato e cubo di binomio, differenza di quadrati, quadrato di trinomio), con le **frecce curve** che mostrano quale termine moltiplica quale | 1 |
 | `radicali/radicali.pdf` | **I Radicali: la Scheda Unica** — campo di esistenza (indice pari, dispari, più radici pari), operazioni (somma e sottrazione, prodotto, divisione, potenza di radice, radice di radice) e semplificazione (la proprietà invariantiva, portar fuori, portar dentro) | 1 |
 | `potenze/potenze.pdf` | **Le Potenze: Schema Visivo** — operazioni con la stessa base (prodotto, quoziente, potenza di potenza) e stesso esponente con i casi particolari (prodotto e quoziente con lo stesso esponente, esponente zero, uno, negativo), ogni proprietà col suo esempio numerico accanto | 1 |
 
@@ -105,6 +110,9 @@ tiene in piedi tutto il resto.
 | `\riquadro[titolo]{testo}` | un riquadro con la regola in evidenza |
 | `\formaQuadrato` `\formaTriangolo` `\formaCerchio` | le tre forme, **col colore già dentro** |
 | `\formaRombo`, `\freccia`, `\freccia[etichetta]` | rombo e frecce, grigi della casa |
+| `\begin{schedaFrecce} … \end{schedaFrecce}` | una formula a **pezzi con un nome**, per le frecce curve |
+| `\termine[spazio]{nome}{pezzo}` | un pezzo della formula (la forma, la parentesi, il «+», la coda) |
+| `\frecciaCurva[opzioni]{partenza}{arrivo}` | l'arco che dice **quale termine moltiplica quale**: la punta è quella della casa; `sotto` (default sopra), `giro=<n>` (quanto è alto: 1, 2, 3… per non sovrapporre due archi), `colore=` (un colore della palette, quando l'arco deve dire da quale termine parte) |
 | `\radice{…}` `\radice[3]{…}` `\radice[n]{…}` | il segno di radice con l'indice, disegnato attorno al contenuto |
 | `\cePari{…}` `\cePari[4]{…}` `\ceDispari{…}` | il campo di esistenza in un comando |
 | `\sistema{riga\\riga}` | la graffa con le condizioni, una per riga |
@@ -112,12 +120,41 @@ tiene in piedi tutto il resto.
 Le forme reggono qualunque contenuto: una radice dentro una radice, un
 esponente, una somma — il segno cresce da solo.
 
+### Le frecce curve (27/11/2026)
+
+Le ha chieste l'operatore per la scheda dei polinomi: «sono utili per far
+capire l'operazione». Vivono nella libreria, così la prossima scheda le riusa
+invece di ridisegnarle. Un arco parte dal **termine** e scende sull'**altro**
+(la punta guarda in giù, come nel suo foglio), e i due capi hanno un nome:
+
+```latex
+\begin{schedaFrecce}
+  \termine{q}{$\formaQuadrato$}
+  \termine[4.4pt]{piu}{$+$}
+  \termine[4.4pt]{t}{$\formaTriangolo$}
+  \frecciaCurva[colore=schedeBlu,giro=1]{q}{t}
+\end{schedaFrecce}
+```
+
+L'altezza dell'arco è in **punti per «giro»**, non relativa alla distanza fra i
+due termini: con due termini vicini un arco proporzionato passerebbe dentro la
+parentesi. Si dà un colore della palette solo quando l'arco deve dire **da quale
+termine** parte (blu il quadrato, rosso il triangolo): le frecce della casa sono
+grigie, e un colore nuovo non si inventa.
+
 ## 5. La regola dei colori (operatore, 26/11/2026)
 
 **La forma porta il colore: quadrato = blu, triangolo = rosso, cerchio =
 verde.** Nelle schede il codice non cambia mai, per non confondere. Chi
 scrive una scheda non sceglie un colore: `\formaQuadrato` esce blu e basta.
 Le forme che non sono una delle tre — il rombo, le frecce — sono **grigie**.
+
+Le cinque forme del foglio dei polinomi stanno in questa palette senza
+aggiungere un colore: quadrato blu → `\formaQuadrato`, triangolo
+arancio-rosso → `\formaTriangolo`, cerchio verde → `\formaCerchio`, rombo
+viola → `\formaRombo`, quadrato rosa arrotondato → `\formaRombo[0.7]` (lo
+stesso grigio, più piccolo: nella stessa formula i due termini si
+distinguono). La mappatura è difesa da `tests/test_schede_polinomi.py`.
 
 I quattro colori sono definiti **una volta sola**, in cima a `schede.sty`
 (sezione 1, «LA PALETTE»): cambiare il blu è una riga, e cambia in tutte le

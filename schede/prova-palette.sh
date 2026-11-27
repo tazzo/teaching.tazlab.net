@@ -9,10 +9,13 @@
 #  in TUTTE le schede. Poi la riga torna com'era e si ricompila.
 #
 #  QUALI schede: quelle dichiarate in schede.json (le stesse che il sito
-#  elenca), non una scritta a mano — una scheda nuova entra nella prova da
-#  sola. Fino al 27/11/2026 lo script conosceva solo `radicali`: la scheda
-#  delle potenze sarebbe rimasta fuori dalla prova senza che nessuno se ne
-#  accorgesse.
+#  elenca) PIU' quelle che stanno in una cartella con Makefile e .tex — così
+#  una scheda nuova entra nella prova da sola, anche quando non è pubblicata
+#  sul sito (la scheda dei polinomi: c'è, si compila, ma non è in schede.json).
+#  Fino al 27/11/2026 lo script conosceva solo `radicali`: la scheda delle
+#  potenze sarebbe rimasta fuori dalla prova senza che nessuno se ne
+#  accorgesse, e i polinomi — che da schede.json non passano — ci sarebbero
+#  rimasti anche dopo.
 #
 #  I PDF: la prova li RICOMPILA per misurarli, e poi rimette i byte che ha
 #  trovato. Un PDF committato non cambia per una prova — se cambiasse, la
@@ -30,12 +33,24 @@ PRIMA="2563EB"            # il blu della casa
 DOPO="7C3AED"             # un altro colore, solo per la prova
 DPI=60                    # bassa risoluzione: bastano i pixel pieni
 
-# Le schede da provare, dal documento che le dichiara: una riga per PDF,
-# e la cartella da ricompilare è quella del PDF.
-mappa=$(python3 - "$QUI/schede.json" <<'PY'
-import json, sys
+# Le schede da provare: prima quelle che schede.json dichiara (una riga per
+# PDF), poi quelle che si presentano da sole — una cartella con <nome>.tex,
+# <nome>.pdf e il suo Makefile. La cartella da ricompilare è quella del PDF.
+mappa=$(python3 - "$QUI/schede.json" "$QUI" <<'PY'
+import json, os, sys
+dichiarate = []
 for scheda in json.load(open(sys.argv[1]))["schede"]:
+    dichiarate.append(scheda["file"])
     print(scheda["file"])
+radice = sys.argv[2]
+for nome in sorted(os.listdir(radice)):
+    cartella = os.path.join(radice, nome)
+    file = nome + "/" + nome + ".pdf"
+    if not os.path.isdir(cartella) or file in dichiarate:
+        continue
+    if all(os.path.isfile(os.path.join(cartella, f))
+           for f in (nome + ".tex", nome + ".pdf", "Makefile")):
+        print(file)
 PY
 ) || { echo "ERRORE: schede.json non si legge"; exit 1; }
 if [ -z "$mappa" ]; then echo "ERRORE: schede.json non dichiara nessuna scheda"; exit 1; fi
