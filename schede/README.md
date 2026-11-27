@@ -14,7 +14,11 @@ schede/
 │   ├── Makefile          ← make radicali.pdf
 │   ├── radicali.tex      ← «I Radicali: la Scheda Unica» (le tre sezioni in una pagina)
 │   └── radicali.pdf      ← compilata, pubblicata su /schede/radicali/radicali.pdf
-├── prova-palette.sh      ← la prova che il blu si cambia in un punto solo
+├── potenze/
+│   ├── Makefile          ← make potenze.pdf
+│   ├── potenze.tex       ← «Le Potenze: Schema Visivo» (le due sezioni in una pagina)
+│   └── potenze.pdf       ← compilata, pubblicata su /schede/potenze/potenze.pdf
+├── prova-palette.sh      ← la prova che il blu si cambia in un punto solo (tutte le schede)
 └── README.md             ← questo file
 ```
 
@@ -23,6 +27,7 @@ schede/
 | file | che cos'è | pagine |
 |---|---|---|
 | `radicali/radicali.pdf` | **I Radicali: la Scheda Unica** — campo di esistenza (indice pari, dispari, più radici pari), operazioni (somma e sottrazione, prodotto, divisione, potenza di radice, radice di radice) e semplificazione (la proprietà invariantiva, portar fuori, portar dentro) | 1 |
+| `potenze/potenze.pdf` | **Le Potenze: Schema Visivo** — operazioni con la stessa base (prodotto, quoziente, potenza di potenza) e stesso esponente con i casi particolari (prodotto e quoziente con lo stesso esponente, esponente zero, uno, negativo), ogni proprietà col suo esempio numerico accanto | 1 |
 
 **Una scheda sola** (ordine dell'operatore, 26/11/2026: «devono essere fuse in
 un'unica scheda; tutte le altre possono essere cancellate»). Prima erano due
@@ -46,6 +51,12 @@ Poi, dalla cartella della scheda:
 cd schede/radicali
 make                     # oppure: make radicali.pdf
 ```
+
+Una scheda nuova si aggiunge alla prova della palette da sola quando compare in
+`schede.json`: `prova-palette.sh` legge quel documento invece di avere una lista
+scritta a mano (fino al 27/11/2026 conosceva solo `radicali`). I PDF che la prova
+ricompila vengono rimessi com'erano alla fine: una prova non lascia la cartella
+sporca.
 
 Il `Makefile` lancia `pdflatex` **due volte** — la seconda passata serve al
 «Pagina 1 di 1» del piede — e toglie i file di servizio (`.aux`, `.log`).

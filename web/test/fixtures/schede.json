@@ -12,6 +12,19 @@
       "updated": "2026-11-27",
       "commit": "c1a4425",
       "versionSource": "versions"
+    },
+    {
+      "id": "potenze/potenze",
+      "file": "potenze/potenze.pdf",
+      "url": "/schede/potenze/potenze.pdf",
+      "title": "Le Potenze: Schema Visivo",
+      "subtitle": "Operazioni con la stessa base, stesso esponente e casi particolari — una pagina",
+      "order": 20,
+      "sha256": "309e19efa8c041c2e6673085c3b498836c20aa10c0f8ad42c2e648e776d24540",
+      "bytes": 84743,
+      "updated": "2026-11-27",
+      "commit": "aaee25d",
+      "versionSource": "versions"
     }
   ]
 }

@@ -5,6 +5,12 @@
       "title": "I Radicali: la Scheda Unica",
       "subtitle": "Campo di esistenza, operazioni e semplificazione — una pagina",
       "order": 10
+    },
+    {
+      "file": "potenze/potenze.pdf",
+      "title": "Le Potenze: Schema Visivo",
+      "subtitle": "Operazioni con la stessa base, stesso esponente e casi particolari — una pagina",
+      "order": 20
     }
   ]
 }

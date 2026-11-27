@@ -4,12 +4,23 @@
 #
 #  Regola della casa (operatore, 26/11/2026): quadrato = blu, triangolo =
 #  rosso, cerchio = verde, e i colori si definiscono UNA volta sola. Qui si
-#  cambia il blu in quel punto (una riga di schede.sty), si ricompila la
-#  scheda e si misura: il blu vecchio deve sparire e quello nuovo comparire
+#  cambia il blu in quel punto (una riga di schede.sty), si ricompilano le
+#  schede e si misura: il blu vecchio deve sparire e quello nuovo comparire
 #  in TUTTE le schede. Poi la riga torna com'era e si ricompila.
 #
+#  QUALI schede: quelle dichiarate in schede.json (le stesse che il sito
+#  elenca), non una scritta a mano — una scheda nuova entra nella prova da
+#  sola. Fino al 27/11/2026 lo script conosceva solo `radicali`: la scheda
+#  delle potenze sarebbe rimasta fuori dalla prova senza che nessuno se ne
+#  accorgesse.
+#
+#  I PDF: la prova li RICOMPILA per misurarli, e poi rimette i byte che ha
+#  trovato. Un PDF committato non cambia per una prova — se cambiasse, la
+#  prova stessa lascerebbe la cartella sporca e il confronto col fixture del
+#  sito salterebbe per un orologio, non per la palette.
+#
 #  Uso:  cd schede && ./prova-palette.sh
-#  Esce 1 se la scheda non cambia colore. Serve pdflatex, pdftoppm, python3.
+#  Esce 1 se una scheda non cambia colore. Serve pdflatex, pdftoppm, python3.
 # ---------------------------------------------------------------------------
 set -u
 
@@ -17,16 +28,38 @@ QUI=$(cd "$(dirname "$0")" && pwd)
 STY="$QUI/schede.sty"
 PRIMA="2563EB"            # il blu della casa
 DOPO="7C3AED"             # un altro colore, solo per la prova
-CARTELLA="$QUI/radicali"
-SCHEDE="radicali"
 DPI=60                    # bassa risoluzione: bastano i pixel pieni
+
+# Le schede da provare, dal documento che le dichiara: una riga per PDF,
+# e la cartella da ricompilare è quella del PDF.
+mappa=$(python3 - "$QUI/schede.json" <<'PY'
+import json, sys
+for scheda in json.load(open(sys.argv[1]))["schede"]:
+    print(scheda["file"])
+PY
+) || { echo "ERRORE: schede.json non si legge"; exit 1; }
+if [ -z "$mappa" ]; then echo "ERRORE: schede.json non dichiara nessuna scheda"; exit 1; fi
 
 copia=$(mktemp)
 cp "$STY" "$copia"
+# I byte dei PDF, uno per scheda: si rimettono alla fine (vedi l'intestazione).
+magazzino=$(mktemp -d)
+for file in $mappa; do
+  [ -f "$QUI/$file" ] && cp "$QUI/$file" "$magazzino/$(echo "$file" | tr '/' '_')"
+done
+rimetti_pdf() {
+  local file
+  for file in $mappa; do
+    [ -f "$magazzino/$(echo "$file" | tr '/' '_')" ] &&
+      cp "$magazzino/$(echo "$file" | tr '/' '_')" "$QUI/$file"
+  done
+  rm -rf "$magazzino"
+}
 ripristina() {
   cp "$copia" "$STY"
   rm -f "$copia"
-  ( cd "$CARTELLA" && make >/dev/null 2>&1 )
+  compila_tutte >/dev/null 2>&1
+  rimetti_pdf
 }
 trap ripristina EXIT INT TERM
 
@@ -53,11 +86,21 @@ PY
   rm -f "${ppm%.*}.ppm" "$ppm"
 }
 
-compila() { ( cd "$CARTELLA" && make >/dev/null 2>&1 ) || { echo "ERRORE: make in $CARTELLA"; exit 1; }; }
+# ricompila TUTTE le schede: ogni cartella che ha un Makefile e un .tex
+compila_tutte() {
+  local file cartella
+  for file in $mappa; do
+    cartella="$QUI/$(dirname "$file")"
+    ( cd "$cartella" && make >/dev/null 2>&1 ) || { echo "ERRORE: make in $cartella"; return 1; }
+  done
+  return 0
+}
 
-echo "== 1. la scheda com'è adesso (blu $PRIMA) =="
+compila() { compila_tutte || exit 1; }
+
+echo "== 1. le schede come sono adesso (blu $PRIMA) =="
 compila
-for s in $SCHEDE; do printf '  %-12s blu=%s\n' "$s" "$(conta "$CARTELLA/$s.pdf" "$PRIMA")"; done
+for file in $mappa; do printf '  %-24s blu=%s\n' "$file" "$(conta "$QUI/$file" "$PRIMA")"; done
 
 echo "== 2. cambio il blu in un punto solo: $PRIMA -> $DOPO =="
 sed -i "s/^\\\\definecolor{schedeBlu}{HTML}{$PRIMA}/\\\\definecolor{schedeBlu}{HTML}{$DOPO}/" "$STY"
@@ -67,22 +110,26 @@ if ! grep -q "definecolor{schedeBlu}{HTML}{$DOPO}" "$STY"; then
 fi
 compila
 esito=0
-for s in $SCHEDE; do
-  vecchio=$(conta "$CARTELLA/$s.pdf" "$PRIMA")
-  nuovo=$(conta "$CARTELLA/$s.pdf" "$DOPO")
-  printf '  %-12s blu=%s  %s=%s\n' "$s" "$vecchio" "$DOPO" "$nuovo"
+for file in $mappa; do
+  vecchio=$(conta "$QUI/$file" "$PRIMA")
+  nuovo=$(conta "$QUI/$file" "$DOPO")
+  printf '  %-24s blu=%s  %s=%s\n' "$file" "$vecchio" "$DOPO" "$nuovo"
   if [ "$vecchio" != "0" ] || [ "$nuovo" -le 0 ]; then
-    echo "  ROSSO: $s non ha seguito la palette"; esito=1
+    echo "  ROSSO: $file non ha seguito la palette"; esito=1
   fi
 done
 
 echo "== 3. rimetto il blu della casa e ricompilo =="
-ripristina
+cp "$copia" "$STY"
+compila
+for file in $mappa; do printf '  %-24s blu=%s\n' "$file" "$(conta "$QUI/$file" "$PRIMA")"; done
+echo "== 4. rimetto i PDF com'erano =="
+rm -f "$copia"
+rimetti_pdf
 trap - EXIT INT TERM
-for s in $SCHEDE; do printf '  %-12s blu=%s\n' "$s" "$(conta "$CARTELLA/$s.pdf" "$PRIMA")"; done
 
 if [ "$esito" -eq 0 ]; then
-  echo "VERDE: il blu si cambia in una riga e la scheda lo segue."
+  echo "VERDE: il blu si cambia in una riga e le schede lo seguono."
 else
   echo "ROSSO: la palette non è in un punto solo."
 fi
