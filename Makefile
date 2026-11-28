@@ -9,6 +9,12 @@
 #   make ci          the three commands of the workflow's `test` job
 #   make ci-no-history   reproduce GitHub's tarball checkout (no .git) and prove the guard bites
 #
+# `make deps` installs the Python packages, not the system libraries they load: pytest needs
+# libpango-1.0-0/libpangocairo-1.0-0/libgdk-pixbuf-2.0-0 (WeasyPrint) and the CI image is
+# where they exist (`apt-get install` in .github/workflows/publish.yml). On a machine without
+# them the first two commands of `make ci` still run — `make versions` and `make ci-no-history` —
+# but the pytest half says `cannot load library libpango-1.0-0` instead of a test result.
+#
 # PYTHON=... selects the interpreter (the image runs 3.14: `PYTHON=python3.14 make ci`).
 
 PYTHON ?= python3
