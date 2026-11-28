@@ -18,20 +18,50 @@ jobs:
     # pass while production fails, which is the failure mode this job exists to prevent.
     container: python:3.14-slim
     steps:
+      # GIT BEFORE THE CHECKOUT, and this order is not cosmetic: every step of a container
+      # job — `uses:` steps included — runs INSIDE this image, so when `actions/checkout`
+      # finds no git on PATH it falls back to downloading the commit as a tarball: no
+      # `.git`, no history, and `fetch-depth: 0` is silently ignored. That is exactly what
+      # happened: five runs went red between 2026-11-26 and 2026-11-27 (691b3e4, 5b33224,
+      # 8a6d677, f352740, 0d16293) because the sheet's commit could not be named. Git was
+      # installed, but in the NEXT step — one step too late, and the failure landed two
+      # steps further on, in the suite, as "no commit".
+      - name: Install git before the checkout
+        # python:3.14-slim ships no git. Nothing here needs the repository: this step only
+        # has to make `git` exist so that the checkout below clones instead of downloading.
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git ca-certificates
+          rm -rf /var/lib/apt/lists/*
+          git --version
+
       - name: Checkout code
         uses: actions/checkout@v7
         with:
           # full history: the version of a sheet is the commit that last touched its PDF
           fetch-depth: 0
 
+      - name: The checkout is a repository, not a tarball
+        # The guard for the failure above, at the step that would cause it: a tarball
+        # checkout looks exactly like a good one until somebody asks git a question.
+        run: |
+          test -e .git || {
+            echo "ERROR: the checkout has no .git — git was missing when actions/checkout ran";
+            exit 1; }
+          test "$(git rev-parse --is-shallow-repository)" = false || {
+            echo "ERROR: the checkout is shallow — the commit that last touched a PDF is not HEAD";
+            exit 1; }
+
       - name: Install the libraries the rendering path needs
         # Pango/cairo/gdk-pixbuf are WeasyPrint's dependencies (the PDF renderer);
         # Node runs KaTeX server-side, so screen and PDF share one LaTeX source.
+        # git is not in this list on purpose: it must already exist when the checkout
+        # above runs, which is why the first step installs it (see the comment there).
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
             libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 shared-mime-info \
-            nodejs npm git
+            nodejs npm
           rm -rf /var/lib/apt/lists/*
           # Debian ships the binary as `nodejs`; the renderer looks for `node` on PATH
           command -v node >/dev/null || ln -s "$(command -v nodejs)" /usr/local/bin/node
@@ -43,7 +73,7 @@ jobs:
         # each PDF, and a shallow clone would find nothing to compare with. Running it
         # before the tests means a version that cannot be named is a red pipeline, not a
         # page that quietly loses its commit.
-        run: python3 scripts/schede_versions.py
+        run: python3 scripts/schede_versions.py --require-commit
 
       - name: Install the Python dependencies
         # Read from pyproject so the workflow and the image cannot drift apart.
@@ -85,8 +115,10 @@ jobs:
       - name: Name the version of every sheet
         # Writes schede/versions.json (date + commit + sha256 per PDF) into the build
         # context, where the Dockerfile copies it into the image: the running service has
-        # no .git, so this is the only place the answer can be found.
-        run: python3 scripts/schede_versions.py
+        # no .git, so this is the only place the answer can be found. `--require-commit`
+        # makes an unnameable version a red pipeline instead of an image whose page says
+        # only "compilata il".
+        run: python3 scripts/schede_versions.py --require-commit
 
       - name: Login to Docker Hub
         uses: docker/login-action@v4
