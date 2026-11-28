@@ -8,6 +8,9 @@
 #   make deps        once: the Python and the frontend dependencies
 #   make ci          the three commands of the workflow's `test` job
 #   make ci-no-history   reproduce GitHub's tarball checkout (no .git) and prove the guard bites
+#   make hooks       once per clone: the wall that refuses a push to `master` (it PUBLISHES) and to any
+#                    branch that is not integra-schede-master — the sheet that went to master on
+#                    2026-11-27/28 went through a raw `git push` that no script could have stopped
 #
 # `make deps` installs the Python packages, not the system libraries they load: pytest needs
 # libpango-1.0-0/libpangocairo-1.0-0/libgdk-pixbuf-2.0-0 (WeasyPrint) and the CI image is
@@ -19,7 +22,7 @@
 
 PYTHON ?= python3
 
-.PHONY: deps ci versions ci-no-history clean
+.PHONY: deps ci versions ci-no-history hooks clean
 
 deps: ## the dependencies the workflow installs, in one go
 	$(PYTHON) -m pip install --upgrade pip
@@ -51,6 +54,13 @@ ci-no-history: ## reproduce the no-.git checkout and prove the version guard ref
 	else \
 	  echo "FAIL: the script did not even understand --require-commit (rc=$$rc)"; exit 1; \
 	fi
+
+# One copy, in the common .git: hooks live there, so this covers every worktree of this clone — the
+# workers' included. `scripts/ship.sh` is the polite way; this is the wall behind it (see its header).
+hooks: ## install the pre-push that refuses master (it publishes) and any branch but the integration line
+	cp scripts/hooks/pre-push .git/hooks/pre-push
+	chmod +x .git/hooks/pre-push
+	@echo "OK: .git/hooks/pre-push installed — master publishes, so it is refused here"
 
 clean:
 	rm -rf .ci-no-history
